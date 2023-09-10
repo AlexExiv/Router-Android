@@ -1,6 +1,7 @@
 package com.speakerboxlite.router
 
 import com.speakerboxlite.router.result.ResultManager
+import kotlin.reflect.KClass
 
 class RouterTab(callerKey: String?,
                 parent: RouterSimple,
@@ -38,8 +39,15 @@ class RouterTab(callerKey: String?,
         }
         else
         {
-            parent!!.closeTo(key)
-            routerTab.closeTabs()
+            if (routerTab.closeTo(key))
+            {
+
+            }
+            else
+            {
+                parent!!.closeTo(key)
+                routerTab.closeTabs()
+            }
         }
     }
 
@@ -54,5 +62,22 @@ class RouterTab(callerKey: String?,
             routerTab.closeTabs()
             parent.closeToTop()
         }
+    }
+
+    override fun scanForPath(clazz: KClass<*>, recursive: Boolean): ViewMeta?
+    {
+        if (recursive)
+        {
+            val v = routerTab.scanForPath(clazz)
+            if (v != null)
+                return v
+
+            if (parent != null)
+                return parent.scanForPath(clazz)
+
+            return null
+        }
+
+        return viewsStack.lastOrNull { it.path == clazz }
     }
 }

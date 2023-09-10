@@ -49,6 +49,12 @@
                 android:text="Close To Top"
                 android:onClick="@{() -> viewmodel.onCloseToRoot()}"/>
 
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Show Singleton"
+                android:onClick="@{() -> viewmodel.onShowSingleton()}"/>
+
         </LinearLayout>
 
     </FrameLayout>

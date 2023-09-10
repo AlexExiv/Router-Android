@@ -5,7 +5,7 @@ import kotlin.reflect.KClass
 
 interface RouteController<VM: ViewModel>
 {
-    val singleTop: Boolean
+    val singleton: Boolean
     val preferredPresentation: Presentation
     val isChain: Boolean
 

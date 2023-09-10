@@ -33,6 +33,12 @@
                 android:text="Next"
                 android:onClick="@{() -> viewmodel.onNext()}"/>
 
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Singleton"
+                android:onClick="@{() -> viewmodel.onSingleton()}"/>
+
         </LinearLayout>
 
     </FrameLayout>

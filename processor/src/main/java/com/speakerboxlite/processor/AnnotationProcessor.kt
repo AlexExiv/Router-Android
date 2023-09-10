@@ -170,9 +170,9 @@ class AnnotationProcessor : AbstractProcessor()
             initBuilder.addStatement("${valName}.preferredPresentation = %T.%L", presentationEnum, annotation.presentation.toString())
         }
 
-        if (annotation.singleTop)
+        if (annotation.singleton)
         {
-            initBuilder.addStatement("${valName}.singleTop = true")
+            initBuilder.addStatement("${valName}.singleton = true")
         }
 
         initBuilder.addStatement("")

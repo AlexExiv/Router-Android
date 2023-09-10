@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.sample.base.BaseViewModel
+import com.speakerboxlite.router.sample.tabs.tab.TabSingletonPath
 
 class StepViewModel(val step: Int, app: Application): BaseViewModel(app)
 {
@@ -25,5 +26,10 @@ class StepViewModel(val step: Int, app: Application): BaseViewModel(app)
     fun onCloseToRoot()
     {
         router.closeToTop()
+    }
+
+    fun onShowSingleton()
+    {
+        router.route(TabSingletonPath(100))
     }
 }

@@ -8,7 +8,7 @@ abstract class RouteControllerBase<Path: RoutePath, VM: ViewModel, V: View<VM>, 
 {
     lateinit var pathClass: KClass<Path>
     var pattern: UrlMatcher? = null
-    override var singleTop: Boolean = false
+    override var singleton: Boolean = false
     override var preferredPresentation: Presentation = Presentation.Push
     open val chainPaths: List<KClass<*>> get() = listOf()
 

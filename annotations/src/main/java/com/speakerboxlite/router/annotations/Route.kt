@@ -4,4 +4,4 @@ package com.speakerboxlite.router.annotations
 @Retention(AnnotationRetention.SOURCE)
 annotation class Route(val uri: String = "",
                        val presentation: Presentation = Presentation.Push,
-                       val singleTop: Boolean = false)
+                       val singleton: Boolean = false)

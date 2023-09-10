@@ -44,7 +44,7 @@ open class RouterSimple(protected val callerKey: String?,
         val route = routeManager.find(url)
         if (route != null)
         {
-            return doRoute(route, RouteType.Simple, route.convert(url), route.preferredPresentation, null)
+            return route(route.convert(url), RouteType.Simple, route.preferredPresentation, null)
         }
 
         return null
@@ -184,6 +184,21 @@ open class RouterSimple(protected val callerKey: String?,
         return null
     }
 
+    internal open fun scanForPath(clazz: KClass<*>, recursive: Boolean = true): ViewMeta?
+    {
+        val v = viewsStack.lastOrNull { it.path == clazz }
+        if (v != null)
+            return v
+
+        if (parent != null && recursive)
+            return parent.scanForPath(clazz)
+
+        return null
+    }
+
+    internal fun containsView(key: String): Boolean =
+        viewsStack.lastOrNull { it.key == key } != null
+
     protected fun _closeTo(i: Int)
     {
         val deleteCount = viewsStack.size - i - 1
@@ -200,6 +215,16 @@ open class RouterSimple(protected val callerKey: String?,
     {
         Log.i("", "Start route with path: ${path::class}")
         val route = findRoute(path) ?: throw RouteNotFoundException(path)
+        if (route.singleton)
+        {
+            val exist = scanForPath(path::class)
+            if (exist != null)
+            {
+                closeTo(exist.key)
+                return exist.key
+            }
+        }
+
         return doRoute(route, routeType, path, presentation, result)
     }
 

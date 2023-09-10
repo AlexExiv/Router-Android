@@ -12,6 +12,11 @@ class TabViewModel(val index: Int, app: Application): BaseViewModel(app)
 
     fun onNext()
     {
-        router.route(StepPath(0), Presentation.Push)
+        router.route(StepPath(0))
+    }
+
+    fun onSingleton()
+    {
+        router.route(TabSingletonPath(100))
     }
 }

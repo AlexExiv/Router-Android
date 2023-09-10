@@ -40,7 +40,7 @@ class TabsFragment: BaseViewModelFragment<TabsViewModel, FragmentTabsBinding>(R.
 
         dataBinding.bottomNavigationView.setOnItemSelectedListener {
             val i = TABS_MAP[it.itemId]!!
-            dataBinding.tabs.setCurrentItem(i, false)
+            dataBinding.tabs.setCurrentItem(i, true)
             true
         }
 
