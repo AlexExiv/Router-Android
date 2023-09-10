@@ -2,7 +2,7 @@ package com.speakerboxlite.router.sample
 
 import android.app.Application
 import android.content.Intent
-import com.speakerboxlite.router.ActivityLifeCycle
+import com.speakerboxlite.router.lifecycle.ActivityLifeCycle
 import com.speakerboxlite.router.HostActivityFactory
 import com.speakerboxlite.router.RouterComponent
 import com.speakerboxlite.router.sample.base.HostActivity

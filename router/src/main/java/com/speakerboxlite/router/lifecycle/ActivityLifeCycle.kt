@@ -1,9 +1,15 @@
-package com.speakerboxlite.router
+package com.speakerboxlite.router.lifecycle
 
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.speakerboxlite.router.command.CommandExecutorAndroid
+import com.speakerboxlite.router.HostActivityFactory
+import com.speakerboxlite.router.R
+import com.speakerboxlite.router.Router
+import com.speakerboxlite.router.RouterManager
+import com.speakerboxlite.router.hostActivityKey
 
 interface BaseHostView
 {

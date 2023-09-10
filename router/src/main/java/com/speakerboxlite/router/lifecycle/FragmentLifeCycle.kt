@@ -1,8 +1,14 @@
-package com.speakerboxlite.router
+package com.speakerboxlite.router.lifecycle
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import com.speakerboxlite.router.command.CommandExecutorAndroid
+import com.speakerboxlite.router.HostActivityFactory
+import com.speakerboxlite.router.HostView
+import com.speakerboxlite.router.R
+import com.speakerboxlite.router.RouterManager
+import com.speakerboxlite.router.View
 
 class FragmentLifeCycle(private val routerManager: RouterManager,
                         private val hostActivityFactory: HostActivityFactory): FragmentManager.FragmentLifecycleCallbacks()

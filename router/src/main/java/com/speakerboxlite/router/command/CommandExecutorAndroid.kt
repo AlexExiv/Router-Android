@@ -1,4 +1,4 @@
-package com.speakerboxlite.router
+package com.speakerboxlite.router.command
 
 import androidx.annotation.IdRes
 import androidx.fragment.app.DialogFragment
@@ -6,6 +6,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.speakerboxlite.router.HOST_ACTIVITY_KEY
+import com.speakerboxlite.router.HostActivityFactory
+import com.speakerboxlite.router.View
 
 class CommandExecutorAndroid(val activity: FragmentActivity,
                              @IdRes val containerId: Int,

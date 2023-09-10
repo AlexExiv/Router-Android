@@ -1,5 +1,7 @@
 package com.speakerboxlite.router
 
+import com.speakerboxlite.router.command.CommandExecutor
+
 typealias OnTabChangeCallback = (Int) -> Unit
 
 interface RouterTabs

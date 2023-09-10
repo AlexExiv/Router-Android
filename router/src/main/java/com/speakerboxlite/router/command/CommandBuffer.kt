@@ -1,4 +1,7 @@
-package com.speakerboxlite.router
+package com.speakerboxlite.router.command
+
+import com.speakerboxlite.router.OnTabChangeCallback
+import com.speakerboxlite.router.View
 
 sealed class Command
 {

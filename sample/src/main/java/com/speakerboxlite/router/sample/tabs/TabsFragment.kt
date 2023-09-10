@@ -1,6 +1,6 @@
 package com.speakerboxlite.router.sample.tabs
 
-import com.speakerboxlite.router.CommandExecutorAndroid
+import com.speakerboxlite.router.command.CommandExecutorAndroid
 import com.speakerboxlite.router.HostView
 import com.speakerboxlite.router.HostViewFactory
 import com.speakerboxlite.router.RouterTabs

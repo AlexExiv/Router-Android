@@ -1,7 +1,7 @@
 package com.speakerboxlite.router.sample.base
 
 import androidx.appcompat.app.AppCompatActivity
-import com.speakerboxlite.router.BaseHostView
+import com.speakerboxlite.router.lifecycle.BaseHostView
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterManager
 import com.speakerboxlite.router.sample.R

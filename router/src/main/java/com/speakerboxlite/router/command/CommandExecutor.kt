@@ -1,4 +1,4 @@
-package com.speakerboxlite.router
+package com.speakerboxlite.router.command
 
 interface CommandExecutor
 {
