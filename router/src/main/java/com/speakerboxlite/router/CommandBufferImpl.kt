@@ -1,9 +1,9 @@
 package com.speakerboxlite.router
 
-class CommandBufferImpl : CommandBuffer
+internal class CommandBufferImpl : CommandBuffer
 {
-    var executor: CommandExecutor? = null
-    val buffer = mutableListOf<Command>()
+    private var executor: CommandExecutor? = null
+    private val buffer = mutableListOf<Command>()
 
     override fun bind(executor: CommandExecutor)
     {

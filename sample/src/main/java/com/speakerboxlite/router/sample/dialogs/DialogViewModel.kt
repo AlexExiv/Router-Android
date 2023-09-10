@@ -11,11 +11,13 @@ class DialogViewModel(val title: String,
 {
     fun onOk()
     {
-        router.closeWithResult(true)
+        resultProvider.send(true)
+        router.close()
     }
 
     fun onCancel()
     {
-        router.closeWithResult(false)
+        resultProvider.send(false)
+        router.close()
     }
 }

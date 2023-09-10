@@ -11,6 +11,7 @@ sealed class Command
     class Dialog(val view: View<*>): Command()
     class CloseDialog(val key: String): Command()
     class SubFragment(val containerId: Int, val view: View<*>): Command()
+    class ChangeTab(val tabChangeCallback: OnTabChangeCallback, val tab: Int): Command()
 }
 
 interface CommandBuffer

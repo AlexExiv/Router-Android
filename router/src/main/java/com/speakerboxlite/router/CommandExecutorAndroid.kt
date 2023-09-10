@@ -25,6 +25,7 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
             is Command.BottomSheet -> showBottomSheet(command.view)
             is Command.CloseBottomSheet -> closeBottomSheet(command.key)
             is Command.SubFragment -> showSubFragment(command.containerId, command.view)
+            is Command.ChangeTab -> command.tabChangeCallback(command.tab)
         }
     }
 

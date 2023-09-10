@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterLocal
 import com.speakerboxlite.router.View
+import com.speakerboxlite.router.result.RouterResultProvider
 
 abstract class BaseViewModelFragment<VM: BaseViewModel, VDB: ViewDataBinding>(open val layoutId: Int): Fragment(), View<VM>
 {
@@ -22,10 +23,9 @@ abstract class BaseViewModelFragment<VM: BaseViewModel, VDB: ViewDataBinding>(op
         }
 
     override lateinit var router: Router
-
     override lateinit var localRouter: RouterLocal
-
     override lateinit var viewModel: VM
+    override lateinit var resultProvider: RouterResultProvider
 
     lateinit var dataBinding: VDB
 

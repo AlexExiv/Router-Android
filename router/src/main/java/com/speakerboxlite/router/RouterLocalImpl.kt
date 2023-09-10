@@ -13,7 +13,7 @@ class RouterLocalImpl(router: RouterSimple): RouterLocal
         get() = router?.topRouter
         set(value) { router?.topRouter = value }
 
-    protected val commandBuffer = CommandBufferImpl()
+    protected val commandBuffer: CommandBuffer = CommandBufferImpl()
 
     override fun route(url: String): String? = router!!.route(url)
 
@@ -21,18 +21,6 @@ class RouterLocalImpl(router: RouterSimple): RouterLocal
 
     override fun <R: Any> routeWithResult(path: RoutePath, presentation: Presentation, result: Result<R>): String =
         router!!.routeWithResult(path, presentation, result)
-
-    override fun subRoute(path: RoutePath, presentation: Presentation): String =
-        router!!.subRoute(path, presentation)
-
-    override fun <R: Any> subRouteWithResult(path: RoutePath, presentation: Presentation, result: Result<R>): String =
-        router!!.subRouteWithResult(path, presentation, result)
-
-    override fun chainRoute(path: RoutePath, presentation: Presentation): String =
-        router!!.chainRoute(path, presentation)
-
-    override fun <R: Any> chainRouteWithResult(path: RoutePath, presentation: Presentation, result: Result<R>): String =
-        router!!.chainRouteWithResult(path, presentation, result)
 
     override fun routeDialog(path: RoutePath)
     {
@@ -44,11 +32,6 @@ class RouterLocalImpl(router: RouterSimple): RouterLocal
         router?.routeDialogWithResult(path, result)
     }
 
-    override fun <R : Any> sendResult(result: R)
-    {
-        router?.sendResult(result)
-    }
-
     override fun back()
     {
         router?.back()
@@ -57,11 +40,6 @@ class RouterLocalImpl(router: RouterSimple): RouterLocal
     override fun close()
     {
         router?.close()
-    }
-
-    override fun <R: Any> closeWithResult(result: R)
-    {
-        router?.closeWithResult(result)
     }
 
     override fun closeTo(key: String)

@@ -1,5 +1,7 @@
 package com.speakerboxlite.router
 
+import com.speakerboxlite.router.result.ResultManager
+
 class RouterTab(callerKey: String?,
                 parent: RouterSimple,
                 routeManager: RouteManager,
@@ -25,14 +27,6 @@ class RouterTab(callerKey: String?,
             super.close()
         else
             routerTab.closeTabs()
-    }
-
-    override fun <R: Any> closeWithResult(result: R)
-    {
-        if (viewsStack.size > 1)
-            super.closeWithResult(result)
-        else
-            routerTab.closeTabsWithResult(result)
     }
 
     override fun closeTo(key: String)

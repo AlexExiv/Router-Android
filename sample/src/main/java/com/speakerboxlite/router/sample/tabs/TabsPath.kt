@@ -4,8 +4,8 @@ import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.annotations.Route
 import com.speakerboxlite.router.sample.base.RouteControllerApp
 
-class TabsRoute: RoutePath
+class TabsPath: RoutePath
 {}
 
 @Route
-abstract class TabsRouteController: RouteControllerApp<TabsRoute, TabsViewModel, TabsFragment>()
+abstract class TabsRouteController: RouteControllerApp<TabsPath, TabsViewModel, TabsFragment>()

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <variable
+            name="viewmodel"
+            type="com.speakerboxlite.router.sample.chain.sub.SubChainViewModel" />
+
+    </data>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{viewmodel.title}"
+            android:textSize="16sp"
+            android:textColor="@color/black"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Close me"
+            android:onClick="@{() -> viewmodel.onClose()}"/>
+
+
+    </LinearLayout>
+
+</layout>

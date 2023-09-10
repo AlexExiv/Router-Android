@@ -1,6 +1,6 @@
 package com.speakerboxlite.router
 
-typealias ViewModelFactory<VM> = () -> VM
+import com.speakerboxlite.router.result.RouterResultProvider
 
 interface View<VM: ViewModel>
 {
@@ -9,6 +9,7 @@ interface View<VM: ViewModel>
     var router: Router
     var localRouter: RouterLocal
 
+    var resultProvider: RouterResultProvider
+
     var viewModel: VM
-    //var viewModelFactory: ViewModelFactory<VM>?
 }

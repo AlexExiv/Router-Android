@@ -1,8 +1,10 @@
 package com.speakerboxlite.router.sample.tabs
 
+import com.speakerboxlite.router.CommandExecutorAndroid
 import com.speakerboxlite.router.HostView
 import com.speakerboxlite.router.HostViewFactory
 import com.speakerboxlite.router.RouterTabs
+import com.speakerboxlite.router.sample.App
 import com.speakerboxlite.router.sample.R
 import com.speakerboxlite.router.sample.base.BaseViewModelFragment
 import com.speakerboxlite.router.sample.base.HostFragment
@@ -15,10 +17,18 @@ class HostViewFactoryDefault: HostViewFactory
 
 class TabsFragment: BaseViewModelFragment<TabsViewModel, FragmentTabsBinding>(R.layout.fragment_tabs)
 {
-    val routerTabs: RouterTabs by lazy {
-        val r = router.createRouterTabs(HostViewFactoryDefault())
-        r.tabChangeCallback = { dataBinding.bottomNavigationView.selectedItemId = TABS_BACK_MAP[it]!! }
-        r
+    val routerTabs: RouterTabs by lazy { router.createRouterTabs(HostViewFactoryDefault()) }
+
+    override fun onResume()
+    {
+        super.onResume()
+        routerTabs.bindExecutor(CommandExecutorAndroid(requireActivity(), 0, childFragmentManager, requireActivity().application as App))
+    }
+
+    override fun onPause()
+    {
+        routerTabs.unbindExecutor()
+        super.onPause()
     }
 
     override fun onBindData()
@@ -33,6 +43,8 @@ class TabsFragment: BaseViewModelFragment<TabsViewModel, FragmentTabsBinding>(R.
             dataBinding.tabs.setCurrentItem(i, false)
             true
         }
+
+        routerTabs.tabChangeCallback = { dataBinding.bottomNavigationView.selectedItemId = TABS_BACK_MAP[it]!! }
     }
 
     companion object

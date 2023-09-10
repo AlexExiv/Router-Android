@@ -10,8 +10,7 @@
 
     </data>
 
-    <FrameLayout
-        android:orientation="vertical"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -31,6 +30,12 @@
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="Show Steps Url"
+                android:onClick="@{() -> viewmodel.onShowStepUrl()}"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:text="Show Tabs"
                 android:onClick="@{() -> viewmodel.onShowTabs()}"/>
 
@@ -39,6 +44,20 @@
                 android:layout_height="wrap_content"
                 android:text="Show Composite View"
                 android:onClick="@{() -> viewmodel.onShowComposite()}"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Show Chain"
+                android:onClick="@{() -> viewmodel.onShowChain()}"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@{viewmodel.chainResult}"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textAlignment="center" />
 
             <Button
                 android:layout_width="match_parent"
@@ -56,6 +75,6 @@
 
         </LinearLayout>
 
-    </FrameLayout>
+    </ScrollView>
 
 </layout>

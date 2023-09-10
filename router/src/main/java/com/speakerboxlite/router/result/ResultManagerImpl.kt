@@ -1,14 +1,16 @@
-package com.speakerboxlite.router
+package com.speakerboxlite.router.result
+
+import com.speakerboxlite.router.Result
 
 data class ResultConnector(val from: String,
                            val to: String,
-                           val result: Result<Any>)
+                           val result: Result<Any>?)
 
 class ResultManagerImpl: ResultManager
 {
     val connectors = mutableMapOf<String, ResultConnector>()
 
-    override fun bind(from: String, to: String, result: Result<Any>)
+    override fun bind(from: String, to: String, result: Result<Any>?)
     {
         connectors[from] = ResultConnector(from, to, result)
     }
@@ -20,6 +22,6 @@ class ResultManagerImpl: ResultManager
 
     override fun send(from: String, result: Any)
     {
-        connectors[from]!!.result(result)
+        connectors[from]!!.result?.invoke(result)
     }
 }

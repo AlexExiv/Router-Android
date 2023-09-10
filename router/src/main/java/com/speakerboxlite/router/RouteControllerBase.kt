@@ -2,27 +2,54 @@ package com.speakerboxlite.router
 
 import com.speakerboxlite.router.pattern.UrlMatcher
 import com.speakerboxlite.router.annotations.Presentation
-import java.net.URL
+import kotlin.reflect.KClass
 
 abstract class RouteControllerBase<Path: RoutePath, VM: ViewModel, V: View<VM>, Component>: RouteController<VM>
 {
-    lateinit var pathClass: Class<Path>
+    lateinit var pathClass: KClass<Path>
     var pattern: UrlMatcher? = null
     override var singleTop: Boolean = false
     override var preferredPresentation: Presentation = Presentation.Push
+    open val chainPaths: List<KClass<*>> get() = listOf()
 
-    override fun check(url: String): Boolean
-    {
-        val _url = URL(url)
-        return _url.host == "" || _url.host == "speakerboxlite.com" || _url.host == "www.speakerboxlite.com" || pattern?.matches(url) ?: false
-    }
+    override val isChain: Boolean get() = chainPaths.isNotEmpty()
+
+    override fun check(url: String): Boolean = pattern?.matches(url) ?: false
 
     override final fun check(path: RoutePath): Boolean = pathClass.isInstance(path)
 
-    override fun convert(url: String): RoutePath
+    override final fun convert(url: String): RoutePath
     {
-        TODO("Not yet implemented")
+        val match = pattern!!.match(url)!!
+
+        val query: Map<String, String>
+        val comp = url.split("?")
+        if (comp.size > 1)
+        {
+            query = mutableMapOf()
+            val pairs = comp[1].split("&")
+            pairs.forEach {
+                val pair = it.split("=")
+                if (pair.size > 1)
+                    query[pair[0]] = pair[1]
+                else
+                    query[pair[0]] = ""
+            }
+        }
+        else
+        {
+            query = mapOf()
+        }
+
+        return convert(match.parameters, query)
     }
+
+    open fun convert(path: Map<String, String>, query: Map<String, String>): RoutePath
+    {
+        TODO("")
+    }
+
+    override fun isPartOfChain(clazz: KClass<*>): Boolean = chainPaths.indexOfFirst { it == clazz } != -1
 
     override fun <CommonComponent> onComposeView(view: View<*>, path: RoutePath, commonComponent: CommonComponent)
     {

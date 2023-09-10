@@ -63,9 +63,9 @@ class AnnotationProcessor : AbstractProcessor()
                 .build()
 
             val resultManager = PropertySpec
-                .builder("resultManager", ClassName(MAIN_ROUTER_PACK, "ResultManager"))
+                .builder("resultManager", ClassName("${MAIN_ROUTER_PACK}.result", "ResultManager"))
                 .addModifiers(listOf(KModifier.PUBLIC, KModifier.OVERRIDE))
-                .initializer("%T()", ClassName(MAIN_ROUTER_PACK, "ResultManagerImpl"))
+                .initializer("%T()", ClassName("${MAIN_ROUTER_PACK}.result", "ResultManagerImpl"))
                 .build()
 
             val routerManager = PropertySpec
@@ -155,7 +155,7 @@ class AnnotationProcessor : AbstractProcessor()
         val pathElement = typeArguments[PATH_INDEX].asElement()
         val pathElementPack = processingEnv.elementUtils.getPackageOf(pathElement).toString()
         val pathElementType = ClassName(pathElementPack, pathElement.simpleName.toString())
-        initBuilder.addStatement("${valName}.pathClass = %T::class.java", pathElementType)
+        initBuilder.addStatement("${valName}.pathClass = %T::class", pathElementType)
 
         val annotation = element.getAnnotation(Route::class.java)
         if (annotation.uri.isNotEmpty())

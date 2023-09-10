@@ -4,18 +4,21 @@ import android.util.Log
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.exceptions.ImpossibleRouteException
 import com.speakerboxlite.router.exceptions.RouteNotFoundException
+import com.speakerboxlite.router.result.ResultManager
+import com.speakerboxlite.router.result.RouterResultProviderImpl
 import java.util.UUID
+import kotlin.reflect.KClass
 
 enum class RouteType
 {
-    Simple, Chain, Sub, Dialog, BTS;
-
-    val isSubChain: Boolean get() = this == Sub || this == Dialog || this == BTS
+    Simple, Dialog, BTS;
 }
 
 data class ViewMeta(val key: String,
                     val routeType: RouteType,
-                    val pathName: String)
+                    val route: RouteController<*>,
+                    val path: KClass<*>,
+                    val result: Result<Any>?)
 
 open class RouterSimple(protected val callerKey: String?,
                         val parent: RouterSimple?,
@@ -26,7 +29,7 @@ open class RouterSimple(protected val callerKey: String?,
 {
     protected val pathData = mutableMapOf<String, RoutePath>()
 
-    protected val commandBuffer = CommandBufferImpl()
+    protected val commandBuffer: CommandBuffer = CommandBufferImpl()
 
     override var topRouter: Router?
         get() = routerManager.top
@@ -41,7 +44,7 @@ open class RouterSimple(protected val callerKey: String?,
         val route = routeManager.find(url)
         if (route != null)
         {
-            return doRoute(route, RouteType.Sub, route.convert(url), route.preferredPresentation, null)
+            return doRoute(route, RouteType.Simple, route.convert(url), route.preferredPresentation, null)
         }
 
         return null
@@ -53,18 +56,6 @@ open class RouterSimple(protected val callerKey: String?,
     override fun <R: Any> routeWithResult(path: RoutePath, presentation: Presentation, result: Result<R>): String =
         route(path, RouteType.Simple, presentation) { result(it as  R) }
 
-    override fun subRoute(path: RoutePath, presentation: Presentation): String =
-        route(path, RouteType.Sub, presentation, null)
-
-    override fun <R: Any> subRouteWithResult(path: RoutePath, presentation: Presentation, result: Result<R>): String =
-        route(path, RouteType.Sub, presentation) { result(it as  R) }
-
-    override fun chainRoute(path: RoutePath, presentation: Presentation): String =
-        route(path, RouteType.Chain, presentation, null)
-
-    override fun <R: Any> chainRouteWithResult(path: RoutePath, presentation: Presentation, result: Result<R>): String =
-        route(path, RouteType.Chain, presentation) { result(it as  R) }
-
     override fun routeDialog(path: RoutePath)
     {
         routeManager.find(path)?.also { commandBuffer.apply(Command.Dialog(createView(it, RouteType.Dialog, path, null))) }
@@ -75,46 +66,27 @@ open class RouterSimple(protected val callerKey: String?,
         routeManager.find(path)?.also { commandBuffer.apply(Command.Dialog(createView(it, RouteType.Dialog, path) { result(it as  R) })) }
     }
 
-    override fun <R : Any> sendResult(result: R)
-    {
-        resultManager.send(viewsStack.last().key, result)
-    }
-
     override fun back()
     {
-        close()
+        val v = viewsStack.last()
+        viewsStack.removeLast()
+        dispatchClose(v)
+        resultManager.unbind(v.key)
     }
 
     override fun close()
     {
         val v = viewsStack.last()
         val chain = scanForChain()
-        if (chain != null && !v.routeType.isSubChain)
+        if (chain != null && chain.key != v.key && chain.route.isPartOfChain(v.path))
         {
             closeTo(chain.key)
+            close()
         }
         else
         {
             viewsStack.removeLast()
             dispatchClose(v)
-            resultManager.unbind(v.key)
-        }
-    }
-
-    override fun <R: Any> closeWithResult(result: R)
-    {
-        val v = viewsStack.last()
-        val chain = scanForChain()
-        if (chain != null && !v.routeType.isSubChain)
-        {
-            resultManager.send(chain.key, result)
-            closeTo(chain.key)
-        }
-        else
-        {
-            viewsStack.removeLast()
-            dispatchClose(v)
-            resultManager.send(v.key, result)
             resultManager.unbind(v.key)
         }
     }
@@ -165,11 +137,17 @@ open class RouterSimple(protected val callerKey: String?,
     override fun onComposeView(view: View<*>)
     {
         val path = pathData[view.viewKey]!!
-        val route = routeManager.find(path)
-        if (route != null)
-            route.onComposeView(view, path, component)
+        val route = routeManager.find(path) ?: throw RouteNotFoundException(path)
+        route.onComposeView(view, path, component)
 
-        view.viewModel.router = this
+        view.resultProvider = RouterResultProviderImpl(view.viewKey, resultManager)
+
+        if (!view.viewModel.isInit)
+        {
+            view.viewModel.router = this
+            view.viewModel.resultProvider = RouterResultProviderImpl(view.viewKey, resultManager)
+                .also { it.start() }
+        }
     }
 
     override fun createRouterLocal(): RouterLocal = RouterLocalImpl(this)
@@ -196,7 +174,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     internal fun scanForChain(): ViewMeta?
     {
-        val chain = viewsStack.lastOrNull { it.routeType == RouteType.Chain }
+        val chain = viewsStack.lastOrNull { it.route.isChain }
         if (chain != null)
             return chain
 
@@ -205,7 +183,6 @@ open class RouterSimple(protected val callerKey: String?,
 
         return null
     }
-
 
     protected fun _closeTo(i: Int)
     {
@@ -236,8 +213,6 @@ open class RouterSimple(protected val callerKey: String?,
                 val viewKey = when (routeType)
                 {
                     RouteType.Simple -> router.route(path = path, presentation = Presentation.Push)
-                    RouteType.Sub -> router.subRoute(path = path, presentation = Presentation.Push)
-                    RouteType.Chain -> router.chainRoute(path = path, presentation = Presentation.Push)
                     else -> throw ImpossibleRouteException("Modal route can't contains $routeType as ROOT")
                 }
 
@@ -268,14 +243,18 @@ open class RouterSimple(protected val callerKey: String?,
         pathData[view.viewKey] = path
         bindRouter(view)
 
-        if (result != null)
-        {
-            val toKey = if (viewsStack.isEmpty()) callerKey else viewsStack.last().key
-            if (toKey != null)
-                resultManager.bind(view.viewKey, toKey, result)
-        }
+        val chain = scanForChain()
+        val toKey = if (chain != null && chain.route.isPartOfChain(path::class))
+            chain.key
+        else if (viewsStack.isEmpty())
+            callerKey
+        else
+            viewsStack.last().key
 
-        viewsStack.add(ViewMeta(view.viewKey, routeType, path::class.toString()))
+        if (toKey != null)
+            resultManager.bind(view.viewKey, toKey, if (chain != null && chain.route.isPartOfChain(path::class)) chain.result else result)
+
+        viewsStack.add(ViewMeta(view.viewKey, routeType, route, path::class, result))
 
         return view
     }

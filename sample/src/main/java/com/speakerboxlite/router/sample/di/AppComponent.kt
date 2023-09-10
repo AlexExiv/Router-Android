@@ -1,5 +1,7 @@
 package com.speakerboxlite.router.sample.di
 
+import com.speakerboxlite.router.sample.chain.ChainViewModel
+import com.speakerboxlite.router.sample.chain.sub.SubChainViewModel
 import com.speakerboxlite.router.sample.composite.CompositeViewModel
 import com.speakerboxlite.router.sample.composite.details.DetailsViewModel
 import com.speakerboxlite.router.sample.dialogs.DialogViewModel
@@ -24,4 +26,7 @@ interface AppComponent
     fun inject(vm: DetailsViewModel)
 
     fun inject(vm: DialogViewModel)
+
+    fun inject(vm: ChainViewModel)
+    fun inject(vm: SubChainViewModel)
 }

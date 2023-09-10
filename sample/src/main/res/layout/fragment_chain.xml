@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <variable
+            name="viewmodel"
+            type="com.speakerboxlite.router.sample.chain.ChainViewModel" />
+
+    </data>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{viewmodel.title}"
+            android:textSize="16sp"
+            android:textColor="@color/black"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Next Step"
+            android:onClick="@{() -> viewmodel.onNextStep()}"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Open Sub Chain"
+            android:onClick="@{() -> viewmodel.onSubChain()}"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{viewmodel.chainResult}"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textAlignment="center" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Open sub route"
+            android:onClick="@{() -> viewmodel.onSubRoute()}"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{viewmodel.subResult}"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textAlignment="center" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Close chain"
+            android:onClick="@{() -> viewmodel.onClose()}"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Close chain with result"
+            android:onClick="@{() -> viewmodel.onCloseWithResult()}"/>
+
+    </LinearLayout>
+
+</layout>

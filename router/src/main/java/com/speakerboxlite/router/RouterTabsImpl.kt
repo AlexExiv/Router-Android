@@ -8,6 +8,8 @@ class RouterTabsImpl(val callerKey: String,
 {
     override var tabChangeCallback: OnTabChangeCallback? = null
 
+    protected val commandBuffer: CommandBuffer = CommandBufferImpl()
+
     override fun route(index: Int, path: RoutePath): HostView
     {
         val view = hostFactory.create()
@@ -16,18 +18,24 @@ class RouterTabsImpl(val callerKey: String,
         return view
     }
 
+    override fun bindExecutor(executor: CommandExecutor)
+    {
+        commandBuffer.bind(executor)
+    }
+
+    override fun unbindExecutor()
+    {
+        commandBuffer.unbind()
+    }
+
     fun showFirstTab()
     {
-        tabChangeCallback?.invoke(0)
+        if (tabChangeCallback != null)
+            commandBuffer.apply(Command.ChangeTab(tabChangeCallback!!, 0))
     }
 
     fun closeTabs()
     {
         router.close()
-    }
-
-    fun <R: Any> closeTabsWithResult(result: R)
-    {
-        router.closeWithResult(result)
     }
 }
