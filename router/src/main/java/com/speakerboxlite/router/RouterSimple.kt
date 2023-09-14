@@ -39,6 +39,8 @@ open class RouterSimple(protected val callerKey: String?,
         get() = routerManager.top
         set(value) { routerManager.top = value }
 
+    override val hasPreviousScreen: Boolean get() = parent != null || viewsStack.size > 1
+
     protected val viewsStack = mutableListOf<ViewMeta>()
 
     val isCurrentTop: Boolean get() = parent == null && viewsStack.size == 1

@@ -17,6 +17,8 @@ class RouterLocalImpl(router: RouterSimple): RouterLocal
         get() = router?.topRouter
         set(value) { router?.topRouter = value }
 
+    override val hasPreviousScreen: Boolean get() = router!!.hasPreviousScreen
+
     protected val commandBuffer: CommandBuffer = CommandBufferImpl()
 
     override fun route(url: String): String? = router!!.route(url)

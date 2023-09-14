@@ -10,53 +10,62 @@
 
     </data>
 
-    <FrameLayout
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
-            android:orientation="vertical"
+        <include layout="@layout/action_bar" />
+
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:paddingHorizontal="16dp">
+            android:layout_height="match_parent">
 
-            <TextView
+            <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Current step:"
-                android:textSize="25dp"
-                android:textColor="@color/black"
-                android:textAlignment="center"/>
+                android:layout_gravity="center"
+                android:paddingHorizontal="16dp">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@{viewmodel.stepStr}"
-                android:textSize="25dp"
-                android:textColor="@color/black"
-                android:textAlignment="center"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Current step:"
+                    android:textSize="25dp"
+                    android:textColor="@color/black"
+                    android:textAlignment="center"/>
 
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Next"
-                android:onClick="@{() -> viewmodel.onNext()}"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@{viewmodel.stepStr}"
+                    android:textSize="25dp"
+                    android:textColor="@color/black"
+                    android:textAlignment="center"/>
 
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Close To Top"
-                android:onClick="@{() -> viewmodel.onCloseToRoot()}"/>
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Next"
+                    android:onClick="@{() -> viewmodel.onNext()}"/>
 
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Show Singleton"
-                android:onClick="@{() -> viewmodel.onShowSingleton()}"/>
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Close To Top"
+                    android:onClick="@{() -> viewmodel.onCloseToRoot()}"/>
 
-        </LinearLayout>
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Show Singleton"
+                    android:onClick="@{() -> viewmodel.onShowSingleton()}"/>
 
-    </FrameLayout>
+            </LinearLayout>
+
+        </FrameLayout>
+
+    </LinearLayout>
 
 </layout>

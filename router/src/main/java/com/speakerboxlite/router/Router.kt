@@ -11,6 +11,11 @@ interface Router
     var topRouter: Router?
 
     /**
+     * Returns information about whether the stack has a previous screen.
+     */
+    val hasPreviousScreen: Boolean
+
+    /**
      * Navigate to a specific URL path.
      *
      * @param url The relative URL path. Avoid using absolute URLs. This URL should correspond to a path defined by the @Route annotation.

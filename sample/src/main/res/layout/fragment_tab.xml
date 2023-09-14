@@ -10,37 +10,46 @@
 
     </data>
 
-    <FrameLayout
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
-            android:orientation="vertical"
+        <include layout="@layout/action_bar" />
+
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="@{viewmodel.indexStr}"
-                android:textColor="@color/black"
-                android:textSize="20sp" />
-
-            <Button
+            <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Next"
-                android:onClick="@{() -> viewmodel.onNext()}"/>
+                android:layout_height="wrap_content">
 
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Singleton"
-                android:onClick="@{() -> viewmodel.onSingleton()}"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@{viewmodel.indexStr}"
+                    android:textColor="@color/black"
+                    android:textSize="20sp" />
 
-        </LinearLayout>
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Next"
+                    android:onClick="@{() -> viewmodel.onNext()}"/>
 
-    </FrameLayout>
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Singleton"
+                    android:onClick="@{() -> viewmodel.onSingleton()}"/>
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+    </LinearLayout>
 
 </layout>
