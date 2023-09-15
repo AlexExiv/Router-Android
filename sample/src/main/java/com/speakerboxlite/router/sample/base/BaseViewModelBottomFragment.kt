@@ -1,19 +1,20 @@
 package com.speakerboxlite.router.sample.base
 
+import android.annotation.SuppressLint
 import android.app.Dialog
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
-import androidx.fragment.app.DialogFragment
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterLocal
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.result.RouterResultProvider
 
-abstract class BaseViewModelDialogFragment<VM: BaseViewModel, VDB: ViewDataBinding>(open val layoutId: Int): DialogFragment(), View<VM>
+abstract class BaseViewModelBottomFragment<VM: BaseViewModel, VDB: ViewDataBinding>(open val layoutId: Int): BottomSheetDialogFragment(),
+    View<VM>
 {
     override var viewKey: String
         get() = requireArguments().getString("VIEW_KEY")!!
@@ -31,31 +32,28 @@ abstract class BaseViewModelDialogFragment<VM: BaseViewModel, VDB: ViewDataBindi
 
     lateinit var dataBinding: VDB
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog
+    @SuppressLint("RestrictedApi")
+    override fun setupDialog(dialog: Dialog, style: Int)
     {
+        super.setupDialog(dialog, style)
+
         dataBinding = DataBindingUtil.inflate(LayoutInflater.from(requireContext()), layoutId, null, false)
         dataBinding.lifecycleOwner = this
-        onViewCreated(dataBinding.root, null)
 
-        return AlertDialog.Builder(requireActivity()).setView(dataBinding.root).create()
-    }
+        dialog.window?.decorView?.systemUiVisibility = (
+                android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        or android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        or android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
 
-    override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?)
-    {
-        super.onViewCreated(view, savedInstanceState)
+        dialog.setContentView(dataBinding.root)
 
         if (!viewModel.isInit)
         {
-            view.postDelayed({ viewModel.onInit() }, 10)
+            view?.postDelayed({ viewModel.onInit() }, 10)
             viewModel.onInitRequested()
         }
 
         onBindData()
-    }
-
-    override fun onDismiss(dialog: DialogInterface)
-    {
-        super.onDismiss(dialog)
     }
 
     open fun onBindData()

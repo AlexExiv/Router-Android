@@ -23,7 +23,7 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
         if (f is View<*>)
         {
             f.router = routerManager.get(f)
-            f.localRouter = f.router.createRouterLocal()
+            f.localRouter = f.router.createRouterLocal(f.viewKey)
             f.router.onComposeView(f)
         }
     }
@@ -55,5 +55,11 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
             f.localRouter.unbindExecutor()
             f.resultProvider.pause()
         }
+    }
+
+    override fun onFragmentDestroyed(fm: FragmentManager, f: Fragment)
+    {
+        if (f is View<*>)
+            f.router.removeView(f.viewKey)
     }
 }

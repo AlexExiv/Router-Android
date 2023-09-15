@@ -8,9 +8,9 @@ class RouterTab(callerKey: String?,
                 routeManager: RouteManager,
                 routerManager: RouterManager,
                 resultManager: ResultManager,
-                component: Any,
+                componentProvider: ComponentProvider,
                 val index: Int,
-                val routerTab: RouterTabsImpl): RouterSimple(callerKey, parent, routeManager, routerManager, resultManager, component)
+                val routerTab: RouterTabsImpl): RouterSimple(callerKey, parent, routeManager, routerManager, resultManager, componentProvider)
 {
     override fun back()
     {

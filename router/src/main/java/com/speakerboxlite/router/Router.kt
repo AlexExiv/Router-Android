@@ -104,12 +104,25 @@ interface Router
     fun onComposeView(view: View<*>)
 
     /**
-     * Creates local router for the top view in the stack
+     * Creates a local router for the top view in the stack associated with the specified view key.
+     *
+     * @param key The view's key (viewKey) to which the new router belongs.
+     * @return A new local router instance.
      */
-    fun createRouterLocal(): RouterLocal
+    fun createRouterLocal(key: String): RouterLocal
 
     /**
      * Creates tabs router for the top view in the stack
      */
     fun createRouterTabs(factory: HostViewFactory): RouterTabs
+
+    /**
+     * Removes a view from the views stack and resets all connections.
+     * It's important to call this method in the `Fragment's` lifecycle method `onDestroy` to ensure that the view
+     * has been removed from the views stack.
+     * This is particularly important for dialog fragments that can be closed silently.
+     *
+     * @param key The view's key (viewKey) to be removed.
+     */
+    fun removeView(key: String)
 }

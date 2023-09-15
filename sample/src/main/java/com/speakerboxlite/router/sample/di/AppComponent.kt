@@ -22,9 +22,6 @@ interface AppComponent
     fun inject(vm: TabsViewModel)
     fun inject(vm: TabViewModel)
 
-    fun inject(vm: CompositeViewModel)
-    fun inject(vm: DetailsViewModel)
-
     fun inject(vm: DialogViewModel)
 
     fun inject(vm: ChainViewModel)

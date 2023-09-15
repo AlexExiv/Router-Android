@@ -43,7 +43,7 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
     private fun closeTo(key: String)
     {
         if (fragmentManager.backStackEntryCount > 1)
-            fragmentManager.popBackStack(key, 0)
+            fragmentManager.popBackStackImmediate(key, 0)
     }
 
     private fun startActivity(key: String)

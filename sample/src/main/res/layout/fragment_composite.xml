@@ -22,8 +22,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <FrameLayout
+            <LinearLayout
                 android:id="@+id/frameLayout"
+                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -37,8 +38,21 @@
                     android:textSize="18sp"
                     android:textColor="@color/black"/>
 
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@{viewmodel.resultVal}"
+                    android:textSize="18sp"
+                    android:textColor="@color/black"/>
 
-            </FrameLayout>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@{viewmodel.sharedVar}"
+                    android:textSize="18sp"
+                    android:textColor="@color/black"/>
+
+            </LinearLayout>
 
             <FrameLayout
                 android:id="@+id/sub"

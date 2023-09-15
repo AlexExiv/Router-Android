@@ -30,6 +30,24 @@
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="Random Value Via Result"
+                android:onClick="@{() -> viewmodel.onGenerateResult()}"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Random Value Via Shared"
+                android:onClick="@{() -> viewmodel.onGenerateShared()}"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Show Composite"
+                android:onClick="@{() -> viewmodel.onShowComposite()}"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:text="Show Step"
                 android:onClick="@{() -> viewmodel.onShowStep()}"/>
 

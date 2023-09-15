@@ -80,6 +80,12 @@
                     android:textSize="16sp"
                     android:textAlignment="center" />
 
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Show Shared Component"
+                    android:onClick="@{() -> viewmodel.onShowSharedComponent()}"/>
+
             </LinearLayout>
 
         </ScrollView>

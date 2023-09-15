@@ -6,6 +6,7 @@ import com.speakerboxlite.router.sample.base.BaseViewModel
 import com.speakerboxlite.router.sample.chain.ChainPath
 import com.speakerboxlite.router.sample.composite.CompositePath
 import com.speakerboxlite.router.sample.dialogs.DialogPath
+import com.speakerboxlite.router.sample.shared.SharedPath
 import com.speakerboxlite.router.sample.step.StepPath
 import com.speakerboxlite.router.sample.tabs.TabsPath
 
@@ -46,5 +47,10 @@ class MainViewModel(app: Application): BaseViewModel(app)
         router.routeDialogWithResult<Boolean>(DialogPath(title = "Title", message = "Tap Yes or No", okBtn = "Yes", cancelBtn = "No")) {
             dialogResult.value = "Dialog result: ${if (it) "Yes" else "No"}"
         }
+    }
+
+    fun onShowSharedComponent()
+    {
+        router.route(SharedPath())
     }
 }

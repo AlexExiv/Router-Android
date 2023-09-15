@@ -5,10 +5,11 @@ import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
 import com.speakerboxlite.router.command.CommandBufferImpl
 import com.speakerboxlite.router.command.CommandExecutor
+import com.speakerboxlite.router.exceptions.RouteNotFoundException
 import java.lang.ref.WeakReference
 import java.util.UUID
 
-class RouterLocalImpl(router: RouterSimple): RouterLocal
+class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
 {
     val weakRouter = WeakReference(router)
     val router: RouterSimple? get() = weakRouter.get()
@@ -73,22 +74,37 @@ class RouterLocalImpl(router: RouterSimple): RouterLocal
         router?.onComposeView(view)
     }
 
-    override fun createRouterLocal(): RouterLocal = router!!.createRouterLocal()
+    override fun createRouterLocal(key: String): RouterLocal = router!!.createRouterLocal(key)
 
     override fun createRouterTabs(factory: HostViewFactory): RouterTabs
     {
         TODO("Not yet implemented")
     }
 
-    override fun routeInContainer(containerId: Int, path: RoutePath)
+    override fun removeView(key: String)
     {
-        val router = router ?: return
-        val route = router.findRoute(path) ?: return
+        router?.removeView(key)
+    }
+
+    override fun routeInContainer(containerId: Int, path: RoutePath): String
+    {
+        val router = router ?: return ""
+        val route = router.findRoute(path) ?: throw RouteNotFoundException(path)
         val view = route.onCreateView()
         view.viewKey = UUID.randomUUID().toString()
         router.setPath(view.viewKey, path)
         router.bindRouter(view)
+        router.connectComponent(viewKey, view.viewKey)
 
         commandBuffer.apply(Command.SubFragment(containerId, view))
+
+        return view.viewKey
+    }
+
+    override fun <R: Any> routeInContainerWithResult(containerId: Int, path: RoutePath, result: Result<R>): String
+    {
+        val key = routeInContainer(containerId, path)
+        router?.bindResult(key, viewKey) { result(it as R) }
+        return key
     }
 }

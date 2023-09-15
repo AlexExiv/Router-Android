@@ -3,9 +3,10 @@ package com.speakerboxlite.router
 import com.speakerboxlite.router.annotations.Presentation
 import kotlin.reflect.KClass
 
-interface RouteController<VM: ViewModel>
+interface RouteController<Path: RoutePath, VM: ViewModel>
 {
     val singleton: Boolean
+    val creatingInjector: Boolean
     val preferredPresentation: Presentation
     val isChain: Boolean
 
@@ -16,5 +17,6 @@ interface RouteController<VM: ViewModel>
     fun isPartOfChain(clazz: KClass<*>): Boolean
 
     fun onCreateView(): View<VM>
-    fun <CommonComponent> onComposeView(view: View<*>, path: RoutePath, commonComponent: CommonComponent)
+    fun onCreateInjector(path: Path, component: Any): Any
+    fun onComposeView(view: View<*>, path: RoutePath, component: Any)
 }

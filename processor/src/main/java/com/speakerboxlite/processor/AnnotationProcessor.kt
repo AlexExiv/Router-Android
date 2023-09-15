@@ -74,9 +74,21 @@ class AnnotationProcessor : AbstractProcessor()
                 .initializer("%T()", ClassName(MAIN_ROUTER_PACK, "RouterManagerImpl"))
                 .build()
 
+            val componentProviderLazy = CodeBlock.builder()
+                .beginControlFlow("lazy(mode = %T.SYNCHRONIZED)", LazyThreadSafetyMode::class.asTypeName())
+                .addStatement("%T(component)", ClassName(MAIN_ROUTER_PACK, "ComponentProviderImpl"))
+                .endControlFlow()
+                .build()
+
+            val componentProvider = PropertySpec
+                .builder("componentProvider", ClassName(MAIN_ROUTER_PACK, "ComponentProvider"))
+                .addModifiers(listOf(KModifier.PUBLIC, KModifier.OVERRIDE))
+                .delegate(componentProviderLazy)
+                .build()
+
             val startRouterLazy = CodeBlock.builder()
                 .beginControlFlow("lazy(mode = %T.SYNCHRONIZED)", LazyThreadSafetyMode::class.asTypeName())
-                .addStatement("val router = %T(null, null, routeManager, routerManager, resultManager, component)", ClassName(MAIN_ROUTER_PACK, "RouterSimple"))
+                .addStatement("val router = %T(null, null, routeManager, routerManager, resultManager, componentProvider)", ClassName(MAIN_ROUTER_PACK, "RouterSimple"))
                 .addStatement("router")
                 .endControlFlow()
                 .build()
@@ -103,6 +115,7 @@ class AnnotationProcessor : AbstractProcessor()
             classBuilder.addProperty(resultManager)
             classBuilder.addProperty(routerManager)
             classBuilder.addProperty(startRouter)
+            classBuilder.addProperty(componentProvider)
             classBuilder.addProperty(component)
             classBuilder.addProperty(startPath)
 
@@ -173,6 +186,12 @@ class AnnotationProcessor : AbstractProcessor()
         if (annotation.singleton)
         {
             initBuilder.addStatement("${valName}.singleton = true")
+        }
+
+        val names = elementClass.getExecutables().map { it.simpleName.toString() }
+        if (names.contains(CREATE_INJECTOR))
+        {
+            initBuilder.addStatement("${valName}.creatingInjector = true")
         }
 
         initBuilder.addStatement("")
@@ -288,6 +307,7 @@ class AnnotationProcessor : AbstractProcessor()
         const val CREATE_VIEW = "onCreateView"
         const val CREATE_VIEWMODEL = "onCreateViewModel"
         const val INJECT = "onInject"
+        const val CREATE_INJECTOR = "onCreateInjector"
 
         const val KAPT_KOTLIN_GENERATED_OPTION_NAME = "kapt.kotlin.generated"
         val REQUIRED_METHODS = listOf(CREATE_VIEW, CREATE_VIEWMODEL, INJECT)
