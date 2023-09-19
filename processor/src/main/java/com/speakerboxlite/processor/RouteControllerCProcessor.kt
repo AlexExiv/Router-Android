@@ -4,16 +4,15 @@ import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
-import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.TypeSpec
 import java.io.File
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 
-class RouteControllerVMProcessor(processingEnv: ProcessingEnvironment,
-                                 kaptKotlinGeneratedDir: String,
-                                 mainRouterPack: String): RouteControllerProcessorBase(processingEnv, kaptKotlinGeneratedDir, mainRouterPack)
+class RouteControllerCProcessor(processingEnv: ProcessingEnvironment,
+                                kaptKotlinGeneratedDir: String,
+                                mainRouterPack: String): RouteControllerProcessorBase(processingEnv, kaptKotlinGeneratedDir, mainRouterPack)
 {
     override fun createClass(element: TypeElement): ClassName
     {
@@ -35,9 +34,6 @@ class RouteControllerVMProcessor(processingEnv: ProcessingEnvironment,
         val viewElement = typeArguments[V_INDEX].asElement() as TypeElement
         val viewClass = ClassName(viewElement.getPack(processingEnv), viewElement.simpleName.toString())
 
-        val vmElement = typeArguments[VM_INDEX].asElement() as TypeElement
-        val vmClass = ClassName(vmElement.getPack(processingEnv), vmElement.simpleName.toString())
-
         if (!names.contains(CREATE_VIEW))
         {
             val func = FunSpec.builder(CREATE_VIEW)
@@ -48,17 +44,17 @@ class RouteControllerVMProcessor(processingEnv: ProcessingEnvironment,
             classBuilder.addFunction(func.build())
         }
 
-        if (!names.contains(CREATE_VIEWMODEL))
+        if (!names.contains(INJECT))
         {
-            val getAndroidViewModel = MemberName(mainRouterPack, "getAndroidViewModel")
+            val componentElement = typeArguments[COMPONENT_INDEX].asElement() as TypeElement
+            val componentClass = ClassName(componentElement.getPack(processingEnv), componentElement.simpleName.toString())
 
-            val func = FunSpec.builder(CREATE_VIEWMODEL)
+            val func = FunSpec.builder(INJECT)
             func.addModifiers(KModifier.OVERRIDE)
             func.addModifiers(KModifier.PROTECTED)
             func.addParameter("view", viewClass)
-            func.addParameter("path", pathClass)
-            func.returns(vmClass)
-            func.addStatement("return view.%M()", getAndroidViewModel)
+            func.addParameter("component", componentClass)
+            func.addStatement("component.inject(view)")
             classBuilder.addFunction(func.build())
         }
 
@@ -75,12 +71,12 @@ class RouteControllerVMProcessor(processingEnv: ProcessingEnvironment,
     companion object
     {
         val PATH_INDEX = 0
-        val VM_INDEX = 1
-        val V_INDEX = 2
+        val V_INDEX = 1
+        val COMPONENT_INDEX = 2
 
         const val CREATE_VIEW = "onCreateView"
-        const val CREATE_VIEWMODEL = "onCreateViewModel"
+        const val INJECT = "onInject"
 
-        val REQUIRED_METHODS = listOf(CREATE_VIEW, CREATE_VIEWMODEL)
+        val REQUIRED_METHODS = listOf(CREATE_VIEW, INJECT)
     }
 }

@@ -6,6 +6,8 @@ import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
 import com.speakerboxlite.router.command.CommandBufferImpl
 import com.speakerboxlite.router.command.CommandExecutor
+import com.speakerboxlite.router.controllers.RouteControllerComposable
+import com.speakerboxlite.router.controllers.RouteControllerInterface
 import com.speakerboxlite.router.exceptions.ImpossibleRouteException
 import com.speakerboxlite.router.exceptions.RouteNotFoundException
 import com.speakerboxlite.router.result.ResultManager
@@ -21,7 +23,7 @@ enum class RouteType
 
 data class ViewMeta(val key: String,
                     val routeType: RouteType,
-                    val route: RouteController<RoutePath, *>,
+                    val route: RouteControllerInterface<RoutePath, *>,
                     val path: KClass<*>,
                     val result: Result<Any>?)
 
@@ -171,7 +173,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     internal open fun createRouterTab(callerKey: String, index: Int, tabs: RouterTabsImpl): Router = RouterTab(callerKey, this, routeManager, routerManager, resultManager, index, tabs)
 
-    internal fun findRoute(path: RoutePath): RouteController<RoutePath, *>? = routeManager.find(path)
+    internal fun findRoute(path: RoutePath): RouteControllerInterface<RoutePath, *>? = routeManager.find(path)
 
     internal fun setPath(key: String, path: RoutePath)
     {
@@ -248,7 +250,7 @@ open class RouterSimple(protected val callerKey: String?,
         return doRoute(route, routeType, path, presentation, result)
     }
 
-    protected fun doRoute(route: RouteController<RoutePath, *>, routeType: RouteType, path: RoutePath, presentation: Presentation, result: Result<Any>?): String =
+    protected fun doRoute(route: RouteControllerInterface<RoutePath, *>, routeType: RouteType, path: RoutePath, presentation: Presentation, result: Result<Any>?): String =
         when (presentation)
         {
             Presentation.Modal ->
@@ -281,7 +283,7 @@ open class RouterSimple(protected val callerKey: String?,
             }
         }
 
-    protected fun createView(route: RouteController<RoutePath, *>, routeType: RouteType, path: RoutePath, result: Result<Any>?): View
+    protected fun createView(route: RouteControllerInterface<RoutePath, *>, routeType: RouteType, path: RoutePath, result: Result<Any>?): View
     {
         val view = route.onCreateView(path)
         view.viewKey = UUID.randomUUID().toString()

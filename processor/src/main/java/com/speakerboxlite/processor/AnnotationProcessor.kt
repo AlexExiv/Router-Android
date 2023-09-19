@@ -118,6 +118,8 @@ class AnnotationProcessor : AbstractProcessor()
             val processorManager = RouteControllerProcessorManager()
             processorManager.register(RouteControllerVMProcessor(processingEnv, kaptKotlinGeneratedDir, MAIN_ROUTER_PACK))
             processorManager.register(RouteControllerVMCProcessor(processingEnv, kaptKotlinGeneratedDir, MAIN_ROUTER_PACK))
+            processorManager.register(RouteControllerProcessor(processingEnv, kaptKotlinGeneratedDir, MAIN_ROUTER_PACK))
+            processorManager.register(RouteControllerCProcessor(processingEnv, kaptKotlinGeneratedDir, MAIN_ROUTER_PACK))
 
             elements.forEach {
                 if (it.kind != ElementKind.CLASS)

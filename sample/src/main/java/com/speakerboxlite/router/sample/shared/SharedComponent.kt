@@ -19,7 +19,7 @@ class SharedData
 
 @MasterDetailScope
 @Component(dependencies = [AppComponent::class], modules = [SharedModule::class])
-interface SharedComponent
+interface SharedComponent: com.speakerboxlite.router.controllers.Component
 {
     fun inject(vm: SharedViewModel)
     fun inject(vm: SharedSub0ViewModel)

@@ -4,8 +4,10 @@ import com.speakerboxlite.router.sample.chain.ChainViewModel
 import com.speakerboxlite.router.sample.chain.sub.SubChainViewModel
 import com.speakerboxlite.router.sample.composite.CompositeViewModel
 import com.speakerboxlite.router.sample.composite.details.DetailsViewModel
+import com.speakerboxlite.router.sample.di.modules.AppModule
 import com.speakerboxlite.router.sample.dialogs.DialogViewModel
 import com.speakerboxlite.router.sample.main.MainViewModel
+import com.speakerboxlite.router.sample.simple.component.SimpleComponentFragment
 import com.speakerboxlite.router.sample.step.StepViewModel
 import com.speakerboxlite.router.sample.tabs.TabsViewModel
 import com.speakerboxlite.router.sample.tabs.tab.TabViewModel
@@ -13,8 +15,8 @@ import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [])
-interface AppComponent
+@Component(modules = [AppModule::class])
+interface AppComponent: com.speakerboxlite.router.controllers.Component
 {
     fun inject(vm: MainViewModel)
     fun inject(vm: StepViewModel)
@@ -26,4 +28,6 @@ interface AppComponent
 
     fun inject(vm: ChainViewModel)
     fun inject(vm: SubChainViewModel)
+
+    fun inject(view: SimpleComponentFragment)
 }

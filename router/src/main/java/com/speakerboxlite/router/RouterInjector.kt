@@ -1,5 +1,6 @@
 package com.speakerboxlite.router
 
+import com.speakerboxlite.router.controllers.RouteControllerComponent
 import com.speakerboxlite.router.exceptions.RouteNotFoundException
 import com.speakerboxlite.router.ext.retrieveComponent
 import com.speakerboxlite.router.result.ResultManager
@@ -26,10 +27,11 @@ open class RouterInjector(callerKey: String?,
         val path = pathData[view.viewKey]!!
         val route = routeManager.find(path) ?: throw RouteNotFoundException(path)
 
-        (route as? RouteControllerComponent<RoutePath, View>)?.also {
+        (route as? RouteControllerComponent<RoutePath, View, *>)?.also {
             val compKey = componentProvider.componentKey(view.viewKey)
             val i = viewsStack.indexOfFirst { it.key == compKey }
-            val comp = scanForTopComponent(i, route::class.retrieveComponent())
+            val compClass = route::class.retrieveComponent() ?: throw RuntimeException("Couldn't retrieve Component class")
+            val comp = scanForTopComponent(i, compClass)
             it.onComposeView(this, view, path, comp)
         }
     }
@@ -59,7 +61,8 @@ open class RouterInjector(callerKey: String?,
             var comp = componentProvider.find(viewsStack[0].key)
             if (comp == null)
             {
-                val routeComponent = viewsStack[0].route as? RouteControllerComponent<RoutePath, *> ?: throw RuntimeException("")
+                val routeComponent = viewsStack[0].route as? RouteControllerComponent<RoutePath, *, *>
+                    ?: throw RuntimeException("")
                 comp = routeComponent.onCreateInjector(pathData[viewsStack[0].key]!!, componentProvider.appComponent)
                 componentProvider.bind(viewsStack[0].key, comp)
             }
@@ -77,7 +80,7 @@ open class RouterInjector(callerKey: String?,
                 var comp = componentProvider.find(v.key)
                 if (comp == null)
                 {
-                    val routeComponent = v.route as? RouteControllerComponent<RoutePath, *> ?: throw RuntimeException("")
+                    val routeComponent = v.route as? RouteControllerComponent<RoutePath, *, *> ?: throw RuntimeException("")
                     comp = routeComponent.onCreateInjector(pathData[v.key]!!, componentProvider.appComponent)
                     componentProvider.bind(v.key, comp)
                 }

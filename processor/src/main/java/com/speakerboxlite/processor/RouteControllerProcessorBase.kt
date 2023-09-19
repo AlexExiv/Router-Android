@@ -5,7 +5,7 @@ import javax.lang.model.element.TypeElement
 
 abstract class RouteControllerProcessorBase(val processingEnv: ProcessingEnvironment,
                                             val kaptKotlinGeneratedDir: String,
-                                            val mainRouterPack: String): RouteControllerProcessor
+                                            val mainRouterPack: String): RouteControllerProcessorInterface
 {
     override fun checkElement(element: TypeElement): Boolean
     {

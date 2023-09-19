@@ -1,10 +1,12 @@
-package com.speakerboxlite.router
+package com.speakerboxlite.router.controllers
 
+import com.speakerboxlite.router.RoutePath
+import com.speakerboxlite.router.Router
+import com.speakerboxlite.router.View
 import com.speakerboxlite.router.annotations.Presentation
-import com.speakerboxlite.router.result.RouterResultProvider
 import kotlin.reflect.KClass
 
-interface RouteController<Path: RoutePath, V: View>
+interface RouteControllerInterface<Path: RoutePath, V: View>
 {
     val singleton: Boolean
     val creatingInjector: Boolean
@@ -25,7 +27,9 @@ interface RouteControllerComposable<Path: RoutePath, V: View>
     fun onComposeView(router: Router, view: V, path: Path)
 }
 
-interface RouteControllerComponent<Path: RoutePath, V: View>
+interface Component
+
+interface RouteControllerComponent<Path: RoutePath, V: View, C: Component>
 {
     fun onCreateInjector(path: Path, component: Any): Any
     fun onComposeView(router: Router, view: V, path: Path, component: Any)

@@ -8,6 +8,8 @@ import com.speakerboxlite.router.RouterComponent
 import com.speakerboxlite.router.sample.base.HostActivity
 import com.speakerboxlite.router.sample.di.AppComponent
 import com.speakerboxlite.router.sample.di.DaggerAppComponent
+import com.speakerboxlite.router.sample.di.modules.AppData
+import com.speakerboxlite.router.sample.di.modules.AppModule
 import com.speakerboxlite.router.sample.main.MainPath
 
 class App: Application(), HostActivityFactory
@@ -21,6 +23,7 @@ class App: Application(), HostActivityFactory
         super.onCreate()
 
         component = DaggerAppComponent.builder()
+            .appModule(AppModule(AppData("App String")))
             .build()
 
         routerComponent.initialize(component, MainPath())

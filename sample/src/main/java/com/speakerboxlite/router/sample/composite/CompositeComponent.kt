@@ -16,7 +16,7 @@ class CompositeData
 
 @MasterDetailScope
 @Component(dependencies = [AppComponent::class], modules = [CompositeModule::class])
-interface CompositeComponent
+interface CompositeComponent: com.speakerboxlite.router.controllers.Component
 {
     fun inject(vm: CompositeViewModel)
     fun inject(vm: DetailsViewModel)

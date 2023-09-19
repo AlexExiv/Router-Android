@@ -7,6 +7,8 @@ import com.speakerboxlite.router.sample.chain.ChainPath
 import com.speakerboxlite.router.sample.composite.CompositePath
 import com.speakerboxlite.router.sample.dialogs.DialogPath
 import com.speakerboxlite.router.sample.shared.SharedPath
+import com.speakerboxlite.router.sample.simple.SimplePath
+import com.speakerboxlite.router.sample.simple.component.SimpleComponentPath
 import com.speakerboxlite.router.sample.step.StepPath
 import com.speakerboxlite.router.sample.tabs.TabsPath
 
@@ -52,5 +54,15 @@ class MainViewModel(app: Application): BaseViewModel(app)
     fun onShowSharedComponent()
     {
         router.route(SharedPath())
+    }
+
+    fun onShowSimple()
+    {
+        router.route(SimplePath("Text to argument"))
+    }
+
+    fun onShowSimpleComponent()
+    {
+        router.route(SimpleComponentPath())
     }
 }

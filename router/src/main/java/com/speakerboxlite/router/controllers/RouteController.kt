@@ -1,11 +1,12 @@
-package com.speakerboxlite.router
+package com.speakerboxlite.router.controllers
 
+import com.speakerboxlite.router.RoutePath
+import com.speakerboxlite.router.View
 import com.speakerboxlite.router.pattern.UrlMatcher
 import com.speakerboxlite.router.annotations.Presentation
-import com.speakerboxlite.router.result.RouterResultProvider
 import kotlin.reflect.KClass
 
-abstract class RouteControllerBase<Path: RoutePath, V: View>: RouteController<Path, V>
+abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterface<Path, V>
 {
     lateinit var pathClass: KClass<Path>
     var pattern: UrlMatcher? = null
