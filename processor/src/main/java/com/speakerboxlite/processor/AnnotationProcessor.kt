@@ -86,19 +86,6 @@ class AnnotationProcessor : AbstractProcessor()
                 .delegate(componentProviderLazy)
                 .build()
 
-            val startRouterLazy = CodeBlock.builder()
-                .beginControlFlow("lazy(mode = %T.SYNCHRONIZED)", LazyThreadSafetyMode::class.asTypeName())
-                .addStatement("val router = %T(null, null, routeManager, routerManager, resultManager, componentProvider)", ClassName(MAIN_ROUTER_PACK, "RouterSimple"))
-                .addStatement("router")
-                .endControlFlow()
-                .build()
-
-            val startRouter = PropertySpec
-                .builder("startRouter", ClassName(MAIN_ROUTER_PACK, "Router"))
-                .addModifiers(listOf(KModifier.PUBLIC, KModifier.OVERRIDE))
-                .delegate(startRouterLazy)
-                .build()
-
             val startPath = PropertySpec
                 .builder("startPath", ClassName(MAIN_ROUTER_PACK, "RoutePath"))
                 .addModifiers(listOf(KModifier.PRIVATE, KModifier.LATEINIT))
@@ -114,7 +101,6 @@ class AnnotationProcessor : AbstractProcessor()
             classBuilder.addProperty(routeManager)
             classBuilder.addProperty(resultManager)
             classBuilder.addProperty(routerManager)
-            classBuilder.addProperty(startRouter)
             classBuilder.addProperty(componentProvider)
             classBuilder.addProperty(component)
             classBuilder.addProperty(startPath)
@@ -127,6 +113,12 @@ class AnnotationProcessor : AbstractProcessor()
             initBuilder.addStatement("this.startPath = startPath")
             initBuilder.addStatement("routerManager[%M] = startRouter", MemberName(MAIN_ROUTER_PACK, "START_ACTIVITY_KEY"))
 
+            val kaptKotlinGeneratedDir = processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]!!
+
+            val processorManager = RouteControllerProcessorManager()
+            processorManager.register(RouteControllerVMProcessor(processingEnv, kaptKotlinGeneratedDir, MAIN_ROUTER_PACK))
+            processorManager.register(RouteControllerVMCProcessor(processingEnv, kaptKotlinGeneratedDir, MAIN_ROUTER_PACK))
+
             elements.forEach {
                 if (it.kind != ElementKind.CLASS)
                 {
@@ -134,8 +126,28 @@ class AnnotationProcessor : AbstractProcessor()
                     return true
                 }
 
-                processAnnotation(it, initBuilder)
+                processAnnotation(it, initBuilder, processorManager)
             }
+
+            val routerClass = if (processorManager.hadComponent)
+                ClassName(MAIN_ROUTER_PACK, "RouterInjector")
+            else
+                ClassName(MAIN_ROUTER_PACK, "RouterSimple")
+
+            val startRouterLazy = CodeBlock.builder()
+                .beginControlFlow("lazy(mode = %T.SYNCHRONIZED)", LazyThreadSafetyMode::class.asTypeName())
+                .addStatement("val router = %T(null, null, routeManager, routerManager, resultManager, componentProvider)", routerClass)
+                .addStatement("router")
+                .endControlFlow()
+                .build()
+
+            val startRouter = PropertySpec
+                .builder("startRouter", ClassName(MAIN_ROUTER_PACK, "Router"))
+                .addModifiers(listOf(KModifier.PUBLIC, KModifier.OVERRIDE))
+                .delegate(startRouterLazy)
+                .build()
+
+            classBuilder.addProperty(startRouter)
 
             val presentationEnum = ClassName("$MAIN_ROUTER_PACK.annotations", "Presentation")
             initBuilder.addStatement("startRouter.route(startPath, %T.%L)", presentationEnum, Presentation.Push.toString())
@@ -144,7 +156,6 @@ class AnnotationProcessor : AbstractProcessor()
             classBuilder.addFunction(initBuilder.build())
 
             val file = fileBuilder.addType(classBuilder.build()).build()
-            val kaptKotlinGeneratedDir = processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]
             file.writeTo(File(kaptKotlinGeneratedDir))
         }
         catch (e: Exception)
@@ -155,10 +166,10 @@ class AnnotationProcessor : AbstractProcessor()
         return false
     }
 
-    private fun processAnnotation(element: Element, initBuilder: FunSpec.Builder)
+    private fun processAnnotation(element: Element, initBuilder: FunSpec.Builder, processorManager: RouteControllerProcessorManager)
     {
         val elementClass = element as TypeElement
-        val classType = createClass(elementClass)
+        val classType = processorManager.createClass(elementClass)
         val valName = classType.simpleName.lowercase()
 
         initBuilder.addStatement("val $valName = %T()", classType)
@@ -197,120 +208,15 @@ class AnnotationProcessor : AbstractProcessor()
         initBuilder.addStatement("")
     }
 
-    private fun createClass(element: TypeElement): ClassName
-    {
-        val pack = processingEnv.elementUtils.getPackageOf(element).toString()
-        val className = element.simpleName.toString()
-
-        val elementClassName = ClassName(pack, className)
-        val names = element.getExecutables().map { it.simpleName.toString() }
-        if (names.containsAll(REQUIRED_METHODS))
-            return elementClassName
-
-        val classNameImpl = "${className}_IMP"
-        val classBuilder = TypeSpec.classBuilder(classNameImpl)
-        val typeArguments = (element.superclass as DeclaredType).typeArguments as List<DeclaredType>
-
-        if (!names.contains(CREATE_VIEW))
-        {
-            val viewElement = typeArguments[V_INDEX].asElement() as TypeElement
-            val viewClass = ClassName(viewElement.getPack(processingEnv), viewElement.simpleName.toString())
-
-            val func = FunSpec.builder(CREATE_VIEW)
-            func.addModifiers(KModifier.OVERRIDE)
-            //func.addModifiers(KModifier.PROTECTED)
-            func.returns(viewClass)
-            func.addStatement("return %T()", viewClass)
-            classBuilder.addFunction(func.build())
-        }
-
-        if (!names.contains(CREATE_VIEWMODEL))
-        {
-            val viewElement = typeArguments[V_INDEX].asElement() as TypeElement
-            val pathElement = typeArguments[PATH_INDEX].asElement() as TypeElement
-            val vmElement = typeArguments[VM_INDEX].asElement() as TypeElement
-/*
-            val vmConstructors = vmElement.getExecutables().filter { it.simpleName.contentEquals("init") }
-            vmConstructors[0].parameters[0].javaClass
-*/
-            val viewClass = ClassName(viewElement.getPack(processingEnv), viewElement.simpleName.toString())
-            val pathClass = ClassName(pathElement.getPack(processingEnv), pathElement.simpleName.toString())
-            val vmClass = ClassName(vmElement.getPack(processingEnv), vmElement.simpleName.toString())
-
-            val getAndroidViewModel = MemberName(MAIN_ROUTER_PACK, "getAndroidViewModel")
-
-            val func = FunSpec.builder(CREATE_VIEWMODEL)
-            func.addModifiers(KModifier.OVERRIDE)
-            func.addModifiers(KModifier.PROTECTED)
-            func.addParameter("view", viewClass)
-            func.addParameter("path", pathClass)
-            func.returns(vmClass)
-            func.addStatement("return view.%M()", getAndroidViewModel)
-            classBuilder.addFunction(func.build())
-        }
-
-        if (!names.contains(INJECT))
-        {
-            val viewElement = typeArguments[V_INDEX].asElement() as TypeElement
-            val vmElement = typeArguments[VM_INDEX].asElement() as TypeElement
-            val componentElement = typeArguments[COMPONENT_INDEX].asElement() as TypeElement
-
-            val viewClass = ClassName(viewElement.getPack(processingEnv), viewElement.simpleName.toString())
-            val vmClass = ClassName(vmElement.getPack(processingEnv), vmElement.simpleName.toString())
-            val componentClass = ClassName(componentElement.getPack(processingEnv), componentElement.simpleName.toString())
-
-            val func = FunSpec.builder(INJECT)
-            func.addModifiers(KModifier.OVERRIDE)
-            func.addModifiers(KModifier.PROTECTED)
-            func.addParameter("view", viewClass)
-            func.addParameter("vm", vmClass)
-            func.addParameter("component", componentClass)
-            func.addStatement("component.inject(vm)")
-            classBuilder.addFunction(func.build())
-        }
-
-        classBuilder.superclass(elementClassName)
-
-        val file = FileSpec.builder(pack, classNameImpl)
-            .addType(classBuilder.build())
-            .build()
-
-        val kaptKotlinGeneratedDir = processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]
-        file.writeTo(File(kaptKotlinGeneratedDir))
-        return ClassName(pack, classNameImpl)
-    }
-
-    fun getTypeArgumentWithParent(type: DeclaredType, name: String): DeclaredType?
-    {
-        for (t in type.typeArguments)
-        {
-            if (t is DeclaredType)
-            {
-                val generic = t.asElement() as TypeElement
-                if (generic.interfaces.firstOrNull { (it as DeclaredType).asElement().simpleName.toString() == name } != null)
-                    return t
-            }
-        }
-
-        return null
-    }
-
     companion object
     {
         val MAIN_ROUTER_PACK = "com.speakerboxlite.router"
 
         val PATH_INDEX = 0
-        val VM_INDEX = 1
-        val V_INDEX = 2
-        val COMPONENT_INDEX = 3
 
-        const val CREATE_VIEW = "onCreateView"
-        const val CREATE_VIEWMODEL = "onCreateViewModel"
-        const val INJECT = "onInject"
         const val CREATE_INJECTOR = "onCreateInjector"
 
         const val KAPT_KOTLIN_GENERATED_OPTION_NAME = "kapt.kotlin.generated"
-        val REQUIRED_METHODS = listOf(CREATE_VIEW, CREATE_VIEWMODEL, INJECT)
     }
 }
 
@@ -325,4 +231,14 @@ fun TypeElement.getExecutables(): List<ExecutableElement>
             methods.add(methodDeclaration)
 
     return methods
+}
+
+fun TypeElement.hasParent(name: String): Boolean
+{
+    val sc = superclass as DeclaredType
+    val sd = sc.asElement() as TypeElement
+    if (sd.simpleName.contentEquals(name))
+        return true
+
+    return false
 }

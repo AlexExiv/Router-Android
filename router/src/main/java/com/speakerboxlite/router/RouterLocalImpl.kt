@@ -6,6 +6,7 @@ import com.speakerboxlite.router.command.CommandBuffer
 import com.speakerboxlite.router.command.CommandBufferImpl
 import com.speakerboxlite.router.command.CommandExecutor
 import com.speakerboxlite.router.exceptions.RouteNotFoundException
+import com.speakerboxlite.router.result.RouterResultProvider
 import java.lang.ref.WeakReference
 import java.util.UUID
 
@@ -69,7 +70,7 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
         commandBuffer.unbind()
     }
 
-    override fun onComposeView(view: View<*>)
+    override fun onComposeView(view: View)
     {
         router?.onComposeView(view)
     }
@@ -86,15 +87,19 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
         router?.removeView(key)
     }
 
+    override fun createResultProvider(key: String): RouterResultProvider = router!!.createResultProvider(key)
+
     override fun routeInContainer(containerId: Int, path: RoutePath): String
     {
         val router = router ?: return ""
         val route = router.findRoute(path) ?: throw RouteNotFoundException(path)
-        val view = route.onCreateView()
+        val view = route.onCreateView(path)
         view.viewKey = UUID.randomUUID().toString()
         router.setPath(view.viewKey, path)
         router.bindRouter(view)
-        router.connectComponent(viewKey, view.viewKey)
+
+        if (router is RouterInjector)
+            router.connectComponent(viewKey, view.viewKey)
 
         commandBuffer.apply(Command.SubFragment(containerId, view))
 

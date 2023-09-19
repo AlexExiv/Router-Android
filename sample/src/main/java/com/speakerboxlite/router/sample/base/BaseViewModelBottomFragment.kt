@@ -4,17 +4,16 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
-import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterLocal
-import com.speakerboxlite.router.View
+import com.speakerboxlite.router.ViewVM
 import com.speakerboxlite.router.result.RouterResultProvider
 
 abstract class BaseViewModelBottomFragment<VM: BaseViewModel, VDB: ViewDataBinding>(open val layoutId: Int): BottomSheetDialogFragment(),
-    View<VM>
+    ViewVM<VM>
 {
     override var viewKey: String
         get() = requireArguments().getString("VIEW_KEY")!!

@@ -8,12 +8,11 @@ import com.speakerboxlite.router.command.CommandBufferImpl
 import com.speakerboxlite.router.command.CommandExecutor
 import com.speakerboxlite.router.exceptions.ImpossibleRouteException
 import com.speakerboxlite.router.exceptions.RouteNotFoundException
-import com.speakerboxlite.router.ext.retrieveComponent
 import com.speakerboxlite.router.result.ResultManager
+import com.speakerboxlite.router.result.RouterResultProvider
 import com.speakerboxlite.router.result.RouterResultProviderImpl
 import java.util.UUID
 import kotlin.reflect.KClass
-import kotlin.reflect.full.superclasses
 
 enum class RouteType
 {
@@ -30,8 +29,7 @@ open class RouterSimple(protected val callerKey: String?,
                         val parent: RouterSimple?,
                         protected val routeManager: RouteManager,
                         protected val routerManager: RouterManager,
-                        protected val resultManager: ResultManager,
-                        protected val componentProvider: ComponentProvider): Router
+                        protected val resultManager: ResultManager): Router
 {
     protected val pathData = mutableMapOf<String, RoutePath>()
 
@@ -44,10 +42,6 @@ open class RouterSimple(protected val callerKey: String?,
     override val hasPreviousScreen: Boolean get() = parent != null || viewsStack.size > 1
 
     protected val viewsStack = mutableListOf<ViewMeta>()
-
-    protected val appComponentClass: KClass<*> by lazy {
-        componentProvider.appComponent::class.superclasses[0]
-    }
 
     val isCurrentTop: Boolean get() = parent == null && viewsStack.size == 1
 
@@ -83,8 +77,7 @@ open class RouterSimple(protected val callerKey: String?,
         val v = viewsStack.last()
         viewsStack.removeLast()
         dispatchClose(v)
-        resultManager.unbind(v.key)
-        componentProvider.unbind(v.key)
+        unbind(v.key)
     }
 
     override fun close()
@@ -100,9 +93,13 @@ open class RouterSimple(protected val callerKey: String?,
         {
             viewsStack.removeLast()
             dispatchClose(v)
-            resultManager.unbind(v.key)
-            componentProvider.unbind(v.key)
+            unbind(v.key)
         }
+    }
+
+    protected open fun unbind(key: String)
+    {
+        resultManager.unbind(key)
     }
 
     override fun closeTo(key: String)
@@ -148,24 +145,16 @@ open class RouterSimple(protected val callerKey: String?,
         commandBuffer.unbind()
     }
 
-    override fun onComposeView(view: View<*>)
+    override fun onComposeView(view: View)
     {
         val path = pathData[view.viewKey]!!
         val route = routeManager.find(path) ?: throw RouteNotFoundException(path)
 
-        val compKey = componentProvider.componentKey(view.viewKey)
-        val i = viewsStack.indexOfFirst { it.key == compKey }
-        val comp = scanForTopComponent(i, route::class.retrieveComponent())
-        route.onComposeView(view, path, comp)
+        (route as? RouteControllerComposable<RoutePath, View>)?.also {
+            it.onComposeView(this, view, path)
+        }
 
         view.resultProvider = RouterResultProviderImpl(view.viewKey, resultManager)
-
-        if (!view.viewModel.isInit)
-        {
-            view.viewModel.router = this
-            view.viewModel.resultProvider = RouterResultProviderImpl(view.viewKey, resultManager)
-                .also { it.start() }
-        }
     }
 
     override fun createRouterLocal(key: String): RouterLocal = RouterLocalImpl(key, this)
@@ -175,13 +164,12 @@ open class RouterSimple(protected val callerKey: String?,
     override fun removeView(key: String)
     {
         viewsStack.removeAll { it.key == key }
-        resultManager.unbind(key)
-        componentProvider.unbind(key)
+        unbind(key)
     }
 
-    internal open fun createRouter(callerKey: String): Router = RouterSimple(callerKey, this, routeManager, routerManager, resultManager, componentProvider)
+    internal open fun createRouter(callerKey: String): Router = RouterSimple(callerKey, this, routeManager, routerManager, resultManager)
 
-    internal open fun createRouterTab(callerKey: String, index: Int, tabs: RouterTabsImpl): Router = RouterTab(callerKey, this, routeManager, routerManager, resultManager, componentProvider, index, tabs)
+    internal open fun createRouterTab(callerKey: String, index: Int, tabs: RouterTabsImpl): Router = RouterTab(callerKey, this, routeManager, routerManager, resultManager, index, tabs)
 
     internal fun findRoute(path: RoutePath): RouteController<RoutePath, *>? = routeManager.find(path)
 
@@ -192,10 +180,12 @@ open class RouterSimple(protected val callerKey: String?,
 
     internal fun getPath(key: String): RoutePath = pathData[key]!!
 
-    internal fun bindRouter(view: View<*>)
+    internal fun bindRouter(view: View)
     {
         routerManager.bind(this, view)
     }
+
+    override fun createResultProvider(key: String): RouterResultProvider = RouterResultProviderImpl(key, resultManager)
 
     internal fun bindResult(from: String, to: String, result: Result<Any>?)
     {
@@ -226,11 +216,6 @@ open class RouterSimple(protected val callerKey: String?,
         return null
     }
 
-    internal fun connectComponent(parentKey: String, childKey: String)
-    {
-        componentProvider.connectComponent(parentKey, childKey)
-    }
-
     internal fun containsView(key: String): Boolean =
         viewsStack.lastOrNull { it.key == key } != null
 
@@ -240,8 +225,7 @@ open class RouterSimple(protected val callerKey: String?,
         for (j in 0 until deleteCount)
         {
             val v = viewsStack.removeLast()
-            resultManager.unbind(v.key)
-            componentProvider.unbind(v.key)
+            unbind(v.key)
         }
 
         commandBuffer.apply(Command.CloseTo(viewsStack.last().key))
@@ -297,50 +281,9 @@ open class RouterSimple(protected val callerKey: String?,
             }
         }
 
-    protected fun scanForTopComponent(startFrom: Int?, compClass: KClass<*>): Any
+    protected fun createView(route: RouteController<RoutePath, *>, routeType: RouteType, path: RoutePath, result: Result<Any>?): View
     {
-        if (compClass == appComponentClass)
-            return componentProvider.appComponent
-
-        if (parent == null && viewsStack.size == 1)
-        {
-            var comp = componentProvider.find(viewsStack[0].key)
-            if (comp == null)
-            {
-                comp = viewsStack[0].route.onCreateInjector(pathData[viewsStack[0].key]!!, componentProvider.appComponent)
-                componentProvider.bind(viewsStack[0].key, comp)
-            }
-
-            return comp
-        }
-
-        val s = startFrom ?: (viewsStack.size - 1)
-        for (i in s downTo 0)
-        {
-            val v = viewsStack[i]
-            val routeComp = v.route::class.retrieveComponent()
-            if (routeComp == compClass && v.route.creatingInjector)
-            {
-                var comp = componentProvider.find(v.key)
-                if (comp == null)
-                {
-                    comp = v.route.onCreateInjector(pathData[v.key]!!, componentProvider.appComponent)
-                    componentProvider.bind(v.key, comp)
-                }
-
-                return comp
-            }
-        }
-
-        if (parent != null)
-            return parent.scanForTopComponent(null, compClass)
-
-        throw RuntimeException("Couldn't find appropriate method to create component: ${compClass}. Maybe your forgot override onCreateInjector method?")
-    }
-
-    protected fun createView(route: RouteController<RoutePath, *>, routeType: RouteType, path: RoutePath, result: Result<Any>?): View<*>
-    {
-        val view = route.onCreateView()
+        val view = route.onCreateView(path)
         view.viewKey = UUID.randomUUID().toString()
         pathData[view.viewKey] = path
         bindRouter(view)

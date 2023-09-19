@@ -3,13 +3,14 @@ package com.speakerboxlite.router
 import com.speakerboxlite.router.result.ResultManager
 import kotlin.reflect.KClass
 
-class RouterTab(callerKey: String?,
-                parent: RouterSimple,
-                routeManager: RouteManager,
-                routerManager: RouterManager,
-                resultManager: ResultManager,
-                val index: Int,
-                val routerTab: RouterTabsImpl): RouterSimple(callerKey, parent, routeManager, routerManager, resultManager)
+class RouterTabInjector(callerKey: String?,
+                        parent: RouterSimple,
+                        routeManager: RouteManager,
+                        routerManager: RouterManager,
+                        resultManager: ResultManager,
+                        componentProvider: ComponentProvider,
+                        val index: Int,
+                        val routerTab: RouterTabsImpl): RouterInjector(callerKey, parent, routeManager, routerManager, resultManager, componentProvider)
 {
     override fun back()
     {

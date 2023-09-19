@@ -2,9 +2,10 @@ package com.speakerboxlite.router
 
 import com.speakerboxlite.router.pattern.UrlMatcher
 import com.speakerboxlite.router.annotations.Presentation
+import com.speakerboxlite.router.result.RouterResultProvider
 import kotlin.reflect.KClass
 
-abstract class RouteControllerBase<Path: RoutePath, VM: ViewModel, V: View<VM>, Component>: RouteController<Path, VM>
+abstract class RouteControllerBase<Path: RoutePath, V: View>: RouteController<Path, V>
 {
     lateinit var pathClass: KClass<Path>
     var pattern: UrlMatcher? = null
@@ -53,18 +54,5 @@ abstract class RouteControllerBase<Path: RoutePath, VM: ViewModel, V: View<VM>, 
 
     override fun isPartOfChain(clazz: KClass<*>): Boolean = chainPaths.indexOfFirst { it == clazz } != -1
 
-    override fun onComposeView(view: View<*>, path: RoutePath, component: Any)
-    {
-        val vm = onCreateViewModel(view as V, path as Path)
-        view.viewModel = vm
-        onInject(view, vm, component as Component)
-    }
-
-    abstract override fun onCreateView(): V
-
-    abstract protected fun onCreateViewModel(view: V, path: Path): VM
-
-    override fun onCreateInjector(path: Path, component: Any): Any = component
-
-    abstract protected fun onInject(view: V, vm: VM, component: Component)
+    abstract override fun onCreateView(path: Path): V
 }

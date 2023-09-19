@@ -20,7 +20,7 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
 
         }
 
-        if (f is View<*>)
+        if (f is View)
         {
             f.router = routerManager.get(f)
             f.localRouter = f.router.createRouterLocal(f.viewKey)
@@ -36,7 +36,7 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
             f.router.bindExecutor(CommandExecutorAndroid(f.requireActivity(), R.id.root, f.childFragmentManager, hostActivityFactory))
         }
 
-        if (f is View<*>)
+        if (f is View)
         {
             f.resultProvider.start()
             f.localRouter.bindExecutor(CommandExecutorAndroid(f.requireActivity(), R.id.root, f.childFragmentManager, hostActivityFactory))
@@ -50,7 +50,7 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
             f.router.unbindExecutor()
         }
 
-        if (f is View<*>)
+        if (f is View)
         {
             f.localRouter.unbindExecutor()
             f.resultProvider.pause()
@@ -59,7 +59,7 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
 
     override fun onFragmentDestroyed(fm: FragmentManager, f: Fragment)
     {
-        if (f is View<*>)
+        if (f is View)
             f.router.removeView(f.viewKey)
     }
 }

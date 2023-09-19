@@ -2,6 +2,7 @@ package com.speakerboxlite.router
 
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.command.CommandExecutor
+import com.speakerboxlite.router.result.RouterResultProvider
 
 typealias Result<R> = (R) -> Unit
 
@@ -57,7 +58,7 @@ interface Router
      * @param path The path to the dialog connected by the `RouteController`
      * @param result The callback for handling the screen result. To send a result, use `ResultProvider::send`.
      */
-    fun <R: Any> routeDialogWithResult(path: RoutePath, result: Result<R>)
+    fun <R: Any> routeDialogWithResult(path: RoutePathResult<R>, result: Result<R>)
 
     /**
      * Closes the top view in the router. This method should be called when handling a physical Back button click
@@ -101,7 +102,7 @@ interface Router
     /**
      * This method compose view injects ViewModel, Router, ResultProvider. This method should be called in the fragment's `onCreate` method
      */
-    fun onComposeView(view: View<*>)
+    fun onComposeView(view: View)
 
     /**
      * Creates a local router for the top view in the stack associated with the specified view key.
@@ -125,4 +126,6 @@ interface Router
      * @param key The view's key (viewKey) to be removed.
      */
     fun removeView(key: String)
+
+    fun createResultProvider(key: String): RouterResultProvider
 }

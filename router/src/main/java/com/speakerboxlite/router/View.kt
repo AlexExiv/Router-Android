@@ -2,7 +2,7 @@ package com.speakerboxlite.router
 
 import com.speakerboxlite.router.result.RouterResultProvider
 
-interface View<VM: ViewModel>
+interface View
 {
     var viewKey: String
 
@@ -10,6 +10,9 @@ interface View<VM: ViewModel>
     var localRouter: RouterLocal
 
     var resultProvider: RouterResultProvider
+}
 
+interface ViewVM<VM: ViewModel>: View
+{
     var viewModel: VM
 }

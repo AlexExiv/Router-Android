@@ -17,12 +17,12 @@ class RouterManagerImpl : RouterManager
 
     override fun get(key: String): Router = routers[key]!!
 
-    override fun bind(router: Router, toView: View<*>)
+    override fun bind(router: Router, toView: View)
     {
         routerByView[toView.viewKey] = router
     }
 
-    override fun get(forView: View<*>): Router = routerByView[forView.viewKey]!!
+    override fun get(forView: View): Router = routerByView[forView.viewKey]!!
 
     override fun release(router: Router)
     {

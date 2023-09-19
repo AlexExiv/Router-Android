@@ -1,11 +1,11 @@
 package com.speakerboxlite.router.sample.composite
 
-import com.speakerboxlite.router.RouteControllerBase
+import com.speakerboxlite.router.RouteControllerVMC
 import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.annotations.Route
 import com.speakerboxlite.router.sample.di.AppComponent
 
-typealias RouteControllerComposite<P, VM, V> = RouteControllerBase<P, VM, V, CompositeComponent>
+typealias RouteControllerComposite<P, VM, V> = RouteControllerVMC<P, VM, V, CompositeComponent>
 
 class CompositePath: RoutePath
 

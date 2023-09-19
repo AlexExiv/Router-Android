@@ -53,7 +53,7 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
         activity.startActivity(intent)
     }
 
-    private fun pushFragment(view: View<*>)
+    private fun pushFragment(view: View)
     {
         if (view is Fragment)
         {
@@ -65,7 +65,7 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
         }
     }
 
-    private fun showBottomSheet(view: View<*>)
+    private fun showBottomSheet(view: View)
     {
         if (view is BottomSheetDialogFragment)
         {
@@ -82,7 +82,7 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
         }
     }
 
-    private fun showDialog(view: View<*>)
+    private fun showDialog(view: View)
     {
         if (view is DialogFragment)
         {
@@ -99,7 +99,7 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
         }
     }
 
-    private fun showSubFragment(@IdRes containerId: Int, view: View<*>)
+    private fun showSubFragment(@IdRes containerId: Int, view: View)
     {
         if (view is Fragment)
         {
