@@ -1,7 +1,5 @@
 package com.speakerboxlite.router
 
 interface RoutePath
-{}
 
-interface RoutePathResult<Result>
-{}
+interface RoutePathResult<Result>: RoutePath

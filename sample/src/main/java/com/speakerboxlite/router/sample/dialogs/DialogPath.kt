@@ -1,6 +1,6 @@
 package com.speakerboxlite.router.sample.dialogs
 
-import com.speakerboxlite.router.RoutePath
+import com.speakerboxlite.router.RoutePathResult
 import com.speakerboxlite.router.annotations.Route
 import com.speakerboxlite.router.getAndroidViewModel
 import com.speakerboxlite.router.sample.base.RouteControllerApp
@@ -8,7 +8,7 @@ import com.speakerboxlite.router.sample.base.RouteControllerApp
 data class DialogPath(val title: String = "",
                       val message: String = "",
                       val okBtn: String = "",
-                      val cancelBtn: String = ""): RoutePath
+                      val cancelBtn: String = ""): RoutePathResult<Boolean>
 
 @Route
 abstract class DialogRouteController: RouteControllerApp<DialogPath, DialogViewModel, DialogFragment>()

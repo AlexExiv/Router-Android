@@ -27,7 +27,7 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
 
     override fun route(path: RoutePath, presentation: Presentation): String = router!!.route(path, presentation)
 
-    override fun <R: Any> routeWithResult(path: RoutePath, presentation: Presentation, result: Result<R>): String =
+    override fun <R: Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation, result: Result<R>): String =
         router!!.routeWithResult(path, presentation, result)
 
     override fun routeDialog(path: RoutePath)
@@ -35,7 +35,7 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
         router?.routeDialog(path)
     }
 
-    override fun <R: Any> routeDialogWithResult(path: RoutePath, result: Result<R>)
+    override fun <R: Any> routeDialogWithResult(path: RoutePathResult<R>, result: Result<R>)
     {
         router?.routeDialogWithResult(path, result)
     }

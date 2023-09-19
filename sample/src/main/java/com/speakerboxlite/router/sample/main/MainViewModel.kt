@@ -37,14 +37,14 @@ class MainViewModel(app: Application): BaseViewModel(app)
 
     fun onShowChain()
     {
-        router.routeWithResult<Int>(ChainPath(0)) {
+        router.routeWithResult(ChainPath(0)) {
             chainResult.value = "Chain has been finished at step $it"
         }
     }
 
     fun onShowDialog()
     {
-        router.routeDialogWithResult<Boolean>(DialogPath(title = "Title", message = "Tap Yes or No", okBtn = "Yes", cancelBtn = "No")) {
+        router.routeDialogWithResult(DialogPath(title = "Title", message = "Tap Yes or No", okBtn = "Yes", cancelBtn = "No")) {
             dialogResult.value = "Dialog result: ${if (it) "Yes" else "No"}"
         }
     }

@@ -1,11 +1,11 @@
 package com.speakerboxlite.router.sample.chain.sub
 
-import com.speakerboxlite.router.RoutePath
+import com.speakerboxlite.router.RoutePathResult
 import com.speakerboxlite.router.annotations.Route
 import com.speakerboxlite.router.getAndroidViewModel
 import com.speakerboxlite.router.sample.base.RouteControllerApp
 
-data class SubChainPath(val step: Int): RoutePath
+data class SubChainPath(val step: Int): RoutePathResult<Int>
 
 @Route
 abstract class SubChainRouteController: RouteControllerApp<SubChainPath, SubChainViewModel, SubChainFragment>()

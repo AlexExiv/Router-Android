@@ -59,7 +59,7 @@ open class RouterSimple(protected val callerKey: String?,
     override fun route(path: RoutePath, presentation: Presentation): String =
         route(path, RouteType.Simple, presentation, null)
 
-    override fun <R: Any> routeWithResult(path: RoutePath, presentation: Presentation, result: Result<R>): String =
+    override fun <R: Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation, result: Result<R>): String =
         route(path, RouteType.Simple, presentation) { result(it as  R) }
 
     override fun routeDialog(path: RoutePath)
@@ -67,7 +67,7 @@ open class RouterSimple(protected val callerKey: String?,
         routeManager.find(path)?.also { commandBuffer.apply(Command.Dialog(createView(it, RouteType.Dialog, path, null))) }
     }
 
-    override fun <R: Any> routeDialogWithResult(path: RoutePath, result: Result<R>)
+    override fun <R: Any> routeDialogWithResult(path: RoutePathResult<R>, result: Result<R>)
     {
         routeManager.find(path)?.also { commandBuffer.apply(Command.Dialog(createView(it, RouteType.Dialog, path) { result(it as  R) })) }
     }

@@ -43,7 +43,7 @@ interface Router
      * @return             A unique view key associated with the displayed screen.
      * @throws RouteNotFoundException If the provided path is not found in the routes manager.
      */
-    fun <R: Any> routeWithResult(path: RoutePath, presentation: Presentation = Presentation.Push, result: Result<R>): String
+    fun <R: Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation = Presentation.Push, result: Result<R>): String
 
     /**
      * Show a dialog screen
