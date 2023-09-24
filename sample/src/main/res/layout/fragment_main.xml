@@ -98,6 +98,12 @@
                     android:text="Show Simple Fragment Component"
                     android:onClick="@{() -> viewmodel.onShowSimpleComponent()}"/>
 
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Show Theme"
+                    android:onClick="@{() -> viewmodel.onShowTheme()}"/>
+
             </LinearLayout>
 
         </ScrollView>

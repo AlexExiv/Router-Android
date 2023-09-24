@@ -1,5 +1,6 @@
 package com.speakerboxlite.router
 
+import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.result.ResultManager
 import kotlin.reflect.KClass
 
@@ -11,6 +12,18 @@ class RouterTab(callerKey: String?,
                 val index: Int,
                 val routerTab: RouterTabsImpl): RouterSimple(callerKey, parent, routeManager, routerManager, resultManager)
 {
+    override fun route(path: RoutePath, presentation: Presentation?): String =
+        if (routerTab.presentInTab && viewsStack.isNotEmpty())
+            super.route(path, Presentation.Modal)
+        else
+            super.route(path, presentation)
+
+    override fun <R : Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation?, result: Result<R>): String =
+        if (routerTab.presentInTab && viewsStack.isNotEmpty())
+            super.routeWithResult(path, Presentation.Modal, result)
+        else
+            super.routeWithResult(path, presentation, result)
+
     override fun back()
     {
         if (viewsStack.size > 1)

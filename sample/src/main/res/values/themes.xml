@@ -2,4 +2,9 @@
 <resources>
 
     <style name="Theme.Router" parent="Theme.MaterialComponents.Light.NoActionBar" />
+
+    <style name="Theme.Router.Landscape">
+        <item name="android:screenOrientation">landscape</item>
+    </style>
+
 </resources>

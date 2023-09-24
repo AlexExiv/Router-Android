@@ -24,8 +24,14 @@
 
         <activity
             android:name=".base.HostActivity"
+            android:theme="@style/Theme.Router">
+
+        </activity>
+
+        <activity
+            android:name=".base.HostLandscapeActivity"
             android:theme="@style/Theme.Router"
-            android:screenOrientation="portrait">
+            android:screenOrientation="landscape">
 
         </activity>
 

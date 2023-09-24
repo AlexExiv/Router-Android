@@ -4,6 +4,7 @@ import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.annotations.Presentation
+import java.io.Serializable
 import kotlin.reflect.KClass
 
 interface RouteControllerInterface<Path: RoutePath, V: View>
@@ -12,6 +13,8 @@ interface RouteControllerInterface<Path: RoutePath, V: View>
     val creatingInjector: Boolean
     val preferredPresentation: Presentation
     val isChain: Boolean
+
+    val params: Serializable?
 
     fun check(url: String): Boolean
     fun check(path: RoutePath): Boolean

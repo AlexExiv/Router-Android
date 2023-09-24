@@ -2,12 +2,13 @@ package com.speakerboxlite.router.command
 
 import com.speakerboxlite.router.OnTabChangeCallback
 import com.speakerboxlite.router.View
+import java.io.Serializable
 
 sealed class Command
 {
     object Close: Command()
     class CloseTo(val key: String): Command()
-    class StartModal(val key: String): Command()
+    class StartModal(val key: String, val params: Serializable?): Command()
     class Push(val view: View): Command()
     class Replace(val byView: View): Command()
     class BottomSheet(val view: View): Command()

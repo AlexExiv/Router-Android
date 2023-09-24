@@ -29,9 +29,9 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
 
     override fun route(url: String): String? = router!!.route(url)
 
-    override fun route(path: RoutePath, presentation: Presentation): String = router!!.route(path, presentation)
+    override fun route(path: RoutePath, presentation: Presentation?): String = router!!.route(path, presentation)
 
-    override fun <R: Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation, result: Result<R>): String =
+    override fun <R: Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation?, result: Result<R>): String =
         router!!.routeWithResult(path, presentation, result)
 
     override fun replace(path: RoutePath): String = router!!.replace(path)
@@ -44,6 +44,16 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
     override fun <R: Any> routeDialogWithResult(path: RoutePathResult<R>, result: Result<R>)
     {
         router?.routeDialogWithResult(path, result)
+    }
+
+    override fun routeBTS(path: RoutePath)
+    {
+        router?.routeBTS(path)
+    }
+
+    override fun <R : Any> routeBTSWithResult(path: RoutePathResult<R>, result: Result<R>)
+    {
+        router?.routeBTSWithResult(path, result)
     }
 
     override fun back()
@@ -83,7 +93,7 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
 
     override fun createRouterLocal(key: String): RouterLocal = router!!.createRouterLocal(key)
 
-    override fun createRouterTabs(factory: HostViewFactory): RouterTabs
+    override fun createRouterTabs(factory: HostViewFactory, presentInTab: Boolean): RouterTabs
     {
         TODO("Not yet implemented")
     }

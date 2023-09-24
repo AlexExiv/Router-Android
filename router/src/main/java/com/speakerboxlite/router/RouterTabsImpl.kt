@@ -9,7 +9,8 @@ import kotlin.reflect.KClass
 
 class RouterTabsImpl(val callerKey: String,
                      val hostFactory: HostViewFactory,
-                     val router: RouterSimple): RouterTabs
+                     val router: RouterSimple,
+                     val presentInTab: Boolean): RouterTabs
 {
     override var tabChangeCallback: OnTabChangeCallback? = null
 

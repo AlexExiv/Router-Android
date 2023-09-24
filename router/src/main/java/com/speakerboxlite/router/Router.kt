@@ -38,7 +38,7 @@ interface Router
      * @return              A unique identifier (view key) associated with the displayed screen.
      * @throws RouteNotFoundException If the provided path is not found in the routes manager.
      */
-    fun route(path: RoutePath, presentation: Presentation = Presentation.Push): String
+    fun route(path: RoutePath, presentation: Presentation? = null): String
 
     /**
      * Navigate to a screen with an expected result.
@@ -49,7 +49,7 @@ interface Router
      * @return             A unique view key associated with the displayed screen.
      * @throws RouteNotFoundException If the provided path is not found in the routes manager.
      */
-    fun <R: Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation = Presentation.Push, result: Result<R>): String
+    fun <R: Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation? = null, result: Result<R>): String
 
     /**
      * Replaces the top screen on the stack with a new one specified by the given `path`.
@@ -74,6 +74,21 @@ interface Router
      * @param result The callback for handling the screen result. To send a result, use `ResultProvider::send`.
      */
     fun <R: Any> routeDialogWithResult(path: RoutePathResult<R>, result: Result<R>)
+
+    /**
+     * Show a bottom sheet screen
+     *
+     * @param path The path to the dialog connected by the `RouteController`
+     */
+    fun routeBTS(path: RoutePath)
+
+    /**
+     * Show a bottom sheet screen with an expected result.
+     *
+     * @param path The path to the dialog connected by the `RouteController`
+     * @param result The callback for handling the screen result. To send a result, use `ResultProvider::send`.
+     */
+    fun <R: Any> routeBTSWithResult(path: RoutePathResult<R>, result: Result<R>)
 
     /**
      * Closes the top view in the router. This method should be called when handling a physical Back button click
@@ -130,7 +145,7 @@ interface Router
     /**
      * Creates tabs router for the top view in the stack
      */
-    fun createRouterTabs(factory: HostViewFactory): RouterTabs
+    fun createRouterTabs(factory: HostViewFactory, presentInTab: Boolean = false): RouterTabs
 
     /**
      * Removes a view from the views stack and resets all connections.

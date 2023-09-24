@@ -6,9 +6,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.speakerboxlite.router.HOST_ACTIVITY_INTENT_DATA_KEY
 import com.speakerboxlite.router.HOST_ACTIVITY_KEY
 import com.speakerboxlite.router.HostActivityFactory
 import com.speakerboxlite.router.View
+import java.io.Serializable
 
 class CommandExecutorAndroid(val activity: FragmentActivity,
                              @IdRes val containerId: Int,
@@ -21,7 +23,7 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
         {
             is Command.Close -> close()
             is Command.CloseTo -> closeTo(command.key)
-            is Command.StartModal -> startActivity(command.key)
+            is Command.StartModal -> startActivity(command.key, command.params)
             is Command.Dialog -> showDialog(command.view)
             is Command.CloseDialog -> closeDialog(command.key)
             is Command.Push -> pushFragment(command.view)
@@ -47,10 +49,11 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
             fragmentManager.popBackStackImmediate(key, 0)
     }
 
-    private fun startActivity(key: String)
+    private fun startActivity(key: String, params: Serializable?)
     {
-        val intent = activityFactory.create()
+        val intent = activityFactory.create(params)
         intent.putExtra(HOST_ACTIVITY_KEY, key)
+        params?.also { intent.putExtra(HOST_ACTIVITY_INTENT_DATA_KEY, it) }
         activity.startActivity(intent)
     }
 
@@ -58,6 +61,7 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
     {
         if (view is Fragment)
         {
+            fragmentManager.executePendingTransactions()
             fragmentManager
                 .beginTransaction()
                 .replace(containerId, view, view.viewKey)

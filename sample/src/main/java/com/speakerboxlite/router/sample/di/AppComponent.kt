@@ -12,6 +12,7 @@ import com.speakerboxlite.router.sample.step.StepViewModel
 import com.speakerboxlite.router.sample.step.replace.ReplaceViewModel
 import com.speakerboxlite.router.sample.tabs.TabsViewModel
 import com.speakerboxlite.router.sample.tabs.tab.TabViewModel
+import com.speakerboxlite.router.sample.theme.ThemeViewModel
 import dagger.Component
 import javax.inject.Singleton
 
@@ -33,4 +34,6 @@ interface AppComponent: com.speakerboxlite.router.controllers.Component
     fun inject(vm: SubChainViewModel)
 
     fun inject(view: SimpleComponentFragment)
+
+    fun inject(view: ThemeViewModel)
 }

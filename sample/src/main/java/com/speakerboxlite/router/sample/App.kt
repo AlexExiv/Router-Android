@@ -6,11 +6,14 @@ import com.speakerboxlite.router.lifecycle.ActivityLifeCycle
 import com.speakerboxlite.router.HostActivityFactory
 import com.speakerboxlite.router.RouterComponent
 import com.speakerboxlite.router.sample.base.HostActivity
+import com.speakerboxlite.router.sample.base.HostLandscapeActivity
+import com.speakerboxlite.router.sample.base.RouteStyle
 import com.speakerboxlite.router.sample.di.AppComponent
 import com.speakerboxlite.router.sample.di.DaggerAppComponent
 import com.speakerboxlite.router.sample.di.modules.AppData
 import com.speakerboxlite.router.sample.di.modules.AppModule
 import com.speakerboxlite.router.sample.main.MainPath
+import java.io.Serializable
 
 class App: Application(), HostActivityFactory
 {
@@ -33,5 +36,13 @@ class App: Application(), HostActivityFactory
 
     }
 
-    override fun create(): Intent = Intent(this, HostActivity::class.java)
+    override fun create(params: Serializable?): Intent
+    {
+        val p = params as? RouteStyle
+        return when (p)
+        {
+            RouteStyle.Landscape -> Intent(this, HostLandscapeActivity::class.java)
+            else -> Intent(this, HostActivity::class.java)
+        }
+    }
 }

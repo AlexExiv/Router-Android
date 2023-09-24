@@ -26,7 +26,7 @@ class SharedViewModel(app: Application): BaseViewModel(app)
 
     fun onShowSub1()
     {
-        router.route(SharedSub1Path(), Presentation.BTS)
+        router.routeBTS(SharedSub1Path())
     }
 
     fun onShowShared()

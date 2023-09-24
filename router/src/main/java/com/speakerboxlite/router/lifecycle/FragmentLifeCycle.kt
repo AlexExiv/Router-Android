@@ -59,7 +59,8 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
 
     override fun onFragmentDestroyed(fm: FragmentManager, f: Fragment)
     {
-        if (f is View)
+        val activityDestroying = !(f.requireActivity().isChangingConfigurations || !f.requireActivity().isFinishing)
+        if (f is View && (f.isRemoving || activityDestroying))
             f.router.removeView(f.viewKey)
     }
 }

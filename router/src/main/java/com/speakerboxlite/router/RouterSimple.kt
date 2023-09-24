@@ -63,10 +63,10 @@ open class RouterSimple(protected val callerKey: String?,
         return null
     }
 
-    override fun route(path: RoutePath, presentation: Presentation): String =
+    override fun route(path: RoutePath, presentation: Presentation?): String =
         route(path, RouteType.Simple, presentation, null)
 
-    override fun <R: Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation, result: Result<R>): String =
+    override fun <R: Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation?, result: Result<R>): String =
         route(path, RouteType.Simple, presentation) { result(it as  R) }
 
     override fun replace(path: RoutePath): String
@@ -89,6 +89,16 @@ open class RouterSimple(protected val callerKey: String?,
     override fun <R: Any> routeDialogWithResult(path: RoutePathResult<R>, result: Result<R>)
     {
         routeManager.find(path)?.also { commandBuffer.apply(Command.Dialog(createView(it, RouteType.Dialog, path) { result(it as  R) })) }
+    }
+
+    override fun routeBTS(path: RoutePath)
+    {
+        routeManager.find(path)?.also { commandBuffer.apply(Command.BottomSheet(createView(it, RouteType.BTS, path, null))) }
+    }
+
+    override fun <R : Any> routeBTSWithResult(path: RoutePathResult<R>, result: Result<R>)
+    {
+        routeManager.find(path)?.also { commandBuffer.apply(Command.BottomSheet(createView(it, RouteType.BTS, path) { result(it as  R) })) }
     }
 
     override fun back()
@@ -181,7 +191,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun createRouterLocal(key: String): RouterLocal = RouterLocalImpl(key, this)
 
-    override fun createRouterTabs(factory: HostViewFactory): RouterTabs = RouterTabsImpl(viewsStack.last().key, factory, this)
+    override fun createRouterTabs(factory: HostViewFactory, presentInTab: Boolean): RouterTabs = RouterTabsImpl(viewsStack.last().key, factory, this, presentInTab)
 
     override fun removeView(key: String)
     {
@@ -253,7 +263,7 @@ open class RouterSimple(protected val callerKey: String?,
         commandBuffer.apply(Command.CloseTo(viewsStack.last().key))
     }
 
-    protected fun route(path: RoutePath, routeType: RouteType, presentation: Presentation, result: Result<Any>?): String
+    protected fun route(path: RoutePath, routeType: RouteType, presentation: Presentation?, result: Result<Any>?): String
     {
         Log.i("Router", "Start route with path: ${path::class}")
         val route = findRoute(path) ?: throw RouteNotFoundException(path)
@@ -267,7 +277,7 @@ open class RouterSimple(protected val callerKey: String?,
             }
         }
 
-        return doRoute(route, routeType, path, presentation, result)
+        return doRoute(route, routeType, path, presentation ?: route.preferredPresentation, result)
     }
 
     protected fun doRoute(route: RouteControllerInterface<RoutePath, *>, routeType: RouteType, path: RoutePath, presentation: Presentation, result: Result<Any>?): String =
@@ -286,19 +296,13 @@ open class RouterSimple(protected val callerKey: String?,
                 val key = UUID.randomUUID().toString()
 
                 routerManager[key] = router
-                commandBuffer.apply(Command.StartModal(key))
+                commandBuffer.apply(Command.StartModal(key, route.params))
                 viewKey
             }
             Presentation.Push ->
             {
                 val view = createView(route, routeType, path, result)
                 commandBuffer.apply(Command.Push(view))
-                view.viewKey
-            }
-            Presentation.BTS ->
-            {
-                val view = createView(route, routeType, path, result)
-                commandBuffer.apply(Command.BottomSheet(view))
                 view.viewKey
             }
         }

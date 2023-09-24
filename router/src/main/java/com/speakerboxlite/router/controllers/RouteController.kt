@@ -4,6 +4,7 @@ import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.pattern.UrlMatcher
 import com.speakerboxlite.router.annotations.Presentation
+import java.io.Serializable
 import kotlin.reflect.KClass
 
 abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterface<Path, V>
@@ -17,6 +18,8 @@ abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterfa
 
     open val chainPaths: List<KClass<*>> get() = listOf()
     override val isChain: Boolean get() = chainPaths.isNotEmpty()
+
+    override val params: Serializable? get() = null
 
     override fun check(url: String): Boolean = pattern?.matches(url) ?: false
 
