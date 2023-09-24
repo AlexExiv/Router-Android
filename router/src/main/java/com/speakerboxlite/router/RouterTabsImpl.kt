@@ -14,14 +14,14 @@ class RouterTabsImpl(val callerKey: String,
     override var tabChangeCallback: OnTabChangeCallback? = null
 
     protected val commandBuffer: CommandBuffer = CommandBufferImpl()
-    protected val tabRoutes = mutableMapOf<Int, RouterTab>()
+    protected val tabRoutes = mutableMapOf<Int, RouterSimple>()
 
     override fun route(index: Int, path: RoutePath): HostView
     {
         val view = hostFactory.create()
         view.router = router.createRouterTab(callerKey, index, this)
         view.router.route(path, Presentation.Push)
-        tabRoutes[index] = view.router as RouterTab
+        tabRoutes[index] = view.router as RouterSimple
 
         return view
     }

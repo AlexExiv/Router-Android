@@ -9,6 +9,7 @@ sealed class Command
     class CloseTo(val key: String): Command()
     class StartModal(val key: String): Command()
     class Push(val view: View): Command()
+    class Replace(val byView: View): Command()
     class BottomSheet(val view: View): Command()
     class CloseBottomSheet(val key: String): Command()
     class Dialog(val view: View): Command()

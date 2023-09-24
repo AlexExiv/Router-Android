@@ -25,6 +25,7 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
             is Command.Dialog -> showDialog(command.view)
             is Command.CloseDialog -> closeDialog(command.key)
             is Command.Push -> pushFragment(command.view)
+            is Command.Replace -> replaceFragment(command.byView)
             is Command.BottomSheet -> showBottomSheet(command.view)
             is Command.CloseBottomSheet -> closeBottomSheet(command.key)
             is Command.SubFragment -> showSubFragment(command.containerId, command.view)
@@ -62,6 +63,15 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
                 .replace(containerId, view, view.viewKey)
                 .addToBackStack(view.viewKey)
                 .commit()
+        }
+    }
+
+    private fun replaceFragment(byView: View)
+    {
+        if (byView is Fragment)
+        {
+            fragmentManager.popBackStack()
+            pushFragment(byView)
         }
     }
 

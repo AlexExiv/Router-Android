@@ -21,6 +21,10 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
 
     override val hasPreviousScreen: Boolean get() = router!!.hasPreviousScreen
 
+    override var lockBack: Boolean
+        get() = router!!.lockBack
+        set(value) { router?.lockBack = value }
+
     protected val commandBuffer: CommandBuffer = CommandBufferImpl()
 
     override fun route(url: String): String? = router!!.route(url)
@@ -29,6 +33,8 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
 
     override fun <R: Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation, result: Result<R>): String =
         router!!.routeWithResult(path, presentation, result)
+
+    override fun replace(path: RoutePath): String = router!!.replace(path)
 
     override fun routeDialog(path: RoutePath)
     {

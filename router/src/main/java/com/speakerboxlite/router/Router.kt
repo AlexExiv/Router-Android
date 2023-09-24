@@ -17,6 +17,12 @@ interface Router
     val hasPreviousScreen: Boolean
 
     /**
+     * Prevents the current screen from being closed when the back button is clicked. This action applies only to the current screen.
+     * If you set this property to `true` and push another screen onto the stack, the new screen will have this property automatically set to `false`.
+     */
+    var lockBack: Boolean
+
+    /**
      * Navigate to a specific URL path.
      *
      * @param url The relative URL path. Avoid using absolute URLs. This URL should correspond to a path defined by the @Route annotation.
@@ -44,6 +50,15 @@ interface Router
      * @throws RouteNotFoundException If the provided path is not found in the routes manager.
      */
     fun <R: Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation = Presentation.Push, result: Result<R>): String
+
+    /**
+     * Replaces the top screen on the stack with a new one specified by the given `path`.
+     *
+     * @param path The path to the screen connected by the `RouteController`.
+     * @return A unique view key associated with the displayed screen after replacement.
+     * @throws RouteNotFoundException If the provided path is not found in the routes manager.
+     */
+    fun replace(path: RoutePath): String
 
     /**
      * Show a dialog screen

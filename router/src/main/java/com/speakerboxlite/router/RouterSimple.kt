@@ -25,7 +25,8 @@ data class ViewMeta(val key: String,
                     val routeType: RouteType,
                     val route: RouteControllerInterface<RoutePath, *>,
                     val path: KClass<*>,
-                    val result: Result<Any>?)
+                    val result: Result<Any>?,
+                    var lockBack: Boolean = false)
 
 open class RouterSimple(protected val callerKey: String?,
                         val parent: RouterSimple?,
@@ -42,6 +43,10 @@ open class RouterSimple(protected val callerKey: String?,
         set(value) { routerManager.top = value }
 
     override val hasPreviousScreen: Boolean get() = parent != null || viewsStack.size > 1
+
+    override var lockBack: Boolean
+        get() = viewsStack.last().lockBack
+        set(value) { viewsStack.last().lockBack = value }
 
     protected val viewsStack = mutableListOf<ViewMeta>()
 
@@ -64,6 +69,18 @@ open class RouterSimple(protected val callerKey: String?,
     override fun <R: Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation, result: Result<R>): String =
         route(path, RouteType.Simple, presentation) { result(it as  R) }
 
+    override fun replace(path: RoutePath): String
+    {
+        val lastView = viewsStack.removeLast()
+        unbind(lastView.key)
+
+        val route = findRoute(path) ?: throw RouteNotFoundException(path)
+        val view = createView(route, RouteType.Simple, path, null)
+        commandBuffer.apply(Command.Replace(view))
+
+        return view.viewKey
+    }
+
     override fun routeDialog(path: RoutePath)
     {
         routeManager.find(path)?.also { commandBuffer.apply(Command.Dialog(createView(it, RouteType.Dialog, path, null))) }
@@ -76,6 +93,9 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun back()
     {
+        if (lockBack)
+            return
+
         val v = viewsStack.last()
         viewsStack.removeLast()
         dispatchClose(v)
@@ -235,7 +255,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     protected fun route(path: RoutePath, routeType: RouteType, presentation: Presentation, result: Result<Any>?): String
     {
-        Log.i("", "Start route with path: ${path::class}")
+        Log.i("Router", "Start route with path: ${path::class}")
         val route = findRoute(path) ?: throw RouteNotFoundException(path)
         if (route.singleton)
         {

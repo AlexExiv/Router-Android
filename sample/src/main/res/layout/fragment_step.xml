@@ -62,6 +62,18 @@
                     android:text="Show Singleton"
                     android:onClick="@{() -> viewmodel.onShowSingleton()}"/>
 
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Replace"
+                    android:onClick="@{() -> viewmodel.onReplace()}"/>
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@{viewmodel.lockBackTitle}"
+                    android:onClick="@{() -> viewmodel.onLockBack()}"/>
+
             </LinearLayout>
 
         </FrameLayout>
