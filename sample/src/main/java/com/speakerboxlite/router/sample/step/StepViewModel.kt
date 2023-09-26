@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.sample.base.BaseViewModel
 import com.speakerboxlite.router.sample.step.replace.ReplacePath
+import com.speakerboxlite.router.sample.tabs.TabsPath
 import com.speakerboxlite.router.sample.tabs.tab.TabSingletonPath
 
 class StepViewModel(val step: Int, app: Application): BaseViewModel(app)
@@ -52,5 +53,10 @@ class StepViewModel(val step: Int, app: Application): BaseViewModel(app)
     fun onLockBack()
     {
         lockBack = !lockBack
+    }
+
+    fun onShowTabs()
+    {
+        router.route(TabsPath())
     }
 }

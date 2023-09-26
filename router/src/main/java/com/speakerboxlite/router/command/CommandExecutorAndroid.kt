@@ -19,6 +19,11 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
 {
     override fun execute(command: Command)
     {
+        activity.runOnUiThread { _execute(command) }
+    }
+
+    private fun _execute(command: Command)
+    {
         when (command)
         {
             is Command.Close -> close()
@@ -38,7 +43,10 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
     private fun close()
     {
         if (fragmentManager.backStackEntryCount > 1)
+        {
+            fragmentManager.executePendingTransactions()
             fragmentManager.popBackStack()
+        }
         else
             activity.finish()
     }
@@ -46,7 +54,10 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
     private fun closeTo(key: String)
     {
         if (fragmentManager.backStackEntryCount > 1)
+        {
+            fragmentManager.executePendingTransactions()
             fragmentManager.popBackStackImmediate(key, 0)
+        }
     }
 
     private fun startActivity(key: String, params: Serializable?)
@@ -74,6 +85,7 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
     {
         if (byView is Fragment)
         {
+            fragmentManager.executePendingTransactions()
             fragmentManager.popBackStack()
             pushFragment(byView)
         }
@@ -117,6 +129,7 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
     {
         if (view is Fragment)
         {
+            fragmentManager.executePendingTransactions()
             fragmentManager
                 .beginTransaction()
                 .replace(containerId, view, view.viewKey)

@@ -51,15 +51,7 @@ class RouterTab(callerKey: String?,
         }
         else
         {
-            if (routerTab.closeTo(key))
-            {
-
-            }
-            else
-            {
-                parent!!.closeTo(key)
-                routerTab.closeTabs()
-            }
+            routerTab.closeTabsTo(key)
         }
     }
 
@@ -71,8 +63,7 @@ class RouterTab(callerKey: String?,
         }
         else
         {
-            routerTab.closeTabs()
-            parent.closeToTop()
+            routerTab.closeTabsToTop()
         }
     }
 

@@ -52,15 +52,7 @@ class RouterTabInjector(callerKey: String?,
         }
         else
         {
-            if (routerTab.closeTo(key))
-            {
-
-            }
-            else
-            {
-                parent!!.closeTo(key)
-                routerTab.closeTabs()
-            }
+            routerTab.closeTabsTo(key)
         }
     }
 
@@ -72,8 +64,7 @@ class RouterTabInjector(callerKey: String?,
         }
         else
         {
-            routerTab.closeTabs()
-            parent.closeToTop()
+            routerTab.closeTabsToTop()
         }
     }
 

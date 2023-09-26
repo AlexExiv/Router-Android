@@ -44,10 +44,11 @@ class RouterTabsImpl(val callerKey: String,
 
     fun closeTabs()
     {
+        releaseRouters()
         router.close()
     }
 
-    fun closeTo(key: String): Boolean
+    fun closeTabsTo(key: String)
     {
         for (i in tabRoutes.keys)
         {
@@ -55,11 +56,18 @@ class RouterTabsImpl(val callerKey: String,
             {
                 showTab(i)
                 tabRoutes[i]!!.closeTo(key)
-                return true
+                return
             }
         }
 
-        return false
+        releaseRouters()
+        router.closeTo(key)
+    }
+
+    fun closeTabsToTop()
+    {
+        releaseRouters()
+        router.closeToTop()
     }
 
     fun scanForPath(clazz: KClass<*>): ViewMeta?
@@ -72,6 +80,11 @@ class RouterTabsImpl(val callerKey: String,
         }
 
         return null
+    }
+
+    internal fun releaseRouters()
+    {
+        tabRoutes.values.forEach { it.releaseRouter() }
     }
 
     protected fun showTab(i: Int)

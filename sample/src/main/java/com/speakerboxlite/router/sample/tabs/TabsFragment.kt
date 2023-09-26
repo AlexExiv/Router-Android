@@ -36,7 +36,7 @@ class TabsFragment: BaseViewModelFragment<TabsViewModel, FragmentTabsBinding>(R.
         super.onBindData()
 
         dataBinding.viewmodel = viewModel
-        dataBinding.tabs.adapter = TabsAdapter(routerTabs, parentFragmentManager, lifecycle)
+        dataBinding.tabs.adapter = TabsAdapter(routerTabs, childFragmentManager, lifecycle)
 
         dataBinding.bottomNavigationView.setOnItemSelectedListener {
             val i = TABS_MAP[it.itemId]!!

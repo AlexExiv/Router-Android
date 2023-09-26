@@ -71,7 +71,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun replace(path: RoutePath): String
     {
-        val lastView = viewsStack.removeLast()
+        val lastView = popViewStack()
         unbind(lastView.key)
 
         val route = findRoute(path) ?: throw RouteNotFoundException(path)
@@ -107,7 +107,7 @@ open class RouterSimple(protected val callerKey: String?,
             return
 
         val v = viewsStack.last()
-        viewsStack.removeLast()
+        popViewStack()
         dispatchClose(v)
         unbind(v.key)
     }
@@ -123,7 +123,7 @@ open class RouterSimple(protected val callerKey: String?,
         }
         else
         {
-            viewsStack.removeLast()
+            popViewStack()
             dispatchClose(v)
             unbind(v.key)
         }
@@ -132,6 +132,8 @@ open class RouterSimple(protected val callerKey: String?,
     protected open fun unbind(key: String)
     {
         resultManager.unbind(key)
+        pathData.remove(key)
+        unbindRouter(key)
     }
 
     override fun closeTo(key: String)
@@ -217,6 +219,16 @@ open class RouterSimple(protected val callerKey: String?,
         routerManager.bind(this, view)
     }
 
+    internal fun unbindRouter(viewKey: String)
+    {
+        routerManager.unbindView(viewKey)
+    }
+
+    internal fun releaseRouter()
+    {
+        routerManager.release(this)
+    }
+
     override fun createResultProvider(key: String): RouterResultProvider = RouterResultProviderImpl(key, resultManager)
 
     internal fun bindResult(from: String, to: String, result: Result<Any>?)
@@ -256,7 +268,7 @@ open class RouterSimple(protected val callerKey: String?,
         val deleteCount = viewsStack.size - i - 1
         for (j in 0 until deleteCount)
         {
-            val v = viewsStack.removeLast()
+            val v = popViewStack()
             unbind(v.key)
         }
 
@@ -338,5 +350,15 @@ open class RouterSimple(protected val callerKey: String?,
             RouteType.Dialog -> commandBuffer.apply(Command.CloseDialog(v.key))
             else -> commandBuffer.apply(Command.Close)
         }
+    }
+
+    protected fun popViewStack(): ViewMeta
+    {
+        val v = viewsStack.removeLast()
+
+        if (viewsStack.isEmpty())
+            releaseRouter()
+
+        return v
     }
 }

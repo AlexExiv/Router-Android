@@ -8,6 +8,7 @@ interface RouterManager
     operator fun get(key: String): Router
 
     fun bind(router: Router, toView: View)
+    fun unbindView(viewKey: String)
     fun get(forView: View): Router
 
     fun release(router: Router)
