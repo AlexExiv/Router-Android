@@ -25,7 +25,7 @@ class ComponentProviderImpl(override val appComponent: Any): ComponentProvider
             if (parentByChild[lastKey] == null)
                 break
 
-            lastKey = parentByChild[key]!!
+            lastKey = parentByChild[lastKey]!!
         }
 
         return lastKey
