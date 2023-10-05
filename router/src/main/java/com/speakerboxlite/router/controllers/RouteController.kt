@@ -51,7 +51,7 @@ abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterfa
         return convert(match.parameters, query)
     }
 
-    open fun convert(path: Map<String, String>, query: Map<String, String>): RoutePath
+    open fun convert(path: Map<String, String>, query: Map<String, String>): Path
     {
         TODO("")
     }

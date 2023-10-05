@@ -1,7 +1,9 @@
 package com.speakerboxlite.router.command
 
 import com.speakerboxlite.router.OnTabChangeCallback
+import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.View
+import com.speakerboxlite.router.controllers.AnimationController
 import java.io.Serializable
 
 sealed class Command
@@ -9,8 +11,8 @@ sealed class Command
     object Close: Command()
     class CloseTo(val key: String): Command()
     class StartModal(val key: String, val params: Serializable?): Command()
-    class Push(val view: View): Command()
-    class Replace(val byView: View): Command()
+    class Push(val path: RoutePath, val view: View, val animation: AnimationController<RoutePath, View>?): Command()
+    class Replace(val path: RoutePath, val byView: View, val animation: AnimationController<RoutePath, View>?): Command()
     class BottomSheet(val view: View): Command()
     class CloseBottomSheet(val key: String): Command()
     class Dialog(val view: View): Command()

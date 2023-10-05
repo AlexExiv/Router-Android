@@ -9,7 +9,9 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.speakerboxlite.router.HOST_ACTIVITY_INTENT_DATA_KEY
 import com.speakerboxlite.router.HOST_ACTIVITY_KEY
 import com.speakerboxlite.router.HostActivityFactory
+import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.View
+import com.speakerboxlite.router.controllers.AnimationController
 import java.io.Serializable
 
 class CommandExecutorAndroid(val activity: FragmentActivity,
@@ -31,8 +33,8 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
             is Command.StartModal -> startActivity(command.key, command.params)
             is Command.Dialog -> showDialog(command.view)
             is Command.CloseDialog -> closeDialog(command.key)
-            is Command.Push -> pushFragment(command.view)
-            is Command.Replace -> replaceFragment(command.byView)
+            is Command.Push -> pushFragment(command.path, command.view, command.animation, false)
+            is Command.Replace -> replaceFragment(command.path, command.byView, command.animation)
             is Command.BottomSheet -> showBottomSheet(command.view)
             is Command.CloseBottomSheet -> closeBottomSheet(command.key)
             is Command.SubFragment -> showSubFragment(command.containerId, command.view)
@@ -68,26 +70,35 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
         activity.startActivity(intent)
     }
 
-    private fun pushFragment(view: View)
+    private fun pushFragment(path: RoutePath, view: View, animation: AnimationController<RoutePath, View>?, replacing: Boolean)
     {
         if (view is Fragment)
         {
             fragmentManager.executePendingTransactions()
-            fragmentManager
-                .beginTransaction()
+            val transaction = fragmentManager.beginTransaction()
+
+            if (animation != null)
+            {
+                val current = fragmentManager.findFragmentById(containerId)
+
+                transaction.setReorderingAllowed(true)
+                animation.onConfigureAnimation(path, transaction, current, view, replacing)
+            }
+
+            transaction
                 .replace(containerId, view, view.viewKey)
                 .addToBackStack(view.viewKey)
                 .commit()
         }
     }
 
-    private fun replaceFragment(byView: View)
+    private fun replaceFragment(path: RoutePath, byView: View, animation: AnimationController<RoutePath, View>?)
     {
         if (byView is Fragment)
         {
             fragmentManager.executePendingTransactions()
             fragmentManager.popBackStack()
-            pushFragment(byView)
+            pushFragment(path, byView, animation, true)
         }
     }
 

@@ -6,6 +6,7 @@ import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
 import com.speakerboxlite.router.command.CommandBufferImpl
 import com.speakerboxlite.router.command.CommandExecutor
+import com.speakerboxlite.router.controllers.AnimationController
 import com.speakerboxlite.router.controllers.RouteControllerComposable
 import com.speakerboxlite.router.controllers.RouteControllerInterface
 import com.speakerboxlite.router.exceptions.ImpossibleRouteException
@@ -19,6 +20,8 @@ import kotlin.reflect.KClass
 enum class RouteType
 {
     Simple, Dialog, BTS;
+
+    val isNoStackStructure: Boolean get() = this == Dialog || this == BTS
 }
 
 data class ViewMeta(val key: String,
@@ -76,7 +79,7 @@ open class RouterSimple(protected val callerKey: String?,
 
         val route = findRoute(path) ?: throw RouteNotFoundException(path)
         val view = createView(route, RouteType.Simple, path, null)
-        commandBuffer.apply(Command.Replace(view))
+        commandBuffer.apply(Command.Replace(path, view, route as? AnimationController<RoutePath, View>))
 
         return view.viewKey
     }
@@ -265,6 +268,9 @@ open class RouterSimple(protected val callerKey: String?,
 
     protected fun _closeTo(i: Int)
     {
+        if (viewsStack.isNotEmpty() && viewsStack.last().routeType.isNoStackStructure)
+            close()
+
         val deleteCount = viewsStack.size - i - 1
         for (j in 0 until deleteCount)
         {
@@ -278,6 +284,10 @@ open class RouterSimple(protected val callerKey: String?,
     protected fun route(path: RoutePath, routeType: RouteType, presentation: Presentation?, result: Result<Any>?): String
     {
         Log.i("Router", "Start route with path: ${path::class}")
+
+        if (viewsStack.isNotEmpty() && viewsStack.last().routeType.isNoStackStructure)
+            close()
+
         val route = findRoute(path) ?: throw RouteNotFoundException(path)
         if (route.singleton)
         {
@@ -314,7 +324,7 @@ open class RouterSimple(protected val callerKey: String?,
             Presentation.Push ->
             {
                 val view = createView(route, routeType, path, result)
-                commandBuffer.apply(Command.Push(view))
+                commandBuffer.apply(Command.Push(path, view, route as? AnimationController<RoutePath, View>))
                 view.viewKey
             }
         }

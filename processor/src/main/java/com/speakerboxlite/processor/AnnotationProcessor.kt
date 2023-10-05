@@ -118,8 +118,8 @@ class AnnotationProcessor : AbstractProcessor()
             val processorManager = RouteControllerProcessorManager()
             processorManager.register(RouteControllerVMProcessor(processingEnv, kaptKotlinGeneratedDir, MAIN_ROUTER_PACK))
             processorManager.register(RouteControllerVMCProcessor(processingEnv, kaptKotlinGeneratedDir, MAIN_ROUTER_PACK))
-            processorManager.register(RouteControllerProcessor(processingEnv, kaptKotlinGeneratedDir, MAIN_ROUTER_PACK))
             processorManager.register(RouteControllerCProcessor(processingEnv, kaptKotlinGeneratedDir, MAIN_ROUTER_PACK))
+            processorManager.register(RouteControllerProcessor(processingEnv, kaptKotlinGeneratedDir, MAIN_ROUTER_PACK))
 
             elements.forEach {
                 if (it.kind != ElementKind.CLASS)
@@ -237,10 +237,10 @@ fun TypeElement.getExecutables(): List<ExecutableElement>
 
 fun TypeElement.hasParent(name: String): Boolean
 {
-    val sc = superclass as DeclaredType
+    val sc = superclass as? DeclaredType ?: return false
     val sd = sc.asElement() as TypeElement
     if (sd.simpleName.contentEquals(name))
         return true
 
-    return false
+    return sd.hasParent(name)
 }

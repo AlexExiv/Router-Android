@@ -10,6 +10,9 @@ class ResultManagerImpl: ResultManager
 {
     val connectors = mutableMapOf<String, ResultConnector>()
 
+    val maxPostponed = 3
+    val postponedUnbinding = mutableListOf<String>()
+
     override fun bind(from: String, to: String, result: Result<Any>?)
     {
         connectors[from] = ResultConnector(from, to, result)
@@ -17,11 +20,23 @@ class ResultManagerImpl: ResultManager
 
     override fun unbind(from: String)
     {
-        connectors.remove(from)
+        if (!postponedUnbinding.contains(from))
+            postponedUnbinding.add(from)
+
+        executePostponed()
     }
 
     override fun send(from: String, result: Any)
     {
         connectors[from]!!.result?.invoke(result)
+    }
+
+    private fun executePostponed()
+    {
+        while (postponedUnbinding.size > maxPostponed)
+        {
+            val first = postponedUnbinding.removeFirst()
+            connectors.remove(first)
+        }
     }
 }
