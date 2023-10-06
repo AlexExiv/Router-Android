@@ -79,7 +79,7 @@ open class RouterSimple(protected val callerKey: String?,
 
         val route = findRoute(path) ?: throw RouteNotFoundException(path)
         val view = createView(route, RouteType.Simple, path, null)
-        commandBuffer.apply(Command.Replace(path, view, route as? AnimationController<RoutePath, View>))
+        commandBuffer.apply(Command.Replace(path, view, route.animationController() as? AnimationController<RoutePath, View>))
 
         return view.viewKey
     }
@@ -324,7 +324,7 @@ open class RouterSimple(protected val callerKey: String?,
             Presentation.Push ->
             {
                 val view = createView(route, routeType, path, result)
-                commandBuffer.apply(Command.Push(path, view, route as? AnimationController<RoutePath, View>))
+                commandBuffer.apply(Command.Push(path, view, route.animationController() as? AnimationController<RoutePath, View>))
                 view.viewKey
             }
         }

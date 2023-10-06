@@ -22,6 +22,7 @@ interface RouteControllerInterface<Path: RoutePath, V: View>
 
     fun isPartOfChain(clazz: KClass<*>): Boolean
 
+    fun animationController(): AnimationController<RoutePath, View>?
     fun onCreateView(path: Path): V
 }
 

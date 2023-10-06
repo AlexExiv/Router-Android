@@ -1,6 +1,5 @@
 package com.speakerboxlite.router.sample.theme
 
-import android.content.pm.ActivityInfo
 import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.annotations.Route
 import com.speakerboxlite.router.sample.base.RouteControllerApp

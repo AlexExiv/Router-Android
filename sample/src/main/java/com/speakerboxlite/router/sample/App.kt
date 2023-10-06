@@ -4,7 +4,7 @@ import android.app.Application
 import android.content.Intent
 import com.speakerboxlite.router.lifecycle.ActivityLifeCycle
 import com.speakerboxlite.router.HostActivityFactory
-import com.speakerboxlite.router.RouterComponent
+import com.speakerboxlite.router.sample.base.animations.AnimationControllerDefault
 import com.speakerboxlite.router.sample.base.HostActivity
 import com.speakerboxlite.router.sample.base.HostLandscapeActivity
 import com.speakerboxlite.router.sample.base.RouteStyle
@@ -18,7 +18,7 @@ import java.io.Serializable
 class App: Application(), HostActivityFactory
 {
     lateinit var component: AppComponent
-    val routerComponent: RouterComponent = RouterComponentImpl()
+    val routerComponent = RouterComponentImpl()
     lateinit var lifeCycle: ActivityLifeCycle
 
     override fun onCreate()
@@ -29,11 +29,10 @@ class App: Application(), HostActivityFactory
             .appModule(AppModule(AppData("App String")))
             .build()
 
-        routerComponent.initialize(component, MainPath())
+        routerComponent.initialize(MainPath(), AnimationControllerDefault(), component)
 
         lifeCycle = ActivityLifeCycle(routerComponent.routerManager, this)
         registerActivityLifecycleCallbacks(lifeCycle)
-
     }
 
     override fun create(params: Serializable?): Intent

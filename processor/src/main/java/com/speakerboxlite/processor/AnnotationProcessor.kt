@@ -12,6 +12,7 @@ import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.asTypeName
 import java.io.File
 import java.lang.Exception
@@ -25,7 +26,11 @@ import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
+import javax.lang.model.type.MirroredTypeException
+import javax.lang.model.type.TypeMirror
 import javax.tools.Diagnostic
+import kotlin.reflect.KClass
+import kotlin.reflect.full.superclasses
 
 @AutoService(Processor::class)
 class AnnotationProcessor : AbstractProcessor()
@@ -54,23 +59,23 @@ class AnnotationProcessor : AbstractProcessor()
             val fileBuilder = FileSpec.builder(pack, fileName)
             val classBuilder = TypeSpec.classBuilder(fileName)
 
-            classBuilder.addSuperinterface(ClassName(MAIN_ROUTER_PACK, "RouterComponent"))
+            //classBuilder.addSuperinterface(ClassName(MAIN_ROUTER_PACK, "RouterComponent"))
 
             val routeManager = PropertySpec
                 .builder("routeManager", ClassName(MAIN_ROUTER_PACK, "RouteManager"))
-                .addModifiers(listOf(KModifier.PUBLIC, KModifier.OVERRIDE))
+                .addModifiers(listOf(KModifier.PUBLIC))
                 .initializer("%T()", ClassName(MAIN_ROUTER_PACK, "RouteManagerImpl"))
                 .build()
 
             val resultManager = PropertySpec
                 .builder("resultManager", ClassName("${MAIN_ROUTER_PACK}.result", "ResultManager"))
-                .addModifiers(listOf(KModifier.PUBLIC, KModifier.OVERRIDE))
+                .addModifiers(listOf(KModifier.PUBLIC))
                 .initializer("%T()", ClassName("${MAIN_ROUTER_PACK}.result", "ResultManagerImpl"))
                 .build()
 
             val routerManager = PropertySpec
                 .builder("routerManager", ClassName(MAIN_ROUTER_PACK, "RouterManager"))
-                .addModifiers(listOf(KModifier.PUBLIC, KModifier.OVERRIDE))
+                .addModifiers(listOf(KModifier.PUBLIC))
                 .initializer("%T()", ClassName(MAIN_ROUTER_PACK, "RouterManagerImpl"))
                 .build()
 
@@ -82,7 +87,7 @@ class AnnotationProcessor : AbstractProcessor()
 
             val componentProvider = PropertySpec
                 .builder("componentProvider", ClassName(MAIN_ROUTER_PACK, "ComponentProvider"))
-                .addModifiers(listOf(KModifier.PUBLIC, KModifier.OVERRIDE))
+                .addModifiers(listOf(KModifier.PUBLIC))
                 .delegate(componentProviderLazy)
                 .build()
 
@@ -106,12 +111,13 @@ class AnnotationProcessor : AbstractProcessor()
             classBuilder.addProperty(startPath)
 
             val initBuilder = FunSpec.builder("initialize")
-            initBuilder.addModifiers(listOf(KModifier.PUBLIC, KModifier.OVERRIDE))
-            initBuilder.addParameter("component", ANY)
+            initBuilder.addModifiers(listOf(KModifier.PUBLIC))
             initBuilder.addParameter("startPath", ClassName(MAIN_ROUTER_PACK, "RoutePath"))
-            initBuilder.addStatement("this.component = component")
+
+            val animClass = ClassName(CONTROLLERS_PACK, "AnyAnimationController")
+            initBuilder.addParameter("animation", animClass.copy(nullable = true))
+
             initBuilder.addStatement("this.startPath = startPath")
-            initBuilder.addStatement("routerManager[%M] = startRouter", MemberName(MAIN_ROUTER_PACK, "START_ACTIVITY_KEY"))
 
             val kaptKotlinGeneratedDir = processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]!!
 
@@ -132,9 +138,15 @@ class AnnotationProcessor : AbstractProcessor()
             }
 
             val routerClass = if (processorManager.hadComponent)
+            {
+                initBuilder.addParameter("component", ANY)
+                initBuilder.addStatement("this.component = component")
                 ClassName(MAIN_ROUTER_PACK, "RouterInjector")
+            }
             else
                 ClassName(MAIN_ROUTER_PACK, "RouterSimple")
+
+            initBuilder.addStatement("routerManager[%M] = startRouter", MemberName(MAIN_ROUTER_PACK, "START_ACTIVITY_KEY"))
 
             val startRouterLazy = CodeBlock.builder()
                 .beginControlFlow("lazy(mode = %T.SYNCHRONIZED)", LazyThreadSafetyMode::class.asTypeName())
@@ -145,7 +157,7 @@ class AnnotationProcessor : AbstractProcessor()
 
             val startRouter = PropertySpec
                 .builder("startRouter", ClassName(MAIN_ROUTER_PACK, "Router"))
-                .addModifiers(listOf(KModifier.PUBLIC, KModifier.OVERRIDE))
+                .addModifiers(listOf(KModifier.PUBLIC))
                 .delegate(startRouterLazy)
                 .build()
 
@@ -197,15 +209,34 @@ class AnnotationProcessor : AbstractProcessor()
         }
 
         if (annotation.singleton)
-        {
             initBuilder.addStatement("${valName}.singleton = true")
+
+        val animationMirror = try
+            {
+                annotation.animation as TypeMirror
+            }
+            catch (e: MirroredTypeException)
+            {
+                e.typeMirror
+            }
+
+        val animDecl = animationMirror as? DeclaredType
+        if (animDecl != null && animDecl.asElement()?.simpleName?.contentEquals(Nothing::class.simpleName) == false)
+        {
+            val typeE = animDecl.asElement() as TypeElement
+/*
+            if (typeE.superclasses.firstOrNull { it.qualifiedName == "${CONTROLLERS_PACK}.AnimationController" } == null)
+                throw IllegalArgumentException("Animation must be a subclass of AnimationController")
+*/
+            val animClass = typeE.asClassName()
+            initBuilder.addStatement("${valName}.preferredAnimationController = %T()", animClass)
         }
+        else
+            initBuilder.addStatement("${valName}.preferredAnimationController = animation")
 
         val names = elementClass.getExecutables().map { it.simpleName.toString() }
         if (names.contains(CREATE_INJECTOR))
-        {
             initBuilder.addStatement("${valName}.creatingInjector = true")
-        }
 
         initBuilder.addStatement("")
     }
@@ -213,6 +244,7 @@ class AnnotationProcessor : AbstractProcessor()
     companion object
     {
         val MAIN_ROUTER_PACK = "com.speakerboxlite.router"
+        val CONTROLLERS_PACK = "com.speakerboxlite.router.controllers"
 
         val PATH_INDEX = 0
 
