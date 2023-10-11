@@ -311,7 +311,14 @@ open class RouterSimple(protected val callerKey: String?,
                 val router = createRouter(newCallerKey)
                 val viewKey = when (routeType)
                 {
-                    RouteType.Simple -> router.route(path = path, presentation = Presentation.Push)
+                    RouteType.Simple ->
+                    {
+                        if (result == null)
+                            router.route(path = path, presentation = Presentation.Push)
+                        else
+                            router.routeWithResult(path = path as RoutePathResult<Any>, presentation = Presentation.Push, result = result)
+                    }
+
                     else -> throw ImpossibleRouteException("Modal route can't contains $routeType as ROOT")
                 }
 
@@ -324,7 +331,7 @@ open class RouterSimple(protected val callerKey: String?,
             Presentation.Push ->
             {
                 val view = createView(route, routeType, path, result)
-                commandBuffer.apply(Command.Push(path, view, route.animationController() as? AnimationController<RoutePath, View>))
+                commandBuffer.apply(Command.Push(path, view, route.animationController()))
                 view.viewKey
             }
         }

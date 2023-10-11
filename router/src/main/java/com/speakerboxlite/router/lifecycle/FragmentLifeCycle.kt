@@ -13,6 +13,8 @@ import com.speakerboxlite.router.View
 class FragmentLifeCycle(private val routerManager: RouterManager,
                         private val hostActivityFactory: HostActivityFactory): FragmentManager.FragmentLifecycleCallbacks()
 {
+    private var resumedHoster = false
+
     override fun onFragmentPreCreated(fm: FragmentManager, f: Fragment, savedInstanceState: Bundle?)
     {
         if (f is HostView)
@@ -32,13 +34,18 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
     {
         if (f is HostView)
         {
-            f.router.topRouter = f.router
+            if (!resumedHoster)
+            {
+                f.router.topRouter = f.router
+                resumedHoster = true
+            }
+
             f.router.bindExecutor(CommandExecutorAndroid(f.requireActivity(), R.id.root, f.childFragmentManager, hostActivityFactory))
         }
 
         if (f is View)
         {
-            if (f.parentFragment == null)
+            if (f.parentFragment == null && !resumedHoster)
                 f.router.topRouter = f.router
 
             f.resultProvider.start()
@@ -50,6 +57,7 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
     {
         if (f is HostView)
         {
+            resumedHoster = false
             f.router.unbindExecutor()
         }
 
