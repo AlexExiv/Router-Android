@@ -17,7 +17,7 @@ class HostViewFactoryDefault: HostViewFactory
 
 class TabsFragment: BaseViewModelFragment<TabsViewModel, FragmentTabsBinding>(R.layout.fragment_tabs)
 {
-    val routerTabs: RouterTabs by lazy { router.createRouterTabs(HostViewFactoryDefault(), true) }
+    val routerTabs: RouterTabs by lazy { router.createRouterTabs(HostViewFactoryDefault(), false) }
 
     override fun onResume()
     {

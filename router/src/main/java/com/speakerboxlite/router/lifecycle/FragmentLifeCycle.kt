@@ -32,12 +32,15 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
     {
         if (f is HostView)
         {
+            f.router.topRouter = f.router
             f.router.bindExecutor(CommandExecutorAndroid(f.requireActivity(), R.id.root, f.childFragmentManager, hostActivityFactory))
         }
 
         if (f is View)
         {
-            f.router.topRouter = f.router
+            if (f.parentFragment == null)
+                f.router.topRouter = f.router
+
             f.resultProvider.start()
             f.localRouter.bindExecutor(CommandExecutorAndroid(f.requireActivity(), R.id.root, f.childFragmentManager, hostActivityFactory))
         }
