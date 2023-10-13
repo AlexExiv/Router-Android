@@ -34,4 +34,9 @@ class TabViewModel(val index: Int, app: Application): BaseViewModel(app)
     {
         lockBack = !lockBack
     }
+
+    fun onShowStepPresent()
+    {
+        router.route(StepPath(0), Presentation.Modal)
+    }
 }

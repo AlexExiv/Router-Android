@@ -52,6 +52,12 @@
                     android:text="@{viewmodel.lockBackTitle}"
                     android:onClick="@{() -> viewmodel.onLockBack()}"/>
 
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Show Step Present"
+                    android:onClick="@{() -> viewmodel.onShowStepPresent()}"/>
+
             </LinearLayout>
 
         </FrameLayout>

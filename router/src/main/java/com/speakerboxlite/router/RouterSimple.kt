@@ -55,13 +55,13 @@ open class RouterSimple(protected val callerKey: String?,
 
     val isCurrentTop: Boolean get() = parent == null && viewsStack.size == 1
 
+    protected var isClosing = false
+
     override fun route(url: String): String?
     {
         val route = routeManager.find(url)
         if (route != null)
-        {
             return route(route.convert(url), RouteType.Simple, route.preferredPresentation, null)
-        }
 
         return null
     }
@@ -79,7 +79,7 @@ open class RouterSimple(protected val callerKey: String?,
 
         val route = findRoute(path) ?: throw RouteNotFoundException(path)
         val view = createView(route, RouteType.Simple, path, null)
-        commandBuffer.apply(Command.Replace(path, view, route.animationController() as? AnimationController<RoutePath, View>))
+        commandBuffer.apply(Command.Replace(path, view, route.animationController()))
 
         return view.viewKey
     }
@@ -229,6 +229,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     internal fun releaseRouter()
     {
+        isClosing = true
         routerManager.release(this)
     }
 
@@ -287,6 +288,14 @@ open class RouterSimple(protected val callerKey: String?,
 
         if (viewsStack.isNotEmpty() && viewsStack.last().routeType.isNoStackStructure)
             close()
+
+        if (isClosing)
+        {
+            return if (result == null)
+                parent!!.route(path, presentation)
+            else
+                parent!!.routeWithResult(path as RoutePathResult<Any>, presentation, result)
+        }
 
         val route = findRoute(path) ?: throw RouteNotFoundException(path)
         if (route.singleton)
@@ -373,7 +382,7 @@ open class RouterSimple(protected val callerKey: String?,
     {
         val v = viewsStack.removeLast()
 
-        if (viewsStack.isEmpty())
+        if (viewsStack.isEmpty() && parent != null)
             releaseRouter()
 
         return v
