@@ -229,7 +229,8 @@ class AnnotationProcessor : AbstractProcessor()
                 throw IllegalArgumentException("Animation must be a subclass of AnimationController")
 */
             val animClass = typeE.asClassName()
-            initBuilder.addStatement("${valName}.preferredAnimationController = %T()", animClass)
+            val anyAnimClass = ClassName(CONTROLLERS_PACK, "AnyAnimationController")
+            initBuilder.addStatement("${valName}.preferredAnimationController = %T() as %T", animClass, anyAnimClass)
         }
         else
             initBuilder.addStatement("${valName}.preferredAnimationController = animation")

@@ -106,11 +106,10 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun back()
     {
-        if (lockBack)
+        if (lockBack || !hasPreviousScreen)
             return
 
-        val v = viewsStack.last()
-        popViewStack()
+        val v = popViewStack()
         dispatchClose(v)
         unbind(v.key)
     }
