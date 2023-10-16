@@ -6,5 +6,5 @@ import kotlin.reflect.KClass
 @Retention(AnnotationRetention.SOURCE)
 annotation class Route(val uri: String = "",
                        val presentation: Presentation = Presentation.Push,
-                       val singleton: Boolean = false,
+                       val singleTop: Boolean = false,
                        val animation: KClass<*> = Nothing::class)

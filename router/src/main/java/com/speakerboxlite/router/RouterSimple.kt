@@ -6,7 +6,6 @@ import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
 import com.speakerboxlite.router.command.CommandBufferImpl
 import com.speakerboxlite.router.command.CommandExecutor
-import com.speakerboxlite.router.controllers.AnimationController
 import com.speakerboxlite.router.controllers.RouteControllerComposable
 import com.speakerboxlite.router.controllers.RouteControllerInterface
 import com.speakerboxlite.router.exceptions.ImpossibleRouteException
@@ -297,7 +296,7 @@ open class RouterSimple(protected val callerKey: String?,
         }
 
         val route = findRoute(path) ?: throw RouteNotFoundException(path)
-        if (route.singleton)
+        if (route.singleTop)
         {
             val exist = scanForPath(path::class)
             if (exist != null)

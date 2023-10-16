@@ -29,8 +29,6 @@ import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.MirroredTypeException
 import javax.lang.model.type.TypeMirror
 import javax.tools.Diagnostic
-import kotlin.reflect.KClass
-import kotlin.reflect.full.superclasses
 
 @AutoService(Processor::class)
 class AnnotationProcessor : AbstractProcessor()
@@ -208,8 +206,8 @@ class AnnotationProcessor : AbstractProcessor()
             initBuilder.addStatement("${valName}.preferredPresentation = %T.%L", presentationEnum, annotation.presentation.toString())
         }
 
-        if (annotation.singleton)
-            initBuilder.addStatement("${valName}.singleton = true")
+        if (annotation.singleTop)
+            initBuilder.addStatement("${valName}.singleTop = true")
 
         val animationMirror = try
             {

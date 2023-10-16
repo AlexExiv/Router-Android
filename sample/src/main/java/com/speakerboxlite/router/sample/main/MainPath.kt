@@ -7,5 +7,5 @@ import com.speakerboxlite.router.sample.base.RouteControllerApp
 
 class MainPath: RoutePath
 
-@Route(uri = "/product/{id}", presentation = Presentation.Modal, singleton = true)
+@Route(uri = "/product/{id}", presentation = Presentation.Modal, singleTop = true)
 abstract class MainRouteController: RouteControllerApp<MainPath, MainViewModel, MainFragment>()

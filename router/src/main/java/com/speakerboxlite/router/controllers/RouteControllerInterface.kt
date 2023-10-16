@@ -9,7 +9,7 @@ import kotlin.reflect.KClass
 
 interface RouteControllerInterface<Path: RoutePath, V: View>
 {
-    val singleton: Boolean
+    val singleTop: Boolean
     val creatingInjector: Boolean
     val preferredPresentation: Presentation
     val isChain: Boolean

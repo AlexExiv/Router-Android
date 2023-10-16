@@ -7,7 +7,7 @@ import com.speakerboxlite.router.sample.base.RouteControllerApp
 
 data class TabSingletonPath(val index: Int): RoutePath
 
-@Route(singleton = true)
+@Route(singleTop = true)
 abstract class TabSingletonRouteController: RouteControllerApp<TabSingletonPath, TabViewModel, TabFragment>()
 {
     override fun onCreateViewModel(view: TabFragment, path: TabSingletonPath): TabViewModel =

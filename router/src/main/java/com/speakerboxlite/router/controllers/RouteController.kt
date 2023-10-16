@@ -13,7 +13,7 @@ abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterfa
     var pattern: UrlMatcher? = null
     var preferredAnimationController: AnimationController<RoutePath, View>? = null
 
-    override var singleton: Boolean = false
+    override var singleTop: Boolean = false
     override var creatingInjector: Boolean = false
     override var preferredPresentation: Presentation = Presentation.Push
 
