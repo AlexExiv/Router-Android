@@ -13,7 +13,7 @@ class RouterTabInjector(callerKey: String?,
                         val index: Int,
                         val routerTab: RouterTabsImpl): RouterInjector(callerKey, parent, routeManager, routerManager, resultManager, componentProvider)
 {
-    override val hasPreviousScreen: Boolean get() = parent != null && parent.hasPreviousScreen
+    override val hasPreviousScreen: Boolean get() = viewsStack.size > 1 || parent!!.hasPreviousScreen
 
     override fun route(path: RoutePath, presentation: Presentation?): String =
         if (routerTab.presentInTab && viewsStack.isNotEmpty())

@@ -12,7 +12,7 @@ class RouterTab(callerKey: String?,
                 val index: Int,
                 val routerTab: RouterTabsImpl): RouterSimple(callerKey, parent, routeManager, routerManager, resultManager)
 {
-    override val hasPreviousScreen: Boolean get() = parent != null && parent.hasPreviousScreen
+    override val hasPreviousScreen: Boolean get() = viewsStack.size > 1 || parent!!.hasPreviousScreen
 
     override fun route(path: RoutePath, presentation: Presentation?): String =
         if (routerTab.presentInTab && viewsStack.isNotEmpty())
