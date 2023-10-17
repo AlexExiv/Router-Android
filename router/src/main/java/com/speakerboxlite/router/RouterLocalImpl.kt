@@ -91,6 +91,11 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
         router?.onComposeView(view)
     }
 
+    override fun onComposeAnimation(view: View)
+    {
+        router?.onComposeAnimation(view)
+    }
+
     override fun createRouterLocal(key: String): RouterLocal = router!!.createRouterLocal(key)
 
     override fun createRouterTabs(factory: HostViewFactory, presentInTab: Boolean): RouterTabs

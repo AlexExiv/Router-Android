@@ -30,6 +30,12 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
         }
     }
 
+    override fun onFragmentViewCreated(fm: FragmentManager, f: Fragment, v: android.view.View, savedInstanceState: Bundle?)
+    {
+        if (f is View)
+            f.router.onComposeAnimation(f)
+    }
+
     override fun onFragmentResumed(fm: FragmentManager, f: Fragment)
     {
         if (f is HostView)

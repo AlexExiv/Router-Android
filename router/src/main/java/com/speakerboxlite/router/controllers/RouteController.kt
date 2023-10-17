@@ -6,6 +6,7 @@ import com.speakerboxlite.router.pattern.UrlMatcher
 import com.speakerboxlite.router.annotations.Presentation
 import java.io.Serializable
 import kotlin.reflect.KClass
+import kotlin.reflect.full.createInstance
 
 abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterface<Path, V>
 {
@@ -52,10 +53,8 @@ abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterfa
         return convert(match.parameters, query)
     }
 
-    open fun convert(path: Map<String, String>, query: Map<String, String>): Path
-    {
-        TODO("")
-    }
+    open fun convert(path: Map<String, String>, query: Map<String, String>): Path =
+        pathClass.createInstance()
 
     override fun isPartOfChain(clazz: KClass<*>): Boolean = chainPaths.indexOfFirst { it == clazz } != -1
 

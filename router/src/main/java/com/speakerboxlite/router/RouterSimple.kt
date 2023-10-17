@@ -192,6 +192,13 @@ open class RouterSimple(protected val callerKey: String?,
         view.resultProvider = RouterResultProviderImpl(view.viewKey, resultManager)
     }
 
+    override fun onComposeAnimation(view: View)
+    {
+        val path = pathData[view.viewKey]!!
+        val route = routeManager.find(path) ?: throw RouteNotFoundException(path)
+        route.animationController()?.onConfigureView(path, view)
+    }
+
     override fun createRouterLocal(key: String): RouterLocal = RouterLocalImpl(key, this)
 
     override fun createRouterTabs(factory: HostViewFactory, presentInTab: Boolean): RouterTabs = RouterTabsImpl(viewsStack.last().key, factory, this, presentInTab)

@@ -130,9 +130,14 @@ interface Router
     fun unbindExecutor()
 
     /**
-     * This method compose view injects ViewModel, Router, ResultProvider. This method should be called in the fragment's `onCreate` method
+     * Composes the view by injecting the ViewModel, Router, and ResultProvider and so on. This method should be called in the `onCreate` method of the fragment.
      */
     fun onComposeView(view: View)
+
+    /**
+     * Composes the view's animation. This method should be called in the `onViewCreated` method of the fragment.
+     */
+    fun onComposeAnimation(view: View)
 
     /**
      * Creates a local router for the top view in the stack associated with the specified view key.

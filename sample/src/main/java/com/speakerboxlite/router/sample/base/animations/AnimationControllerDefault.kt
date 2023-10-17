@@ -13,4 +13,9 @@ class AnimationControllerDefault: AnyAnimationController
     {
         transaction.setCustomAnimations(R.anim.def_fragment_in, R.anim.def_fragment_exit, R.anim.def_fragment_pop_enter, R.anim.def_fragment_out)
     }
+
+    override fun onConfigureView(path: RoutePath, view: View)
+    {
+        super.onConfigureView(path, view)
+    }
 }
