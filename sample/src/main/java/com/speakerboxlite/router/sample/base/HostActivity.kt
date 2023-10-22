@@ -1,5 +1,6 @@
 package com.speakerboxlite.router.sample.base
 
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.speakerboxlite.router.lifecycle.BaseHostView
@@ -28,3 +29,21 @@ open class BaseHostActivity: AppCompatActivity(R.layout.activity_host), BaseHost
 class HostActivity: BaseHostActivity()
 
 class HostLandscapeActivity: BaseHostActivity()
+{
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
+        super.onCreate(savedInstanceState)
+
+    }
+
+    override fun onStart()
+    {
+        super.onStart()
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+    }
+
+    override fun onDestroy()
+    {
+        super.onDestroy()
+    }
+}

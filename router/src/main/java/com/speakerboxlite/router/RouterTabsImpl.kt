@@ -84,7 +84,7 @@ class RouterTabsImpl(val callerKey: String,
 
     internal fun releaseRouters()
     {
-        tabRoutes.values.forEach { it.releaseRouter() }
+        //tabRoutes.values.forEach { it.releaseRouter() }
     }
 
     protected fun showTab(i: Int)

@@ -73,8 +73,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun replace(path: RoutePath): String
     {
-        val lastView = popViewStack()
-        unbind(lastView.key)
+        popViewStack()
 
         val route = findRoute(path) ?: throw RouteNotFoundException(path)
         val view = createView(route, RouteType.Simple, path, null)
@@ -110,7 +109,6 @@ open class RouterSimple(protected val callerKey: String?,
 
         val v = popViewStack()
         dispatchClose(v)
-        unbind(v.key)
     }
 
     override fun close()
@@ -126,7 +124,6 @@ open class RouterSimple(protected val callerKey: String?,
         {
             popViewStack()
             dispatchClose(v)
-            unbind(v.key)
         }
     }
 
@@ -135,6 +132,9 @@ open class RouterSimple(protected val callerKey: String?,
         resultManager.unbind(key)
         pathData.remove(key)
         unbindRouter(key)
+
+        if (isClosing)
+            releaseRouter()
     }
 
     override fun closeTo(key: String)
@@ -206,6 +206,9 @@ open class RouterSimple(protected val callerKey: String?,
     override fun removeView(key: String)
     {
         viewsStack.removeAll { it.key == key }
+        if (viewsStack.isEmpty() && parent != null)
+            isClosing = true
+
         unbind(key)
     }
 
@@ -234,7 +237,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     internal fun releaseRouter()
     {
-        isClosing = true
+        //isClosing = true
         routerManager.release(this)
     }
 
@@ -279,10 +282,7 @@ open class RouterSimple(protected val callerKey: String?,
 
         val deleteCount = viewsStack.size - i - 1
         for (j in 0 until deleteCount)
-        {
-            val v = popViewStack()
-            unbind(v.key)
-        }
+            popViewStack()
 
         commandBuffer.apply(Command.CloseTo(viewsStack.last().key))
     }
@@ -388,7 +388,7 @@ open class RouterSimple(protected val callerKey: String?,
         val v = viewsStack.removeLast()
 
         if (viewsStack.isEmpty() && parent != null)
-            releaseRouter()
+            isClosing = true
 
         return v
     }

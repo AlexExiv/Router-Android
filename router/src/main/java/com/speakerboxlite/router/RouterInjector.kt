@@ -61,8 +61,7 @@ open class RouterInjector(callerKey: String?,
             var comp = componentProvider.find(viewsStack[0].key)
             if (comp == null)
             {
-                val routeComponent = viewsStack[0].route as? RouteControllerComponent<RoutePath, *, *>
-                    ?: throw RuntimeException("")
+                val routeComponent = viewsStack[0].route as? RouteControllerComponent<RoutePath, *, *> ?: throw RuntimeException("")
                 comp = routeComponent.onCreateInjector(pathData[viewsStack[0].key]!!, componentProvider.appComponent)
                 componentProvider.bind(viewsStack[0].key, comp)
             }

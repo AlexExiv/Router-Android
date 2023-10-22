@@ -5,6 +5,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentManager.OnBackStackChangedListener
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.speakerboxlite.router.HOST_ACTIVITY_INTENT_DATA_KEY
 import com.speakerboxlite.router.HOST_ACTIVITY_KEY
@@ -12,6 +13,8 @@ import com.speakerboxlite.router.HostActivityFactory
 import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.controllers.AnimationController
+import com.speakerboxlite.router.ext.isPopped
+import com.speakerboxlite.router.ext.isRemovingRecursive
 import java.io.Serializable
 
 class CommandExecutorAndroid(val activity: FragmentActivity,
@@ -19,6 +22,30 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
                              val fragmentManager: FragmentManager,
                              val activityFactory: HostActivityFactory): CommandExecutor
 {
+    val backstackCallback = object : OnBackStackChangedListener
+    {
+        override fun onBackStackChanged()
+        {
+
+        }
+
+        override fun onBackStackChangeStarted(fragment: Fragment, pop: Boolean)
+        {
+            if (fragment.isRemovingRecursive && pop)
+                fragment.isPopped = true
+        }
+    }
+
+    override fun onBind()
+    {
+        fragmentManager.addOnBackStackChangedListener(backstackCallback)
+    }
+
+    override fun onUnbind()
+    {
+        fragmentManager.removeOnBackStackChangedListener(backstackCallback)
+    }
+
     override fun execute(command: Command)
     {
         activity.runOnUiThread { _execute(command) }

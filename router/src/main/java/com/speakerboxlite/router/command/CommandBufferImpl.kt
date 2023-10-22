@@ -8,13 +8,16 @@ internal class CommandBufferImpl : CommandBuffer
     override fun bind(executor: CommandExecutor)
     {
         this.executor = executor
+        executor.onBind()
+
         buffer.forEach { executor.execute(it) }
         buffer.clear()
     }
 
     override fun unbind()
     {
-        this.executor = null
+        executor?.onUnbind()
+        executor = null
     }
 
     override fun apply(command: Command)

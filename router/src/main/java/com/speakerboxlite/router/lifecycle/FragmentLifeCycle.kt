@@ -1,6 +1,7 @@
 package com.speakerboxlite.router.lifecycle
 
 import android.os.Bundle
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.speakerboxlite.router.command.CommandExecutorAndroid
@@ -9,6 +10,8 @@ import com.speakerboxlite.router.HostView
 import com.speakerboxlite.router.R
 import com.speakerboxlite.router.RouterManager
 import com.speakerboxlite.router.View
+import com.speakerboxlite.router.ext.isPoppedRecursive
+import com.speakerboxlite.router.ext.isRemovingRecursive
 
 class FragmentLifeCycle(private val routerManager: RouterManager,
                         private val hostActivityFactory: HostActivityFactory): FragmentManager.FragmentLifecycleCallbacks()
@@ -76,8 +79,12 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
 
     override fun onFragmentDestroyed(fm: FragmentManager, f: Fragment)
     {
-        val activityDestroying = !(f.requireActivity().isChangingConfigurations || !f.requireActivity().isFinishing)
-        if (f is View && (f.isRemoving || activityDestroying))
+        if (f.requireActivity().isChangingConfigurations)
+            return
+
+        val removingDialog = if (f is View && f is DialogFragment) f.isRemovingRecursive else false
+
+        if (f is View && (removingDialog || f.isPoppedRecursive || f.requireActivity().isFinishing))
             f.router.removeView(f.viewKey)
     }
 }
