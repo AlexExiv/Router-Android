@@ -47,14 +47,16 @@ open class RouterSimple(protected val callerKey: String?,
     override val hasPreviousScreen: Boolean get() = parent != null || viewsStack.size > 1
 
     override var lockBack: Boolean
-        get() = viewsStack.last().lockBack
-        set(value) { viewsStack.last().lockBack = value }
+        get() = viewsStack.lastOrNull()?.lockBack ?: false
+        set(value) { viewsStack.lastOrNull()?.lockBack = value }
 
     protected val viewsStack = mutableListOf<ViewMeta>()
 
     val isCurrentTop: Boolean get() = parent == null && viewsStack.size == 1
 
     protected var isClosing = false
+
+    protected val routerTabsByKey = mutableMapOf<String, RouterTabs>()
 
     override fun route(url: String): String?
     {
@@ -201,7 +203,13 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun createRouterLocal(key: String): RouterLocal = RouterLocalImpl(key, this)
 
-    override fun createRouterTabs(factory: HostViewFactory, presentInTab: Boolean): RouterTabs = RouterTabsImpl(viewsStack.last().key, factory, this, presentInTab)
+    override fun createRouterTabs(key: String, presentInTab: Boolean): RouterTabs
+    {
+        if (routerTabsByKey[key] == null)
+            routerTabsByKey[key] = RouterTabsImpl(viewsStack.last().key, this, presentInTab)
+
+        return routerTabsByKey[key]!!
+    }
 
     override fun removeView(key: String)
     {
@@ -225,9 +233,9 @@ open class RouterSimple(protected val callerKey: String?,
 
     internal fun getPath(key: String): RoutePath = pathData[key]!!
 
-    internal fun bindRouter(view: View)
+    internal fun bindRouter(viewKey: String)
     {
-        routerManager.bind(this, view)
+        routerManager.bindView(this, viewKey)
     }
 
     internal fun unbindRouter(viewKey: String)
@@ -355,7 +363,7 @@ open class RouterSimple(protected val callerKey: String?,
         val view = route.onCreateView(path)
         view.viewKey = UUID.randomUUID().toString()
         pathData[view.viewKey] = path
-        bindRouter(view)
+        bindRouter(view.viewKey)
 
         val chain = scanForChain()
         val toKey = if (chain != null && chain.route.isPartOfChain(path::class))

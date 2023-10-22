@@ -22,12 +22,12 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
     {
         if (f is HostView)
         {
-
+            f.router = routerManager.getForView(f.viewKey)
         }
 
         if (f is View)
         {
-            f.router = routerManager.get(f)
+            f.router = routerManager.getForView(f.viewKey)
             f.localRouter = f.router.createRouterLocal(f.viewKey)
             f.router.onComposeView(f)
         }

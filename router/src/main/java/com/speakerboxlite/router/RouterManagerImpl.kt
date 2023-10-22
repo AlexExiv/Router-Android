@@ -6,8 +6,8 @@ class RouterManagerImpl : RouterManager
 {
     override var top: Router? = null
 
-    val routers = mutableMapOf<String, Router>()
-    val routerByView = mutableMapOf<String, Router>()
+    private val routers = mutableMapOf<String, Router>()
+    private val routerByView = mutableMapOf<String, Router>()
 
     override fun set(key: String, value: Router?)
     {
@@ -19,9 +19,9 @@ class RouterManagerImpl : RouterManager
 
     override fun get(key: String): Router = routers[key]!!
 
-    override fun bind(router: Router, toView: View)
+    override fun bindView(router: Router, viewKey: String)
     {
-        routerByView[toView.viewKey] = router
+        routerByView[viewKey] = router
         Log.d("RouterManager", "Bound routers: ${routerByView.size}")
     }
 
@@ -31,7 +31,7 @@ class RouterManagerImpl : RouterManager
         Log.d("RouterManager", "Bound routers after unbind: ${routerByView.size}")
     }
 
-    override fun get(forView: View): Router = routerByView[forView.viewKey]!!
+    override fun getForView(viewKey: String): Router = routerByView[viewKey]!!
 
     override fun release(router: Router)
     {

@@ -4,14 +4,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.speakerboxlite.router.HostView
 import com.speakerboxlite.router.RouterTabs
+import com.speakerboxlite.router.sample.base.HostFragment
 import com.speakerboxlite.router.sample.tabs.tab.TabPath
 import com.speakerboxlite.router.sample.tabs.tab.TabSingletonPath
 
 class TabsAdapter(val router: RouterTabs, fm: FragmentManager, lifecycle: Lifecycle): FragmentStateAdapter(fm, lifecycle)
 {
-    val hosterViews = mutableListOf<HostView>()
+    val hosterViews = mutableListOf<String>()
 
     init
     {
@@ -20,14 +20,15 @@ class TabsAdapter(val router: RouterTabs, fm: FragmentManager, lifecycle: Lifecy
             val hv = when (i)
             {
                 //1 -> router.route(i, TabSingletonPath(i))
-                else -> router.route(i, TabPath(i))
+                else -> router.route(i, TabPath(i), false)
             }
 
             hosterViews.add(hv)
         }
     }
 
-    override fun createFragment(position: Int): Fragment = hosterViews[position] as Fragment
+    override fun createFragment(position: Int): Fragment =
+        HostFragment().also { it.viewKey = hosterViews[position] }
 
     override fun getItemCount(): Int = 3
 }

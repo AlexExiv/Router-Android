@@ -1,23 +1,15 @@
 package com.speakerboxlite.router.sample.tabs
 
-import com.speakerboxlite.router.command.CommandExecutorAndroid
-import com.speakerboxlite.router.HostView
-import com.speakerboxlite.router.HostViewFactory
 import com.speakerboxlite.router.RouterTabs
+import com.speakerboxlite.router.command.CommandExecutorAndroid
 import com.speakerboxlite.router.sample.App
 import com.speakerboxlite.router.sample.R
 import com.speakerboxlite.router.sample.base.BaseViewModelFragment
-import com.speakerboxlite.router.sample.base.HostFragment
 import com.speakerboxlite.router.sample.databinding.FragmentTabsBinding
-
-class HostViewFactoryDefault: HostViewFactory
-{
-    override fun create(): HostView = HostFragment()
-}
 
 class TabsFragment: BaseViewModelFragment<TabsViewModel, FragmentTabsBinding>(R.layout.fragment_tabs)
 {
-    val routerTabs: RouterTabs by lazy { router.createRouterTabs(HostViewFactoryDefault(), false) }
+    val routerTabs: RouterTabs by lazy { router.createRouterTabs(viewKey, false) }
 
     override fun onResume()
     {

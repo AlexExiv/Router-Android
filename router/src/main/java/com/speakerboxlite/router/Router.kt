@@ -149,8 +149,12 @@ interface Router
 
     /**
      * Creates tabs router for the top view in the stack
+     *
+     * @param key The view's key (viewKey) to which the new router belongs.
+     * @param presentInTab
+     * @return A new tabs router instance.
      */
-    fun createRouterTabs(factory: HostViewFactory, presentInTab: Boolean = false): RouterTabs
+    fun createRouterTabs(key: String, presentInTab: Boolean = false): RouterTabs
 
     /**
      * Removes a view from the views stack and resets all connections.

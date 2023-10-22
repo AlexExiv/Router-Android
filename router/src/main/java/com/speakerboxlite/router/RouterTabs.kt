@@ -27,7 +27,7 @@ interface RouterTabs
      * @param index The index of the screen in the adapter.
      * @param path  The path to the screen connected by the `RouteController`.
      */
-    fun route(index: Int, path: RoutePath): HostView
+    fun route(index: Int, path: RoutePath, recreate: Boolean): String
 
     /**
      * Binds a command executor. This method should be called in the `onResume()` methods of the activity and fragment.

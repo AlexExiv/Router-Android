@@ -5,10 +5,10 @@ import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
 import com.speakerboxlite.router.command.CommandBufferImpl
 import com.speakerboxlite.router.command.CommandExecutor
+import java.util.UUID
 import kotlin.reflect.KClass
 
 class RouterTabsImpl(val callerKey: String,
-                     val hostFactory: HostViewFactory,
                      val router: RouterSimple,
                      val presentInTab: Boolean): RouterTabs
 {
@@ -16,15 +16,26 @@ class RouterTabsImpl(val callerKey: String,
 
     protected val commandBuffer: CommandBuffer = CommandBufferImpl()
     protected val tabRoutes = mutableMapOf<Int, RouterSimple>()
+    protected val tabRoutesKeys = mutableMapOf<Int, String>()
 
-    override fun route(index: Int, path: RoutePath): HostView
+    override fun route(index: Int, path: RoutePath, recreate: Boolean): String
     {
-        val view = hostFactory.create()
-        view.router = router.createRouterTab(callerKey, index, this)
-        view.router.route(path, Presentation.Push)
-        tabRoutes[index] = view.router as RouterSimple
+        val viewKey = if (tabRoutesKeys[index] == null || recreate)
+        {
+            val viewKey = UUID.randomUUID().toString()
+            val routerTab = router.createRouterTab(callerKey, index, this)
+            routerTab.route(path, Presentation.Push)
 
-        return view
+            tabRoutes[index] = routerTab as RouterSimple
+            tabRoutes[index]!!.bindRouter(viewKey)
+            tabRoutesKeys[index] = viewKey
+
+            viewKey
+        }
+        else
+            tabRoutesKeys[index]!!
+
+        return viewKey
     }
 
     override fun bindExecutor(executor: CommandExecutor)

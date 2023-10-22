@@ -98,9 +98,9 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
 
     override fun createRouterLocal(key: String): RouterLocal = router!!.createRouterLocal(key)
 
-    override fun createRouterTabs(factory: HostViewFactory, presentInTab: Boolean): RouterTabs
+    override fun createRouterTabs(key: String, presentInTab: Boolean): RouterTabs
     {
-        TODO("Not yet implemented")
+        TODO("Local routers can't have tabs router")
     }
 
     override fun removeView(key: String)
@@ -117,7 +117,7 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
         val view = route.onCreateView(path)
         view.viewKey = UUID.randomUUID().toString()
         router.setPath(view.viewKey, path)
-        router.bindRouter(view)
+        router.bindRouter(view.viewKey)
 
         if (router is RouterInjector)
             router.connectComponent(viewKey, view.viewKey)
