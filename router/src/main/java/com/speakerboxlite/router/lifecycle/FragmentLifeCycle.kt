@@ -79,6 +79,11 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
 
     override fun onFragmentDestroyed(fm: FragmentManager, f: Fragment)
     {
+
+    }
+
+    override fun onFragmentDetached(fm: FragmentManager, f: Fragment)
+    {
         if (f.requireActivity().isChangingConfigurations)
             return
 

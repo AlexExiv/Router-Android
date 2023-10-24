@@ -115,7 +115,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun close()
     {
-        val v = viewsStack.last()
+        val v = viewsStack.lastOrNull() ?: return
         val chain = scanForChain()
         if (chain != null && chain.key != v.key && chain.route.isPartOfChain(v.path))
         {
