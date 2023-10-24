@@ -17,7 +17,7 @@ class RouterManagerImpl : RouterManager
             routers[key] = value
     }
 
-    override fun get(key: String): Router = routers[key]!!
+    override fun get(key: String): Router? = routers[key]
 
     override fun bindView(router: Router, viewKey: String)
     {
@@ -32,15 +32,4 @@ class RouterManagerImpl : RouterManager
     }
 
     override fun getForView(viewKey: String): Router = routerByView[viewKey]!!
-
-    override fun release(router: Router)
-    {
-        val keys = routerByView.filter { it.value == router }.map { it.key }
-        for (k in keys)
-        {
-            routerByView.remove(k)
-            routers.remove(k)
-        }
-        Log.d("RouterManager", "Bound routers after release: ${routerByView.size}")
-    }
 }

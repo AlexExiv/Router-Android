@@ -26,6 +26,7 @@ class ActivityLifeCycle(val routerManager: RouterManager,
         {
             p0.routerManager = routerManager
             p0.router = routerManager[p0.hostActivityKey]
+                ?: throw IllegalArgumentException("Router hasn't been found. Key: ${p0.hostActivityKey} ; Class name ${p0::class.simpleName}")
         }
 
         if (p0 is AppCompatActivity)
@@ -69,6 +70,7 @@ class ActivityLifeCycle(val routerManager: RouterManager,
 
     override fun onActivityDestroyed(p0: Activity)
     {
-
+        if (p0 is BaseHostView && p0.isFinishing)
+            routerManager[p0.hostActivityKey] = null
     }
 }

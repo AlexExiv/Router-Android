@@ -134,9 +134,9 @@ open class RouterSimple(protected val callerKey: String?,
         resultManager.unbind(key)
         pathData.remove(key)
         unbindRouter(key)
-
+/*
         if (isClosing)
-            releaseRouter()
+            releaseRouter()*/
     }
 
     override fun closeTo(key: String)
@@ -241,12 +241,6 @@ open class RouterSimple(protected val callerKey: String?,
     internal fun unbindRouter(viewKey: String)
     {
         routerManager.unbindView(viewKey)
-    }
-
-    internal fun releaseRouter()
-    {
-        //isClosing = true
-        routerManager.release(this)
     }
 
     override fun createResultProvider(key: String): RouterResultProvider = RouterResultProviderImpl(key, resultManager)

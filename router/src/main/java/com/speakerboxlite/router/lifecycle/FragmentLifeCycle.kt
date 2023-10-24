@@ -86,5 +86,8 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
 
         if (f is View && (removingDialog || f.isPoppedRecursive || f.requireActivity().isFinishing))
             f.router.removeView(f.viewKey)
+
+        if (f is HostView && (f.isPoppedRecursive || f.requireActivity().isFinishing))
+            f.router.removeView(f.viewKey)
     }
 }
