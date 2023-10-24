@@ -1,6 +1,7 @@
 package com.speakerboxlite.router
 
 import com.speakerboxlite.router.controllers.RouteControllerComponent
+import com.speakerboxlite.router.controllers.RouteControllerInterface
 import com.speakerboxlite.router.exceptions.RouteNotFoundException
 import com.speakerboxlite.router.ext.retrieveComponent
 import com.speakerboxlite.router.result.ResultManager
@@ -14,11 +15,17 @@ open class RouterInjector(callerKey: String?,
                           resultManager: ResultManager,
                           protected val componentProvider: ComponentProvider): RouterSimple(callerKey, parent, routeManager, routerManager, resultManager)
 {
+    data class ViewMetaComponent(val componentKey: String,
+                                 val routeComponent: RouteControllerComponent<RoutePath, *, *>,
+                                 val componentPathData: RoutePath)
+
     val parentInjector: RouterInjector get() = parent as RouterInjector
 
     protected val appComponentClass: KClass<*> by lazy {
         componentProvider.appComponent::class.superclasses[0]
     }
+
+    protected val metaComponents = mutableMapOf<String, ViewMetaComponent>()
 
     override fun onComposeView(view: View)
     {
@@ -26,13 +33,12 @@ open class RouterInjector(callerKey: String?,
 
         val path = pathData[view.viewKey]!!
         val route = routeManager.find(path) ?: throw RouteNotFoundException(path)
+        val routeComponent = route as? RouteControllerComponent<RoutePath, View, *>
 
-        (route as? RouteControllerComponent<RoutePath, View, *>)?.also {
-            val compKey = componentProvider.componentKey(view.viewKey)
-            val i = viewsStack.indexOfFirst { it.key == compKey }
-            val compClass = route::class.retrieveComponent() ?: throw RuntimeException("Couldn't retrieve Component class")
-            val comp = scanForTopComponent(i, compClass)
-            it.onComposeView(this, view, path, comp)
+        if (routeComponent != null)
+        {
+            val component = onComposeInjector(view.viewKey, route)
+            routeComponent.onComposeView(this, view, path, component)
         }
     }
 
@@ -51,23 +57,35 @@ open class RouterInjector(callerKey: String?,
         componentProvider.connectComponent(parentKey, childKey)
     }
 
-    protected fun scanForTopComponent(startFrom: Int?, compClass: KClass<*>): Any
+    protected fun onComposeInjector(viewKey: String, route: RouteControllerInterface<RoutePath, *>): Any
+    {
+        val compKey = componentProvider.componentKey(viewKey)
+        val i = viewsStack.indexOfFirst { it.key == compKey }
+
+        return if (metaComponents[viewsStack[i].key] != null)
+        {
+            val mc = metaComponents[viewsStack[i].key]!!
+            var comp = componentProvider.find(mc.componentKey)
+            if (comp == null)
+                comp = mc.routeComponent.onCreateInjector(mc.componentPathData, componentProvider.appComponent)
+
+            comp
+        }
+        else
+        {
+            val compClass = route::class.retrieveComponent() ?: throw RuntimeException("Couldn't retrieve Component class")
+            val comp = scanForTopComponent(viewsStack[i].key, metaComponents, i, compClass)
+            comp
+        }
+    }
+
+    protected fun scanForTopComponent(viewKey: String, metaComponents: MutableMap<String, ViewMetaComponent>, startFrom: Int?, compClass: KClass<*>): Any
     {
         if (compClass == appComponentClass)
             return componentProvider.appComponent
 
         if (parent == null && viewsStack.size == 1)
-        {
-            var comp = componentProvider.find(viewsStack[0].key)
-            if (comp == null)
-            {
-                val routeComponent = viewsStack[0].route as? RouteControllerComponent<RoutePath, *, *> ?: throw RuntimeException("")
-                comp = routeComponent.onCreateInjector(pathData[viewsStack[0].key]!!, componentProvider.appComponent)
-                componentProvider.bind(viewsStack[0].key, comp)
-            }
-
-            return comp
-        }
+            return getComponent(viewKey, metaComponents, viewsStack[0].key, viewsStack[0].route)
 
         val s = startFrom ?: (viewsStack.size - 1)
         for (i in s downTo 0)
@@ -75,22 +93,28 @@ open class RouterInjector(callerKey: String?,
             val v = viewsStack[i]
             val routeComp = v.route::class.retrieveComponent()
             if (routeComp == compClass && v.route.creatingInjector)
-            {
-                var comp = componentProvider.find(v.key)
-                if (comp == null)
-                {
-                    val routeComponent = v.route as? RouteControllerComponent<RoutePath, *, *> ?: throw RuntimeException("")
-                    comp = routeComponent.onCreateInjector(pathData[v.key]!!, componentProvider.appComponent)
-                    componentProvider.bind(v.key, comp)
-                }
-
-                return comp
-            }
+                return getComponent(viewKey, metaComponents, v.key, v.route)
         }
 
         if (parent != null)
-            return parentInjector.scanForTopComponent(null, compClass)
+            return parentInjector.scanForTopComponent(viewKey, metaComponents, null, compClass)
 
         throw RuntimeException("Couldn't find appropriate method to create component: ${compClass}. Maybe your forgot override onCreateInjector method?")
+    }
+
+    protected fun getComponent(viewKey: String, metaComponents: MutableMap<String, ViewMetaComponent>, componentKey: String, route: RouteControllerInterface<RoutePath, *>): Any
+    {
+        var comp = componentProvider.find(componentKey)
+        val routeComponent = route as? RouteControllerComponent<RoutePath, *, *> ?: throw RuntimeException("")
+
+        if (comp == null)
+        {
+            comp = routeComponent.onCreateInjector(pathData[componentKey]!!, componentProvider.appComponent)
+            componentProvider.bind(componentKey, comp)
+        }
+
+        metaComponents[viewKey] = ViewMetaComponent(componentKey, routeComponent, pathData[componentKey]!!)
+
+        return comp
     }
 }
