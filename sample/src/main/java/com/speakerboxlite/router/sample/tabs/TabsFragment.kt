@@ -9,26 +9,20 @@ import com.speakerboxlite.router.sample.databinding.FragmentTabsBinding
 
 class TabsFragment: BaseViewModelFragment<TabsViewModel, FragmentTabsBinding>(R.layout.fragment_tabs)
 {
-    val routerTabs: RouterTabs by lazy { router.createRouterTabs(viewKey, false) }
-
-    override fun onResume()
-    {
-        super.onResume()
-        routerTabs.bindExecutor(CommandExecutorAndroid(requireActivity(), 0, childFragmentManager, requireActivity().application as App))
-    }
-
-    override fun onPause()
-    {
-        routerTabs.unbindExecutor()
-        super.onPause()
-    }
+    var routerTabs: RouterTabs? = null
 
     override fun onBindData()
     {
         super.onBindData()
 
         dataBinding.viewmodel = viewModel
-        dataBinding.tabs.adapter = TabsAdapter(routerTabs, childFragmentManager, lifecycle)
+
+        if (router != null)
+        {
+            routerTabs = router?.createRouterTabs(viewKey, false)
+            dataBinding.tabs.adapter = TabsAdapter(routerTabs!!, childFragmentManager, lifecycle)
+        }
+
 
         dataBinding.bottomNavigationView.setOnItemSelectedListener {
             val i = TABS_MAP[it.itemId]!!
@@ -36,7 +30,19 @@ class TabsFragment: BaseViewModelFragment<TabsViewModel, FragmentTabsBinding>(R.
             true
         }
 
-        routerTabs.tabChangeCallback = { dataBinding.bottomNavigationView.selectedItemId = TABS_BACK_MAP[it]!! }
+        routerTabs?.tabChangeCallback = { dataBinding.bottomNavigationView.selectedItemId = TABS_BACK_MAP[it]!! }
+    }
+
+    override fun onResume()
+    {
+        super.onResume()
+        routerTabs?.bindExecutor(CommandExecutorAndroid(requireActivity(), 0, childFragmentManager, requireActivity().application as App))
+    }
+
+    override fun onPause()
+    {
+        routerTabs?.unbindExecutor()
+        super.onPause()
     }
 
     companion object

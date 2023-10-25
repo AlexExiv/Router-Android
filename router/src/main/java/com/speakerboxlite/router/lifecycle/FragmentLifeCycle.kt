@@ -28,37 +28,37 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
         if (f is View)
         {
             f.router = routerManager.getForView(f.viewKey)
-            f.localRouter = f.router.createRouterLocal(f.viewKey)
-            f.router.onComposeView(f)
+            f.localRouter = f.router?.createRouterLocal(f.viewKey)
+            f.router?.onComposeView(f)
         }
     }
 
     override fun onFragmentViewCreated(fm: FragmentManager, f: Fragment, v: android.view.View, savedInstanceState: Bundle?)
     {
         if (f is View)
-            f.router.onComposeAnimation(f)
+            f.router?.onComposeAnimation(f)
     }
 
     override fun onFragmentResumed(fm: FragmentManager, f: Fragment)
     {
-        if (f is HostView)
+        if (f is HostView && f.router != null)
         {
             if (!resumedHoster)
             {
-                f.router.topRouter = f.router
+                f.router?.topRouter = f.router
                 resumedHoster = true
             }
 
-            f.router.bindExecutor(CommandExecutorAndroid(f.requireActivity(), R.id.root, f.childFragmentManager, hostActivityFactory))
+            f.router?.bindExecutor(CommandExecutorAndroid(f.requireActivity(), R.id.root, f.childFragmentManager, hostActivityFactory))
         }
 
-        if (f is View)
+        if (f is View && f.router != null)
         {
             if (f.parentFragment == null && !resumedHoster)
-                f.router.topRouter = f.router
+                f.router?.topRouter = f.router
 
             f.resultProvider.start()
-            f.localRouter.bindExecutor(CommandExecutorAndroid(f.requireActivity(), R.id.root, f.childFragmentManager, hostActivityFactory))
+            f.localRouter?.bindExecutor(CommandExecutorAndroid(f.requireActivity(), R.id.root, f.childFragmentManager, hostActivityFactory))
         }
     }
 
@@ -67,12 +67,12 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
         if (f is HostView)
         {
             resumedHoster = false
-            f.router.unbindExecutor()
+            f.router?.unbindExecutor()
         }
 
         if (f is View)
         {
-            f.localRouter.unbindExecutor()
+            f.localRouter?.unbindExecutor()
             f.resultProvider.pause()
         }
     }
@@ -90,9 +90,9 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
         val removingDialog = if (f is View && f is DialogFragment) f.isRemovingRecursive else false
 
         if (f is View && (removingDialog || f.isPoppedRecursive || f.requireActivity().isFinishing))
-            f.router.removeView(f.viewKey)
+            f.router?.removeView(f.viewKey)
 
         if (f is HostView && (f.isPoppedRecursive || f.requireActivity().isFinishing))
-            f.router.removeView(f.viewKey)
+            f.router?.removeView(f.viewKey)
     }
 }

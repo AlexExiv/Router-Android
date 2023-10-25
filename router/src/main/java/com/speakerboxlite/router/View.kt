@@ -6,8 +6,8 @@ interface View
 {
     var viewKey: String
 
-    var router: Router
-    var localRouter: RouterLocal
+    var router: Router?
+    var localRouter: RouterLocal?
 
     var resultProvider: RouterResultProvider
 }

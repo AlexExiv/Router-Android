@@ -11,7 +11,7 @@ import com.speakerboxlite.router.sample.R
 open class BaseHostActivity: AppCompatActivity(R.layout.activity_host), BaseHostView
 {
     override lateinit var routerManager: RouterManager
-    override lateinit var router: Router
+    override var router: Router? = null
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -22,7 +22,7 @@ open class BaseHostActivity: AppCompatActivity(R.layout.activity_host), BaseHost
     override fun onBackPressed()
     {
         //super.onBackPressed()
-        router.topRouter?.back()
+        router?.topRouter?.back()
     }
 }
 

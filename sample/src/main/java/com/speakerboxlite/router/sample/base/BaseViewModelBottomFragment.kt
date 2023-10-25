@@ -24,8 +24,8 @@ abstract class BaseViewModelBottomFragment<VM: BaseViewModel, VDB: ViewDataBindi
             requireArguments().putString("VIEW_KEY", value)
         }
 
-    override lateinit var router: Router
-    override lateinit var localRouter: RouterLocal
+    override var router: Router? = null
+    override var localRouter: RouterLocal? = null
     override lateinit var viewModel: VM
     override lateinit var resultProvider: RouterResultProvider
 

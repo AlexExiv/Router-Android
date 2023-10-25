@@ -17,5 +17,5 @@ class HostFragment: Fragment(R.layout.fragment_host), HostView
             requireArguments().putString("VIEW_KEY", value)
         }
 
-    override lateinit var router: Router
+    override var router: Router? = null
 }

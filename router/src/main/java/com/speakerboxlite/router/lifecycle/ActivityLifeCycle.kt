@@ -14,7 +14,7 @@ import com.speakerboxlite.router.hostActivityKey
 interface BaseHostView
 {
     var routerManager: RouterManager
-    var router: Router
+    var router: Router?
 }
 
 class ActivityLifeCycle(val routerManager: RouterManager,
@@ -26,7 +26,7 @@ class ActivityLifeCycle(val routerManager: RouterManager,
         {
             p0.routerManager = routerManager
             p0.router = routerManager[p0.hostActivityKey]
-                ?: throw IllegalArgumentException("Router hasn't been found. Key: ${p0.hostActivityKey} ; Class name ${p0::class.simpleName}")
+                //?: throw IllegalArgumentException("Router hasn't been found. Key: ${p0.hostActivityKey} ; Class name ${p0::class.simpleName}")
         }
 
         if (p0 is AppCompatActivity)
@@ -42,11 +42,11 @@ class ActivityLifeCycle(val routerManager: RouterManager,
 
     override fun onActivityResumed(p0: Activity)
     {
-        if (p0 is BaseHostView)
+        if (p0 is BaseHostView && p0.router != null)
         {
             routerManager.top = p0.router
             if (p0 is AppCompatActivity)
-                p0.router.bindExecutor(CommandExecutorAndroid(p0, R.id.root, p0.supportFragmentManager, hostActivityFactory))
+                p0.router!!.bindExecutor(CommandExecutorAndroid(p0, R.id.root, p0.supportFragmentManager, hostActivityFactory))
         }
     }
 
@@ -54,7 +54,7 @@ class ActivityLifeCycle(val routerManager: RouterManager,
     {
         if (p0 is BaseHostView)
         {
-            p0.router.unbindExecutor()
+            p0.router?.unbindExecutor()
         }
     }
 

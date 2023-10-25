@@ -28,13 +28,13 @@ abstract class BaseFragment<VDB: ViewDataBinding>(@LayoutRes val layoutId: Int,
             requireArguments().putString("VIEW_KEY", value)
         }
 
-    override lateinit var router: Router
-    override lateinit var localRouter: RouterLocal
+    override var router: Router? = null
+    override var localRouter: RouterLocal? = null
     override lateinit var resultProvider: RouterResultProvider
 
     lateinit var dataBinding: VDB
 
-    protected val isShowBackBtn get() = router.hasPreviousScreen
+    protected val isShowBackBtn get() = router?.hasPreviousScreen ?: false
     protected var toolbar: Toolbar? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): android.view.View?
