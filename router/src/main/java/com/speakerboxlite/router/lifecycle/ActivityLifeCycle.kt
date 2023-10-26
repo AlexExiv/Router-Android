@@ -37,7 +37,11 @@ class ActivityLifeCycle(val routerManager: RouterManager,
 
     override fun onActivityStarted(p0: Activity)
     {
-
+        if (p0 is BaseHostView)
+        {
+            if (p0 is AppCompatActivity)
+                p0.router.bindExecutor(CommandExecutorAndroid(p0, R.id.root, p0.supportFragmentManager, hostActivityFactory))
+        }
     }
 
     override fun onActivityResumed(p0: Activity)
@@ -45,22 +49,20 @@ class ActivityLifeCycle(val routerManager: RouterManager,
         if (p0 is BaseHostView)
         {
             routerManager.top = p0.router
-            if (p0 is AppCompatActivity)
-                p0.router.bindExecutor(CommandExecutorAndroid(p0, R.id.root, p0.supportFragmentManager, hostActivityFactory))
         }
     }
 
     override fun onActivityPaused(p0: Activity)
     {
-        if (p0 is BaseHostView)
-        {
-            p0.router.unbindExecutor()
-        }
+
     }
 
     override fun onActivityStopped(p0: Activity)
     {
-
+        if (p0 is BaseHostView)
+        {
+            p0.router.unbindExecutor()
+        }
     }
 
     override fun onActivitySaveInstanceState(p0: Activity, p1: Bundle)

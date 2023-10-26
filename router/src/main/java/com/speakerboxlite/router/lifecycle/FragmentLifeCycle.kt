@@ -39,6 +39,20 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
             f.router.onComposeAnimation(f)
     }
 
+    override fun onFragmentStarted(fm: FragmentManager, f: Fragment)
+    {
+        super.onFragmentStarted(fm, f)
+
+        if (f is HostView)
+            f.router.bindExecutor(CommandExecutorAndroid(f.requireActivity(), R.id.root, f.childFragmentManager, hostActivityFactory))
+
+        if (f is View)
+        {
+            f.localRouter.bindExecutor(CommandExecutorAndroid(f.requireActivity(), R.id.root, f.childFragmentManager, hostActivityFactory))
+            f.resultProvider.start()
+        }
+    }
+
     override fun onFragmentResumed(fm: FragmentManager, f: Fragment)
     {
         if (f is HostView)
@@ -48,25 +62,27 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
                 f.router.topRouter = f.router
                 resumedHoster = true
             }
-
-            f.router.bindExecutor(CommandExecutorAndroid(f.requireActivity(), R.id.root, f.childFragmentManager, hostActivityFactory))
         }
 
         if (f is View)
         {
             if (f.parentFragment == null && !resumedHoster)
                 f.router.topRouter = f.router
-
-            f.resultProvider.start()
-            f.localRouter.bindExecutor(CommandExecutorAndroid(f.requireActivity(), R.id.root, f.childFragmentManager, hostActivityFactory))
         }
     }
 
     override fun onFragmentPaused(fm: FragmentManager, f: Fragment)
     {
         if (f is HostView)
-        {
             resumedHoster = false
+    }
+
+    override fun onFragmentStopped(fm: FragmentManager, f: Fragment)
+    {
+        super.onFragmentStopped(fm, f)
+
+        if (f is HostView)
+        {
             f.router.unbindExecutor()
         }
 
