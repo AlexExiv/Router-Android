@@ -11,9 +11,11 @@ class RouterManagerImpl : RouterManager
 
     override fun set(key: String, value: Router?)
     {
-        if (value == null)
-            routers.remove(key)
-        else
+        //if (value == null)
+            //routers.remove(key)
+        //else
+
+        if (value != null)
             routers[key] = value
     }
 
@@ -27,7 +29,7 @@ class RouterManagerImpl : RouterManager
 
     override fun unbindView(viewKey: String)
     {
-        routerByView.remove(viewKey)
+        //routerByView.remove(viewKey)
         Log.d("RouterManager", "Bound routers after unbind: ${routerByView.size}")
     }
 
