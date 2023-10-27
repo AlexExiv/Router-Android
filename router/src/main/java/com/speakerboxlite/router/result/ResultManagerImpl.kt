@@ -28,7 +28,7 @@ class ResultManagerImpl: ResultManager
 
     override fun send(from: String, result: Any)
     {
-        connectors[from]!!.result?.invoke(result)
+        connectors[from]?.result?.invoke(result)
     }
 
     private fun executePostponed()

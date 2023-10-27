@@ -45,7 +45,9 @@ open class RouterInjector(callerKey: String?,
     override fun unbind(key: String)
     {
         super.unbind(key)
+
         componentProvider.unbind(key)
+        metaComponents.remove(key)
     }
 
     override fun createRouter(callerKey: String): Router = RouterInjector(callerKey, this, routeManager, routerManager, resultManager, componentProvider)
@@ -60,11 +62,11 @@ open class RouterInjector(callerKey: String?,
     protected fun onComposeInjector(viewKey: String, route: RouteControllerInterface<RoutePath, *>): Any
     {
         val compKey = componentProvider.componentKey(viewKey)
-        val i = viewsStack.indexOfFirst { it.key == compKey }
+        val meta = viewsStackById[compKey]!!
 
-        return if (metaComponents[viewsStack[i].key] != null)
+        return if (metaComponents[meta.key] != null)
         {
-            val mc = metaComponents[viewsStack[i].key]!!
+            val mc = metaComponents[meta.key]!!
             var comp = componentProvider.find(mc.componentKey)
             if (comp == null)
                 comp = mc.routeComponent.onCreateInjector(mc.componentPathData, componentProvider.appComponent)
@@ -73,8 +75,9 @@ open class RouterInjector(callerKey: String?,
         }
         else
         {
+            val i = viewsStack.indexOfFirst { it.key == compKey }
             val compClass = route::class.retrieveComponent() ?: throw RuntimeException("Couldn't retrieve Component class")
-            val comp = scanForTopComponent(viewsStack[i].key, metaComponents, i, compClass)
+            val comp = scanForTopComponent(meta.key, metaComponents, i, compClass)
             comp
         }
     }
@@ -83,6 +86,9 @@ open class RouterInjector(callerKey: String?,
     {
         if (compClass == appComponentClass)
             return componentProvider.appComponent
+
+        if (startFrom == -1)
+            throw IllegalStateException("There is no such record in the views stack. How could it be.")
 
         if (parent == null && viewsStack.size == 1)
             return getComponent(viewKey, metaComponents, viewsStack[0].key, viewsStack[0].route)

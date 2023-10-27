@@ -21,6 +21,12 @@ abstract class RouteControllerVMC<Path: RoutePath, VM: ViewModel, V: ViewVM<VM>,
         }
 
         onInject(view, vm, component as C)
+
+        if (!view.viewModel.isInit)
+        {
+            view.viewModel.onInit()
+            view.viewModel.isInit = true
+        }
     }
 
     abstract protected fun onCreateViewModel(view: V, path: Path): VM

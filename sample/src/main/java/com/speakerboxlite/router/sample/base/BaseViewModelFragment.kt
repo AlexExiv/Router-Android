@@ -10,6 +10,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.viewModelScope
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterLocal
 import com.speakerboxlite.router.ViewVM
@@ -51,12 +52,6 @@ abstract class BaseViewModelFragment<VM: BaseViewModel, VDB: ViewDataBinding>(@L
         super.onViewCreated(view, savedInstanceState)
 
         toolbar = view.findViewById(R.id.toolbar)
-
-        if (!viewModel.isInit)
-        {
-            view.postDelayed({ viewModel.onInit() }, 10)
-            viewModel.onInitRequested()
-        }
 
         onBindData()
 

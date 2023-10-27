@@ -43,13 +43,6 @@ abstract class BaseViewModelDialogFragment<VM: BaseViewModel, VDB: ViewDataBindi
     override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?)
     {
         super.onViewCreated(view, savedInstanceState)
-
-        if (!viewModel.isInit)
-        {
-            view.postDelayed({ viewModel.onInit() }, 10)
-            viewModel.onInitRequested()
-        }
-
         onBindData()
     }
 

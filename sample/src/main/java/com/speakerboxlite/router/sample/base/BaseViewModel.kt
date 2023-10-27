@@ -13,12 +13,7 @@ open class BaseViewModel(app: Application): AndroidViewModel(app), ViewModel
 
     override var isInit: Boolean = false
 
-    fun onInitRequested()
-    {
-        isInit = true
-    }
-
-    open fun onInit()
+    override fun onInit()
     {
 
     }

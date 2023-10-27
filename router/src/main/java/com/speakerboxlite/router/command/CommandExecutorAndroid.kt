@@ -57,6 +57,7 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
         {
             is Command.Close -> close()
             is Command.CloseTo -> closeTo(command.key)
+            is Command.CloseAll -> activity.finish()
             is Command.StartModal -> startActivity(command.key, command.params)
             is Command.Dialog -> showDialog(command.view)
             is Command.CloseDialog -> closeDialog(command.key)

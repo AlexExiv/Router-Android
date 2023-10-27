@@ -51,6 +51,7 @@ open class RouterSimple(protected val callerKey: String?,
         set(value) { viewsStack.lastOrNull()?.lockBack = value }
 
     protected val viewsStack = mutableListOf<ViewMeta>()
+    protected val viewsStackById = mutableMapOf<String, ViewMeta>()
 
     val isCurrentTop: Boolean get() = parent == null && viewsStack.size == 1
 
@@ -109,7 +110,7 @@ open class RouterSimple(protected val callerKey: String?,
         if (lockBack || !hasPreviousScreen)
             return
 
-        val v = popViewStack()
+        val v = popViewStack() ?: return
         dispatchClose(v)
     }
 
@@ -152,9 +153,8 @@ open class RouterSimple(protected val callerKey: String?,
         }
         else
         {
+            _closeAll()
             parent.closeTo(key)
-            _closeTo(0)
-            close()
         }
     }
 
@@ -166,9 +166,8 @@ open class RouterSimple(protected val callerKey: String?,
         }
         else
         {
+            _closeAll()
             parent.closeToTop()
-            _closeTo(0)
-            close()
         }
     }
 
@@ -198,6 +197,7 @@ open class RouterSimple(protected val callerKey: String?,
     {
         val path = pathData[view.viewKey]!!
         val route = routeManager.find(path) ?: throw RouteNotFoundException(path)
+
         route.animationController()?.onConfigureView(path, view)
     }
 
@@ -206,7 +206,7 @@ open class RouterSimple(protected val callerKey: String?,
     override fun createRouterTabs(key: String, presentInTab: Boolean): RouterTabs
     {
         if (routerTabsByKey[key] == null)
-            routerTabsByKey[key] = RouterTabsImpl(viewsStack.last().key, this, presentInTab)
+            routerTabsByKey[key] = RouterTabsImpl(viewsStack.lastOrNull()?.key ?: "", this, presentInTab)
 
         return routerTabsByKey[key]!!
     }
@@ -287,6 +287,17 @@ open class RouterSimple(protected val callerKey: String?,
             popViewStack()
 
         commandBuffer.apply(Command.CloseTo(viewsStack.last().key))
+    }
+
+    protected fun _closeAll()
+    {
+        if (viewsStack.isNotEmpty() && viewsStack.last().routeType.isNoStackStructure)
+            close()
+
+        viewsStack.clear()
+        isClosing = true
+
+        commandBuffer.apply(Command.CloseAll)
     }
 
     protected fun route(path: RoutePath, routeType: RouteType, presentation: Presentation?, result: Result<Any>?): String
@@ -370,7 +381,9 @@ open class RouterSimple(protected val callerKey: String?,
         if (toKey != null)
             bindResult(view.viewKey, toKey, if (chain != null && chain.route.isPartOfChain(path::class)) chain.result else result)
 
-        viewsStack.add(ViewMeta(view.viewKey, routeType, route, path::class, result))
+        val meta = ViewMeta(view.viewKey, routeType, route, path::class, result)
+        viewsStack.add(meta)
+        viewsStackById[meta.key] = meta
 
         return view
     }
@@ -385,8 +398,11 @@ open class RouterSimple(protected val callerKey: String?,
         }
     }
 
-    protected fun popViewStack(): ViewMeta
+    protected fun popViewStack(): ViewMeta?
     {
+        if (viewsStack.isEmpty())
+            return null
+
         val v = viewsStack.removeLast()
 
         if (viewsStack.isEmpty() && parent != null)

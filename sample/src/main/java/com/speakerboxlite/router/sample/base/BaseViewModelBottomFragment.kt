@@ -46,12 +46,6 @@ abstract class BaseViewModelBottomFragment<VM: BaseViewModel, VDB: ViewDataBindi
 
         dialog.setContentView(dataBinding.root)
 
-        if (!viewModel.isInit)
-        {
-            view?.postDelayed({ viewModel.onInit() }, 10)
-            viewModel.onInitRequested()
-        }
-
         onBindData()
     }
 
