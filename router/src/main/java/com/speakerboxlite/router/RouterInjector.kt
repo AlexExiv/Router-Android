@@ -61,6 +61,10 @@ open class RouterInjector(callerKey: String?,
 
     protected fun onComposeInjector(viewKey: String, route: RouteControllerInterface<RoutePath, *>): Any
     {
+        val compClass = route::class.retrieveComponent() ?: throw RuntimeException("Couldn't retrieve Component class")
+        if (compClass == appComponentClass)
+            return componentProvider.appComponent
+
         val compKey = componentProvider.componentKey(viewKey)
         val meta = viewsStackById[compKey]!!
 
@@ -76,7 +80,6 @@ open class RouterInjector(callerKey: String?,
         else
         {
             val i = viewsStack.indexOfFirst { it.key == compKey }
-            val compClass = route::class.retrieveComponent() ?: throw RuntimeException("Couldn't retrieve Component class")
             val comp = scanForTopComponent(meta.key, metaComponents, i, compClass)
             comp
         }
