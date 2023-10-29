@@ -74,8 +74,8 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
     {
         if (fragmentManager.backStackEntryCount > 1)
         {
-            fragmentManager.executePendingTransactions()
-            fragmentManager.popBackStack()
+            //fragmentManager.executePendingTransactions()
+            fragmentManager.popBackStackImmediate()
         }
         else
             activity.finish()
@@ -85,7 +85,7 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
     {
         if (fragmentManager.backStackEntryCount > 1)
         {
-            fragmentManager.executePendingTransactions()
+            //fragmentManager.executePendingTransactions()
             fragmentManager.popBackStackImmediate(key, 0)
         }
     }
@@ -102,7 +102,6 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
     {
         if (view is Fragment)
         {
-            fragmentManager.executePendingTransactions()
             val transaction = fragmentManager.beginTransaction()
 
             if (animation != null)
@@ -117,6 +116,8 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
                 .replace(containerId, view, view.viewKey)
                 .addToBackStack(view.viewKey)
                 .commit()
+
+            fragmentManager.executePendingTransactions()
         }
     }
 
@@ -124,7 +125,6 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
     {
         if (byView is Fragment)
         {
-            fragmentManager.executePendingTransactions()
             fragmentManager.popBackStack()
             pushFragment(path, byView, animation, true)
         }
@@ -168,11 +168,12 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
     {
         if (view is Fragment)
         {
-            fragmentManager.executePendingTransactions()
             fragmentManager
                 .beginTransaction()
                 .replace(containerId, view, view.viewKey)
                 .commit()
+
+            fragmentManager.executePendingTransactions()
         }
     }
 }
