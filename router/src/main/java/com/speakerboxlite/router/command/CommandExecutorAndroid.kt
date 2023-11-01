@@ -48,11 +48,20 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
 
     override fun execute(command: Command)
     {
-        activity.runOnUiThread { _execute(command) }
+        try
+        {
+            activity.runOnUiThread { _execute(command) }
+        }
+        catch (e: IllegalStateException)
+        {
+            activity.window.decorView.post { _execute(command) }
+        }
     }
 
     private fun _execute(command: Command)
     {
+        checkFragmentManager()
+
         when (command)
         {
             is Command.Close -> close()
@@ -70,11 +79,15 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
         }
     }
 
+    private fun checkFragmentManager()
+    {
+        fragmentManager.executePendingTransactions()
+    }
+
     private fun close()
     {
         if (fragmentManager.backStackEntryCount > 1)
         {
-            //fragmentManager.executePendingTransactions()
             fragmentManager.popBackStackImmediate()
         }
         else
@@ -85,7 +98,6 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
     {
         if (fragmentManager.backStackEntryCount > 1)
         {
-            //fragmentManager.executePendingTransactions()
             fragmentManager.popBackStackImmediate(key, 0)
         }
     }

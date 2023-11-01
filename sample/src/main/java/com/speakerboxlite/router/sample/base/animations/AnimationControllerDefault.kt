@@ -11,7 +11,11 @@ class AnimationControllerDefault: AnyAnimationController
 {
     override fun onConfigureAnimation(path: RoutePath, transaction: FragmentTransaction, current: Fragment?, next: View, replacing: Boolean)
     {
-        transaction.setCustomAnimations(R.anim.def_fragment_in, R.anim.def_fragment_exit, R.anim.def_fragment_pop_enter, R.anim.def_fragment_out)
+        transaction.setCustomAnimations(
+            if (current == null) 0 else R.anim.def_fragment_in,
+            if (current == null) 0 else R.anim.def_fragment_exit,
+            R.anim.def_fragment_pop_enter,
+            R.anim.def_fragment_out)
     }
 
     override fun onConfigureView(path: RoutePath, view: View)
