@@ -29,6 +29,12 @@ data class ViewMeta(val key: String,
                     val path: KClass<*>,
                     val result: Result<Any>?,
                     var lockBack: Boolean = false)
+{
+    override fun toString(): String
+    {
+        return "(key=$key, routeType=$routeType, route=${route::class.simpleName}, path=${path.simpleName}, result=$result, lockBack=$lockBack)"
+    }
+}
 
 open class RouterSimple(protected val callerKey: String?,
                         val parent: RouterSimple?,
@@ -50,7 +56,7 @@ open class RouterSimple(protected val callerKey: String?,
         get() = viewsStack.lastOrNull()?.lockBack ?: false
         set(value) { viewsStack.lastOrNull()?.lockBack = value }
 
-    protected val viewsStack = mutableListOf<ViewMeta>()
+    internal val viewsStack = mutableListOf<ViewMeta>()
     protected val viewsStackById = mutableMapOf<String, ViewMeta>()
 
     val isCurrentTop: Boolean get() = parent == null && viewsStack.size == 1
@@ -409,5 +415,18 @@ open class RouterSimple(protected val callerKey: String?,
             isClosing = true
 
         return v
+    }
+
+    internal fun buildViewStackPath(): List<ViewMeta>
+    {
+        var prev: RouterSimple? = this
+        val totalStack = mutableListOf<ViewMeta>()
+        while (prev != null)
+        {
+            totalStack.addAll(0, prev.viewsStack)
+            prev = prev.parent
+        }
+
+        return totalStack
     }
 }

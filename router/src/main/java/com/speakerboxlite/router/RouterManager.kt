@@ -9,5 +9,5 @@ interface RouterManager
 
     fun bindView(router: Router, viewKey: String)
     fun unbindView(viewKey: String)
-    fun getForView(viewKey: String): Router
+    fun getForView(viewKey: String): Router?
 }

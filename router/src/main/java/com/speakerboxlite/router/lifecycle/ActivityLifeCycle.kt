@@ -3,12 +3,15 @@ package com.speakerboxlite.router.lifecycle
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.speakerboxlite.router.command.CommandExecutorAndroid
 import com.speakerboxlite.router.HostActivityFactory
 import com.speakerboxlite.router.R
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterManager
+import com.speakerboxlite.router.RouterSimple
+import com.speakerboxlite.router.exceptions.RouterNotFoundException
 import com.speakerboxlite.router.hostActivityKey
 
 interface BaseHostView
@@ -25,8 +28,7 @@ class ActivityLifeCycle(val routerManager: RouterManager,
         if (p0 is BaseHostView)
         {
             p0.routerManager = routerManager
-            p0.router = routerManager[p0.hostActivityKey]
-                ?: throw IllegalArgumentException("Router hasn't been found. Key: ${p0.hostActivityKey} ; Class name ${p0::class.simpleName}")
+            p0.router = routerManager[p0.hostActivityKey] ?: throw RouterNotFoundException(p0, routerManager, p1)
         }
 
         if (p0 is AppCompatActivity)
