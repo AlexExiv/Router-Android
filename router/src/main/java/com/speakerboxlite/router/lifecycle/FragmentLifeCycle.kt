@@ -24,7 +24,6 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
     {
         if (f is HostView)
         {
-            throw RouterNotFoundException(f, routerManager, savedInstanceState)
             f.router = routerManager.getForView(f.viewKey) ?: throw RouterNotFoundException(f, routerManager, savedInstanceState)
         }
 
