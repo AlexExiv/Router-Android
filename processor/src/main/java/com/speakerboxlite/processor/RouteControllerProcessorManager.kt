@@ -9,7 +9,7 @@ class RouteControllerProcessorManager
     var hadComponent: Boolean = false
         private set
 
-    fun createClass(element: TypeElement): ClassName
+    fun createClass(element: TypeElement): RouteClass
     {
         val processor = processors.firstOrNull { it.checkElement(element) } ?: throw RuntimeException("Couldn't find")
         if (processor is RouteControllerVMCProcessor)

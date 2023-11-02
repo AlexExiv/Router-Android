@@ -14,14 +14,10 @@ class RouteControllerProcessor(processingEnv: ProcessingEnvironment,
                                kaptKotlinGeneratedDir: String,
                                mainRouterPack: String): RouteControllerProcessorBase(processingEnv, kaptKotlinGeneratedDir, mainRouterPack)
 {
-    override fun createClass(element: TypeElement): ClassName
+    override fun createClass(element: TypeElement): RouteClass
     {
         val pack = processingEnv.elementUtils.getPackageOf(element).toString()
         val className = element.simpleName.toString()
-
-        val elementClassName = ClassName(pack, className)
-        val names = element.getExecutables().map { it.simpleName.toString() }
-        if (names.containsAll(REQUIRED_METHODS)) return elementClassName
 
         val classNameImpl = "${className}_IMP"
         val classBuilder = TypeSpec.classBuilder(classNameImpl)
@@ -32,6 +28,11 @@ class RouteControllerProcessor(processingEnv: ProcessingEnvironment,
 
         val viewElement = typeArguments[V_INDEX].asElement() as TypeElement
         val viewClass = ClassName(viewElement.getPack(processingEnv), viewElement.simpleName.toString())
+
+        val elementClassName = ClassName(pack, className)
+        val names = element.getExecutables().map { it.simpleName.toString() }
+        if (names.containsAll(REQUIRED_METHODS))
+            return RouteClass(elementClassName, pathClass, viewClass, null)
 
         if (!names.contains(CREATE_VIEW))
         {
@@ -46,9 +47,9 @@ class RouteControllerProcessor(processingEnv: ProcessingEnvironment,
         classBuilder.superclass(elementClassName)
 
         val file = FileSpec.builder(pack, classNameImpl).addType(classBuilder.build()).build()
-
         file.writeTo(File(kaptKotlinGeneratedDir))
-        return ClassName(pack, classNameImpl)
+
+        return RouteClass(ClassName(pack, classNameImpl), pathClass, viewClass, null)
     }
 
     companion object

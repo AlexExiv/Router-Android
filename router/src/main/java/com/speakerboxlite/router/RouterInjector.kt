@@ -3,7 +3,6 @@ package com.speakerboxlite.router
 import com.speakerboxlite.router.controllers.RouteControllerComponent
 import com.speakerboxlite.router.controllers.RouteControllerInterface
 import com.speakerboxlite.router.exceptions.RouteNotFoundException
-import com.speakerboxlite.router.ext.retrieveComponent
 import com.speakerboxlite.router.result.ResultManager
 import kotlin.reflect.KClass
 import kotlin.reflect.full.superclasses
@@ -59,9 +58,9 @@ open class RouterInjector(callerKey: String?,
         componentProvider.connectComponent(parentKey, childKey)
     }
 
-    protected fun onComposeInjector(viewKey: String, route: RouteControllerInterface<RoutePath, *>): Any
+    protected fun onComposeInjector(viewKey: String, route: RouteControllerComponent<RoutePath, *, *>): Any
     {
-        val compClass = route::class.retrieveComponent() ?: throw RuntimeException("Couldn't retrieve Component class")
+        val compClass = route.componentClass
         if (compClass == appComponentClass)
             return componentProvider.appComponent
 
@@ -80,6 +79,13 @@ open class RouterInjector(callerKey: String?,
         else
         {
             val i = viewsStack.indexOfFirst { it.key == compKey }
+
+            if (i == -1)
+            {
+                val srcMeta = viewsStackById[viewKey]!!
+                throw IllegalStateException("There is no such record in the views stack. How could it be. ViewMeta: $srcMeta ; CompMeta: $meta")
+            }
+
             val comp = scanForTopComponent(meta.key, metaComponents, i, compClass)
             comp
         }
@@ -87,12 +93,6 @@ open class RouterInjector(callerKey: String?,
 
     protected fun scanForTopComponent(viewKey: String, metaComponents: MutableMap<String, ViewMetaComponent>, startFrom: Int?, compClass: KClass<*>): Any
     {
-        if (compClass == appComponentClass)
-            return componentProvider.appComponent
-
-        if (startFrom == -1)
-            throw IllegalStateException("There is no such record in the views stack. How could it be.")
-
         if (parent == null && viewsStack.size == 1)
             return getComponent(viewKey, metaComponents, viewsStack[0].key, viewsStack[0].route)
 
@@ -100,7 +100,7 @@ open class RouterInjector(callerKey: String?,
         for (i in s downTo 0)
         {
             val v = viewsStack[i]
-            val routeComp = v.route::class.retrieveComponent()
+            val routeComp = (v.route as? RouteControllerComponent<RoutePath, View, *>)?.componentClass ?: continue
             if (routeComp == compClass && v.route.creatingInjector)
                 return getComponent(viewKey, metaComponents, v.key, v.route)
         }

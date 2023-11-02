@@ -57,8 +57,6 @@ class AnnotationProcessor : AbstractProcessor()
             val fileBuilder = FileSpec.builder(pack, fileName)
             val classBuilder = TypeSpec.classBuilder(fileName)
 
-            //classBuilder.addSuperinterface(ClassName(MAIN_ROUTER_PACK, "RouterComponent"))
-
             val routeManager = PropertySpec
                 .builder("routeManager", ClassName(MAIN_ROUTER_PACK, "RouteManager"))
                 .addModifiers(listOf(KModifier.PUBLIC))
@@ -181,17 +179,16 @@ class AnnotationProcessor : AbstractProcessor()
     private fun processAnnotation(element: Element, initBuilder: FunSpec.Builder, processorManager: RouteControllerProcessorManager)
     {
         val elementClass = element as TypeElement
-        val classType = processorManager.createClass(elementClass)
+        val routeClass = processorManager.createClass(elementClass)
+        val classType = routeClass.className
         val valName = classType.simpleName.lowercase()
 
         initBuilder.addStatement("val $valName = %T()", classType)
         initBuilder.addStatement("routeManager.register($valName)")
 
-        val typeArguments = (element.superclass as DeclaredType).typeArguments as List<DeclaredType>
-        val pathElement = typeArguments[PATH_INDEX].asElement()
-        val pathElementPack = processingEnv.elementUtils.getPackageOf(pathElement).toString()
-        val pathElementType = ClassName(pathElementPack, pathElement.simpleName.toString())
-        initBuilder.addStatement("${valName}.pathClass = %T::class", pathElementType)
+        initBuilder.addStatement("${valName}.pathClass = %T::class", routeClass.pathName)
+        if (routeClass.componentName != null)
+            initBuilder.addStatement("${valName}.componentClass = %T::class", routeClass.componentName)
 
         val annotation = element.getAnnotation(Route::class.java)
         if (annotation.uri.isNotEmpty())
@@ -244,8 +241,6 @@ class AnnotationProcessor : AbstractProcessor()
     {
         val MAIN_ROUTER_PACK = "com.speakerboxlite.router"
         val CONTROLLERS_PACK = "com.speakerboxlite.router.controllers"
-
-        val PATH_INDEX = 0
 
         const val CREATE_INJECTOR = "onCreateInjector"
 

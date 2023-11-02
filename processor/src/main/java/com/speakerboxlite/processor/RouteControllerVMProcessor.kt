@@ -15,15 +15,10 @@ class RouteControllerVMProcessor(processingEnv: ProcessingEnvironment,
                                  kaptKotlinGeneratedDir: String,
                                  mainRouterPack: String): RouteControllerProcessorBase(processingEnv, kaptKotlinGeneratedDir, mainRouterPack)
 {
-    override fun createClass(element: TypeElement): ClassName
+    override fun createClass(element: TypeElement): RouteClass
     {
         val pack = processingEnv.elementUtils.getPackageOf(element).toString()
         val className = element.simpleName.toString()
-
-        val elementClassName = ClassName(pack, className)
-        val names = element.getExecutables().map { it.simpleName.toString() }
-        if (names.containsAll(REQUIRED_METHODS))
-            return elementClassName
 
         val classNameImpl = "${className}_IMP"
         val classBuilder = TypeSpec.classBuilder(classNameImpl)
@@ -37,6 +32,11 @@ class RouteControllerVMProcessor(processingEnv: ProcessingEnvironment,
 
         val vmElement = typeArguments[VM_INDEX].asElement() as TypeElement
         val vmClass = ClassName(vmElement.getPack(processingEnv), vmElement.simpleName.toString())
+
+        val elementClassName = ClassName(pack, className)
+        val names = element.getExecutables().map { it.simpleName.toString() }
+        if (names.containsAll(REQUIRED_METHODS))
+            return RouteClass(elementClassName, pathClass, viewClass, null)
 
         if (!names.contains(CREATE_VIEW))
         {
@@ -69,7 +69,8 @@ class RouteControllerVMProcessor(processingEnv: ProcessingEnvironment,
             .build()
 
         file.writeTo(File(kaptKotlinGeneratedDir))
-        return ClassName(pack, classNameImpl)
+
+        return RouteClass(ClassName(pack, classNameImpl), pathClass, viewClass, null)
     }
 
     companion object

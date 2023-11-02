@@ -14,18 +14,13 @@ class RouteControllerCProcessor(processingEnv: ProcessingEnvironment,
                                 kaptKotlinGeneratedDir: String,
                                 mainRouterPack: String): RouteControllerProcessorBase(processingEnv, kaptKotlinGeneratedDir, mainRouterPack)
 {
-    override fun createClass(element: TypeElement): ClassName
+    override fun createClass(element: TypeElement): RouteClass
     {
         val pack = processingEnv.elementUtils.getPackageOf(element).toString()
         val className = element.simpleName.toString()
 
         val elementClassName = ClassName(pack, className)
         val names = element.getExecutables().map { it.simpleName.toString() }
-        if (names.containsAll(REQUIRED_METHODS))
-            return elementClassName
-
-        val classNameImpl = "${className}_IMP"
-        val classBuilder = TypeSpec.classBuilder(classNameImpl)
         val typeArguments = (element.superclass as DeclaredType).typeArguments as List<DeclaredType>
 
         val pathElement = typeArguments[PATH_INDEX].asElement() as TypeElement
@@ -33,6 +28,15 @@ class RouteControllerCProcessor(processingEnv: ProcessingEnvironment,
 
         val viewElement = typeArguments[V_INDEX].asElement() as TypeElement
         val viewClass = ClassName(viewElement.getPack(processingEnv), viewElement.simpleName.toString())
+
+        val componentElement = typeArguments[COMPONENT_INDEX].asElement() as TypeElement
+        val componentClass = ClassName(componentElement.getPack(processingEnv), componentElement.simpleName.toString())
+
+        if (names.containsAll(REQUIRED_METHODS))
+            return RouteClass(elementClassName, pathClass, viewClass, componentClass)
+
+        val classNameImpl = "${className}_IMP"
+        val classBuilder = TypeSpec.classBuilder(classNameImpl)
 
         if (!names.contains(CREATE_VIEW))
         {
@@ -46,9 +50,6 @@ class RouteControllerCProcessor(processingEnv: ProcessingEnvironment,
 
         if (!names.contains(INJECT))
         {
-            val componentElement = typeArguments[COMPONENT_INDEX].asElement() as TypeElement
-            val componentClass = ClassName(componentElement.getPack(processingEnv), componentElement.simpleName.toString())
-
             val func = FunSpec.builder(INJECT)
             func.addModifiers(KModifier.OVERRIDE)
             func.addModifiers(KModifier.PROTECTED)
@@ -65,7 +66,8 @@ class RouteControllerCProcessor(processingEnv: ProcessingEnvironment,
             .build()
 
         file.writeTo(File(kaptKotlinGeneratedDir))
-        return ClassName(pack, classNameImpl)
+
+        return RouteClass(ClassName(pack, classNameImpl), pathClass, viewClass, componentClass)
     }
 
     companion object
