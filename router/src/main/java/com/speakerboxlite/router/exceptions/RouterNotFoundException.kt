@@ -27,9 +27,10 @@ class RouterNotFoundException: IllegalArgumentException
             val managerImpl = routerManager as RouterManagerImpl
             val simpleTop = routerManager.top as? RouterSimple
             return "Router hasn't been found. Key: ${activity.hostActivityKey} ; " +
-                    "Class name ${activity::class.simpleName} ; " +
+                    "Class name ${activity::class.qualifiedName} ; " +
                     "Saved Instance: ${bundle != null} ; " +
                     "Routers count: ${managerImpl.routers.size} ; " +
+                    "Top router: ${routerManager.top != null} ; " +
                     "Path to top: ${simpleTop?.buildViewStackPath() ?: listOf()}"
         }
 
@@ -38,10 +39,11 @@ class RouterNotFoundException: IllegalArgumentException
             val managerImpl = routerManager as RouterManagerImpl
             val simpleTop = routerManager.top as? RouterSimple
             return "Router hasn't been found. Key: ${view.viewKey} ; " +
-                    "Class name ${view::class.simpleName} ; " +
+                    "Class name ${view::class.qualifiedName} ; " +
                     "Saved Instance: ${bundle != null} ; " +
                     "Routers count: ${managerImpl.routerByView.size} ; " +
-                    "Top router: ${simpleTop?.buildViewStackPath() ?: listOf()}"
+                    "Top router: ${routerManager.top != null} ; " +
+                    "Path to top: ${simpleTop?.buildViewStackPath() ?: listOf()}"
         }
 
         fun composeMessage(view: View, routerManager: RouterManager, bundle: Bundle?): String
@@ -49,10 +51,11 @@ class RouterNotFoundException: IllegalArgumentException
             val managerImpl = routerManager as RouterManagerImpl
             val simpleTop = routerManager.top as? RouterSimple
             return "Router hasn't been found. Key: ${view.viewKey} ; " +
-                    "Class name ${view::class.simpleName} ; " +
+                    "Class name ${view::class.qualifiedName} ; " +
                     "Saved Instance: ${bundle != null} ; " +
                     "Routers count: ${managerImpl.routerByView.size} ; " +
-                    "Top router: ${simpleTop?.buildViewStackPath() ?: listOf()}"
+                    "Top router: ${routerManager.top != null} ; " +
+                    "Path to top: ${simpleTop?.buildViewStackPath() ?: listOf()}"
         }
     }
 }

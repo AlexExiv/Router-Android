@@ -32,7 +32,7 @@ data class ViewMeta(val key: String,
 {
     override fun toString(): String
     {
-        return "(key=$key, routeType=$routeType, route=${route::class.simpleName}, path=${path.simpleName}, result=$result, lockBack=$lockBack)"
+        return "(key=$key, routeType=$routeType, route=${route::class.qualifiedName}, path=${path.qualifiedName}, result=$result, lockBack=$lockBack)"
     }
 }
 
