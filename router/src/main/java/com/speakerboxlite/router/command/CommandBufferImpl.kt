@@ -7,6 +7,9 @@ internal class CommandBufferImpl : CommandBuffer
 
     override fun bind(executor: CommandExecutor)
     {
+        if (this.executor != null)
+            unbind()
+
         this.executor = executor
         executor.onBind()
 

@@ -53,7 +53,8 @@ abstract class BaseViewModelFragment<VM: BaseViewModel, VDB: ViewDataBinding>(@L
 
         toolbar = view.findViewById(R.id.toolbar)
 
-        onBindData()
+        if (::viewModel.isInitialized)
+            onBindData()
 
         if (toolbar != null)
         {

@@ -3,15 +3,16 @@ package com.speakerboxlite.router.lifecycle
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.speakerboxlite.router.command.CommandExecutorAndroid
 import com.speakerboxlite.router.HostActivityFactory
 import com.speakerboxlite.router.R
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterManager
-import com.speakerboxlite.router.RouterSimple
-import com.speakerboxlite.router.exceptions.RouterNotFoundException
+import com.speakerboxlite.router.RouterManagerImpl
+import com.speakerboxlite.router.START_ACTIVITY_KEY
+import com.speakerboxlite.router.zombie.RouterZombie
+import com.speakerboxlite.router.command.CommandExecutorAndroid
+import com.speakerboxlite.router.ext.restartApp
 import com.speakerboxlite.router.hostActivityKey
 
 interface BaseHostView
@@ -23,12 +24,29 @@ interface BaseHostView
 class ActivityLifeCycle(val routerManager: RouterManager,
                         val hostActivityFactory: HostActivityFactory): Application.ActivityLifecycleCallbacks
 {
+    private val routerByActivity = mutableMapOf<Router, Activity>()
+
     override fun onActivityCreated(p0: Activity, p1: Bundle?)
     {
         if (p0 is BaseHostView)
         {
             p0.routerManager = routerManager
-            p0.router = routerManager[p0.hostActivityKey] ?: throw RouterNotFoundException(p0, routerManager, p1)
+            val router = routerManager[p0.hostActivityKey]
+
+            //In case of we couldn't find the router start the restarting process. It may occur after the app restores the state after the reboot maybe better
+            //solution is to serialize routers.
+            if (router == null)
+            {
+                p0.router = RouterZombie()
+
+                if (!routerManager.isAppRestarting)
+                {
+                    (routerManager as? RouterManagerImpl)?.resetToTop()
+                    p0.restartApp()
+                }
+            }
+            else
+                p0.router = router
         }
 
         if (p0 is AppCompatActivity)
@@ -42,7 +60,16 @@ class ActivityLifeCycle(val routerManager: RouterManager,
         if (p0 is BaseHostView)
         {
             if (p0 is AppCompatActivity)
+            {
+                if (routerByActivity[p0.router] != null)
+                {
+                    p0.router.unbindExecutor()
+                    routerByActivity.remove(p0.router)
+                }
+
+                routerByActivity[p0.router] = p0
                 p0.router.bindExecutor(CommandExecutorAndroid(p0, R.id.root, p0.supportFragmentManager, hostActivityFactory))
+            }
         }
     }
 
@@ -63,13 +90,18 @@ class ActivityLifeCycle(val routerManager: RouterManager,
     {
         if (p0 is BaseHostView)
         {
-            p0.router.unbindExecutor()
+            if (routerByActivity[p0.router] == p0)
+            {
+                p0.router.unbindExecutor()
+                routerByActivity.remove(p0.router)
+            }
         }
     }
 
     override fun onActivitySaveInstanceState(p0: Activity, p1: Bundle)
     {
-
+        if (p0.hostActivityKey == START_ACTIVITY_KEY)//stop the app restarting process if this is a START_ACTIVITY
+            (routerManager as? RouterManagerImpl)?.isAppRestarting = false
     }
 
     override fun onActivityDestroyed(p0: Activity)

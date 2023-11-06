@@ -26,6 +26,8 @@ open class BaseHostActivity: AppCompatActivity(R.layout.activity_host), BaseHost
     }
 }
 
+class StartActivity: BaseHostActivity()
+
 class HostActivity: BaseHostActivity()
 
 class HostLandscapeActivity: BaseHostActivity()

@@ -4,8 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import java.io.Serializable
 
-const val HOST_ACTIVITY_KEY = "HOST_ACTIVITY_KEY"
-const val HOST_ACTIVITY_INTENT_DATA_KEY = "HOST_ACTIVITY_INTENT_DATA_KEY"
+internal const val HOST_ACTIVITY_KEY = "com.speakerboxlite.router.HOST_ACTIVITY_KEY"
+internal const val HOST_ACTIVITY_INTENT_DATA_KEY = "com.speakerboxlite.router.HOST_ACTIVITY_INTENT_DATA_KEY"
 
 const val START_ACTIVITY_KEY = "START_ACTIVITY"
 

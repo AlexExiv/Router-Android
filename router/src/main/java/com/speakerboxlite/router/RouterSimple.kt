@@ -64,6 +64,7 @@ open class RouterSimple(protected val callerKey: String?,
     protected var isClosing = false
 
     protected val routerTabsByKey = mutableMapOf<String, RouterTabs>()
+    protected var rootPath: RoutePath? = null
 
     override fun route(url: String): String?
     {
@@ -118,6 +119,7 @@ open class RouterSimple(protected val callerKey: String?,
 
         val v = popViewStack() ?: return
         dispatchClose(v)
+        tryRepeatTopIfEmpty()
     }
 
     override fun close()
@@ -134,6 +136,8 @@ open class RouterSimple(protected val callerKey: String?,
             popViewStack()
             dispatchClose(v)
         }
+
+        tryRepeatTopIfEmpty()
     }
 
     protected open fun unbind(key: String)
@@ -162,6 +166,8 @@ open class RouterSimple(protected val callerKey: String?,
             _closeAll()
             parent.closeTo(key)
         }
+
+        tryRepeatTopIfEmpty()
     }
 
     override fun closeToTop()
@@ -175,6 +181,8 @@ open class RouterSimple(protected val callerKey: String?,
             _closeAll()
             parent.closeToTop()
         }
+
+        tryRepeatTopIfEmpty()
     }
 
     override fun bindExecutor(executor: CommandExecutor)
@@ -224,6 +232,8 @@ open class RouterSimple(protected val callerKey: String?,
             isClosing = true
 
         unbind(key)
+
+        tryRepeatTopIfEmpty()
     }
 
     internal open fun createRouter(callerKey: String): Router = RouterSimple(callerKey, this, routeManager, routerManager, resultManager)
@@ -282,6 +292,15 @@ open class RouterSimple(protected val callerKey: String?,
 
     internal fun containsView(key: String): Boolean =
         viewsStack.lastOrNull { it.key == key } != null
+
+    /**
+     * Try to repeat root path if root router has become empty due to some troubles
+     */
+    protected fun tryRepeatTopIfEmpty()
+    {
+        if (viewsStack.isEmpty() && parent == null && rootPath != null)
+            route(rootPath!!, RouteType.Simple, Presentation.Push, null)
+    }
 
     protected fun _closeTo(i: Int)
     {
@@ -386,6 +405,9 @@ open class RouterSimple(protected val callerKey: String?,
 
         if (toKey != null)
             bindResult(view.viewKey, toKey, if (chain != null && chain.route.isPartOfChain(path::class)) chain.result else result)
+
+        if (viewsStack.isEmpty())
+            rootPath = path
 
         val meta = ViewMeta(view.viewKey, routeType, route, path::class, result)
         viewsStack.add(meta)

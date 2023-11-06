@@ -9,11 +9,14 @@ import com.speakerboxlite.router.HostActivityFactory
 import com.speakerboxlite.router.HostView
 import com.speakerboxlite.router.R
 import com.speakerboxlite.router.RouterManager
+import com.speakerboxlite.router.RouterManagerImpl
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.exceptions.RouterNotFoundException
 import com.speakerboxlite.router.ext.isPoppedRecursive
 import com.speakerboxlite.router.ext.isRemovingRecursive
+import com.speakerboxlite.router.ext.restartApp
 import com.speakerboxlite.router.hostActivityKey
+import com.speakerboxlite.router.zombie.RouterZombie
 
 class FragmentLifeCycle(private val routerManager: RouterManager,
                         private val hostActivityFactory: HostActivityFactory): FragmentManager.FragmentLifecycleCallbacks()
@@ -24,12 +27,43 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
     {
         if (f is HostView)
         {
-            f.router = routerManager.getForView(f.viewKey) ?: throw RouterNotFoundException(f, routerManager, savedInstanceState)
+            val router = routerManager.getForView(f.viewKey)
+
+            //In case of we couldn't find the router start the restarting process. It may occur after the app restores the state after the reboot maybe a better
+            //solution is to serialize routers.
+            if (router == null)
+            {
+                f.router = RouterZombie()
+
+                if (!routerManager.isAppRestarting)
+                {
+                    (routerManager as? RouterManagerImpl)?.resetToTop()
+                    f.requireActivity().restartApp()
+                }
+            }
+            else
+                f.router = router
         }
 
         if (f is View)
         {
-            f.router = routerManager.getForView(f.viewKey) ?: throw RouterNotFoundException(f, routerManager, savedInstanceState)
+            val router = routerManager.getForView(f.viewKey)
+
+            //In case of we couldn't find the router start the restarting process. It may occur after the app restores the state after the reboot maybe better
+            //solution is to serialize routers.
+            if (router == null)
+            {
+                f.router = RouterZombie()
+
+                if (!routerManager.isAppRestarting)
+                {
+                    (routerManager as? RouterManagerImpl)?.resetToTop()
+                    f.requireActivity().restartApp()
+                }
+            }
+            else
+                f.router = router
+
             f.localRouter = f.router.createRouterLocal(f.viewKey)
             f.router.onComposeView(f)
         }

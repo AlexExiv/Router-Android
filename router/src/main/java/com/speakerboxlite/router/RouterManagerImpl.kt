@@ -4,7 +4,11 @@ import android.util.Log
 
 class RouterManagerImpl : RouterManager
 {
+    override var isAppRestarting: Boolean = false
+
     override var top: Router? = null
+
+    private var rootRouter: RouterSimple? = null
 
     internal val routers = mutableMapOf<String, Router>()
     internal val routerByView = mutableMapOf<String, Router>()
@@ -16,7 +20,11 @@ class RouterManagerImpl : RouterManager
         //else
 
         if (value != null)
+        {
             routers[key] = value
+            if ((value is RouterSimple) && (value.parent == null))
+                rootRouter = value
+        }
     }
 
     override fun get(key: String): Router? = routers[key]
@@ -34,4 +42,9 @@ class RouterManagerImpl : RouterManager
     }
 
     override fun getForView(viewKey: String): Router? = routerByView[viewKey]
+
+    internal fun resetToTop()
+    {
+        isAppRestarting = true
+    }
 }

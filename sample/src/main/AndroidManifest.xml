@@ -11,10 +11,11 @@
         android:theme="@style/Theme.Router">
 
         <activity
-            android:name=".SplashActivity"
+            android:name=".base.StartActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Router">
+            android:theme="@style/Theme.Router"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -2,6 +2,8 @@ package com.speakerboxlite.router
 
 interface RouterManager
 {
+    val isAppRestarting: Boolean
+
     var top: Router?
 
     operator fun set(key: String, value: Router?)
