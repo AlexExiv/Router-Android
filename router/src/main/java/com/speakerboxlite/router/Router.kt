@@ -2,6 +2,7 @@ package com.speakerboxlite.router
 
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.command.CommandExecutor
+import com.speakerboxlite.router.controllers.RouteParamsGen
 import com.speakerboxlite.router.result.RouterResultProvider
 
 typealias Result<R> = (R) -> Unit
@@ -89,6 +90,16 @@ interface Router
      * @param result The callback for handling the screen result. To send a result, use `ResultProvider::send`.
      */
     fun <R: Any> routeBTSWithResult(path: RoutePathResult<R>, result: Result<R>)
+
+    /**
+     * Navigate to a screen using the specified path and presentation type.
+     *
+     * @param path          The path to the screen connected by the RouteController.
+     * @param presentation  The type of presentation (e.g., modal, full-screen).
+     * @return              A unique identifier (view key) associated with the displayed screen.
+     * @throws RouteNotFoundException If the provided path is not found in the routes manager.
+     */
+    fun route(path: RouteParamsGen)
 
     /**
      * Closes the top view in the router. This method should be called when handling a physical Back button click

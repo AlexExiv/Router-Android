@@ -9,6 +9,7 @@ import com.speakerboxlite.router.RouterTabs
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.command.CommandExecutor
+import com.speakerboxlite.router.controllers.RouteParamsGen
 import com.speakerboxlite.router.result.RouterResultProvider
 
 internal class RouterZombie : Router, RouterLocal
@@ -21,6 +22,11 @@ internal class RouterZombie : Router, RouterLocal
     override fun route(url: String): String? = null
 
     override fun route(path: RoutePath, presentation: Presentation?): String = ""
+
+    override fun route(path: RouteParamsGen)
+    {
+
+    }
 
     override fun <R : Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation?, result: Result<R>): String = ""
 

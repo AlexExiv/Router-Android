@@ -1,6 +1,7 @@
 package com.speakerboxlite.router.controllers
 
 import com.speakerboxlite.router.RoutePath
+import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.pattern.UrlMatcher
 import com.speakerboxlite.router.annotations.Presentation
@@ -14,12 +15,14 @@ abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterfa
     var pattern: UrlMatcher? = null
     var preferredAnimationController: AnimationController<RoutePath, View>? = null
 
-    override var singleTop: Boolean = false
-    override var creatingInjector: Boolean = false
-    override var preferredPresentation: Presentation = Presentation.Push
+    final override var singleTop: Boolean = false
+    final override var creatingInjector: Boolean = false
+    final override var preferredPresentation: Presentation = Presentation.Push
 
     open val chainPaths: List<KClass<*>> get() = listOf()
-    override val isChain: Boolean get() = chainPaths.isNotEmpty()
+    final override val isChain: Boolean get() = chainPaths.isNotEmpty()
+
+    final override var middlewares: List<MiddlewareController> = listOf()
 
     override val params: Serializable? get() = null
 
@@ -61,4 +64,8 @@ abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterfa
     override fun animationController(): AnimationController<RoutePath, View>? = preferredAnimationController
 
     abstract override fun onCreateView(path: Path): V
+
+    override fun onBeforeRoute(router: Router, current: Path, next: RouteParamsGen): Boolean = false
+    override fun onRoute(router: Router, prev: RoutePath?, current: RouteParams<Path>): Boolean = false
+    override fun onClose(router: Router, current: Path, prev: RoutePath?): Boolean = false
 }

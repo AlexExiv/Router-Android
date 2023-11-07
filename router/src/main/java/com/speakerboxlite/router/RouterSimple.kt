@@ -8,6 +8,7 @@ import com.speakerboxlite.router.command.CommandBufferImpl
 import com.speakerboxlite.router.command.CommandExecutor
 import com.speakerboxlite.router.controllers.RouteControllerComposable
 import com.speakerboxlite.router.controllers.RouteControllerInterface
+import com.speakerboxlite.router.controllers.RouteParamsGen
 import com.speakerboxlite.router.exceptions.ImpossibleRouteException
 import com.speakerboxlite.router.exceptions.RouteNotFoundException
 import com.speakerboxlite.router.result.ResultManager
@@ -83,9 +84,13 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun replace(path: RoutePath): String
     {
+        val route = findRoute(path) ?: throw RouteNotFoundException(path)
+        val routeParams = RouteParamsGen(path = path, isReplace = true)
+        if (tryRouteMiddlewares(routeParams, route))
+            return ""
+
         popViewStack()
 
-        val route = findRoute(path) ?: throw RouteNotFoundException(path)
         val view = createView(route, RouteType.Simple, path, null)
         commandBuffer.apply(Command.Replace(path, view, route.animationController()))
 
@@ -94,22 +99,71 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun routeDialog(path: RoutePath)
     {
-        routeManager.find(path)?.also { commandBuffer.apply(Command.Dialog(createView(it, RouteType.Dialog, path, null))) }
+        val route = routeManager.find(path) ?: throw RouteNotFoundException(path)
+        val routeParams = RouteParamsGen(path = path, isDialog = true)
+        if (tryRouteMiddlewares(routeParams, route))
+            return
+
+        commandBuffer.apply(Command.Dialog(createView(route, RouteType.Dialog, path, null)))
     }
 
     override fun <R: Any> routeDialogWithResult(path: RoutePathResult<R>, result: Result<R>)
     {
-        routeManager.find(path)?.also { commandBuffer.apply(Command.Dialog(createView(it, RouteType.Dialog, path) { result(it as  R) })) }
+        val route = routeManager.find(path) ?: throw RouteNotFoundException(path)
+        val routeParams = RouteParamsGen(path = path, isDialog = true) { result(it as R) }
+        if (tryRouteMiddlewares(routeParams, route)  )
+            return
+
+        commandBuffer.apply(Command.Dialog(createView(route, RouteType.Dialog, path) { result(it as  R) }))
     }
 
     override fun routeBTS(path: RoutePath)
     {
-        routeManager.find(path)?.also { commandBuffer.apply(Command.BottomSheet(createView(it, RouteType.BTS, path, null))) }
+        val route = routeManager.find(path) ?: throw RouteNotFoundException(path)
+        val routeParams = RouteParamsGen(path = path, isBts = true)
+        if (tryRouteMiddlewares(routeParams, route))
+            return
+
+        commandBuffer.apply(Command.BottomSheet(createView(route, RouteType.BTS, path, null)))
     }
 
     override fun <R : Any> routeBTSWithResult(path: RoutePathResult<R>, result: Result<R>)
     {
-        routeManager.find(path)?.also { commandBuffer.apply(Command.BottomSheet(createView(it, RouteType.BTS, path) { result(it as  R) })) }
+        val route = routeManager.find(path) ?: throw RouteNotFoundException(path)
+        val routeParams = RouteParamsGen(path = path, isBts = true) { result(it as R) }
+        if (tryRouteMiddlewares(routeParams, route))
+            return
+
+        commandBuffer.apply(Command.BottomSheet(createView(route, RouteType.BTS, path) { result(it as  R) }))
+    }
+
+    override fun route(path: RouteParamsGen)
+    {
+        if (path.isDialog)
+        {
+            if (path.result == null)
+                routeDialog(path.path)
+            else
+                routeDialogWithResult(path.path as RoutePathResult<Any>, path.result)
+        }
+        else if (path.isBts)
+        {
+            if (path.result == null)
+                routeBTS(path.path)
+            else
+                routeBTSWithResult(path.path as RoutePathResult<Any>, path.result)
+        }
+        else if (path.isReplace)
+        {
+            replace(path.path)
+        }
+        else
+        {
+            if (path.result == null)
+                route(path.path, path.presentation)
+            else
+                routeWithResult(path.path as RoutePathResult<Any>, path.presentation, path.result)
+        }
     }
 
     override fun back()
@@ -119,6 +173,10 @@ open class RouterSimple(protected val callerKey: String?,
 
         val v = popViewStack() ?: return
         dispatchClose(v)
+
+        if (pathData[v.key] != null)
+            tryCloseMiddlewares(pathData[v.key]!!)
+
         tryRepeatTopIfEmpty()
     }
 
@@ -135,6 +193,9 @@ open class RouterSimple(protected val callerKey: String?,
         {
             popViewStack()
             dispatchClose(v)
+
+            if (pathData[v.key] != null)
+                tryCloseMiddlewares(pathData[v.key]!!)
         }
 
         tryRepeatTopIfEmpty()
@@ -293,6 +354,59 @@ open class RouterSimple(protected val callerKey: String?,
     internal fun containsView(key: String): Boolean =
         viewsStack.lastOrNull { it.key == key } != null
 
+    internal fun tryRouteMiddlewares(params: RouteParamsGen, route: RouteControllerInterface<RoutePath, *>): Boolean
+    {
+        //onBeforeRoute only available for not empty viewsStack because it refers to current route
+        if (viewsStack.isNotEmpty())
+        {
+            val curPath = pathData[viewsStack.last().key]!!
+            val curRoute = findRoute(curPath) ?: throw RouteNotFoundException(curPath)
+            if (curRoute.onBeforeRoute(this, curPath, params))
+                return true
+
+            for (mid in curRoute.middlewares)
+            {
+                if (mid.onBeforeRoute(this, curPath, params))
+                    return true
+            }
+        }
+
+        //skip if it's not a root router and viewsStack is empty because the caller has already dispatched middlewares
+        if (parent == null || viewsStack.isNotEmpty())
+        {
+            if (route.onRoute(this, viewsStack.lastOrNull()?.let { pathData[it.key] }, params))
+                return true
+
+            for (mid in route.middlewares)
+            {
+                if (mid.onRoute(this, viewsStack.lastOrNull()?.let { pathData[it.key] }, params))
+                    return true
+            }
+        }
+
+        return false
+    }
+
+    internal fun tryCloseMiddlewares(path: RoutePath)
+    {
+        val router = if (viewsStack.isEmpty() && parent != null) parent else this
+        val prev = if (viewsStack.isEmpty() && parent != null)
+            parent.viewsStack.lastOrNull()?.let { parent.pathData[it.key] }
+        else
+            viewsStack.lastOrNull()?.let { pathData[it.key] }
+
+        val route = findRoute(path)!!
+
+        if (route.onClose(router, path, prev))
+            return
+
+        for (mid in route.middlewares)
+        {
+            if (mid.onClose(router, path, prev))
+                return
+        }
+    }
+
     /**
      * Try to repeat root path if root router has become empty due to some troubles
      */
@@ -329,6 +443,11 @@ open class RouterSimple(protected val callerKey: String?,
     {
         Log.i("Router", "Start route with path: ${path::class}")
 
+        val route = findRoute(path) ?: throw RouteNotFoundException(path)
+        val routeParams = RouteParamsGen(path = path, presentation = presentation, result = result)
+        if (tryRouteMiddlewares(routeParams, route))
+            return ""
+
         if (viewsStack.isNotEmpty() && viewsStack.last().routeType.isNoStackStructure)
             close()
 
@@ -340,7 +459,6 @@ open class RouterSimple(protected val callerKey: String?,
                 parent!!.routeWithResult(path as RoutePathResult<Any>, presentation, result)
         }
 
-        val route = findRoute(path) ?: throw RouteNotFoundException(path)
         if (route.singleTop)
         {
             val exist = scanForPath(path::class)

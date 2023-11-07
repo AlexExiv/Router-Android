@@ -5,6 +5,7 @@ import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
 import com.speakerboxlite.router.command.CommandBufferImpl
 import com.speakerboxlite.router.command.CommandExecutor
+import com.speakerboxlite.router.controllers.RouteParamsGen
 import com.speakerboxlite.router.exceptions.RouteNotFoundException
 import com.speakerboxlite.router.result.RouterResultProvider
 import java.lang.ref.WeakReference
@@ -30,6 +31,11 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
     override fun route(url: String): String? = router!!.route(url)
 
     override fun route(path: RoutePath, presentation: Presentation?): String = router!!.route(path, presentation)
+
+    override fun route(path: RouteParamsGen)
+    {
+        router!!.route(path)
+    }
 
     override fun <R: Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation?, result: Result<R>): String =
         router!!.routeWithResult(path, presentation, result)

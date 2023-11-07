@@ -51,6 +51,9 @@ class AnnotationProcessor : AbstractProcessor()
             if (elements.isEmpty())
                 return false
 
+            val processorMiddleware = MiddlewareProcessor(roundEnv)
+            val middlewares = processorMiddleware.prepareMiddlewares()
+
             val pack = processingEnv.elementUtils.getPackageOf(roundEnv.rootElements.first()).toString()
 
             val fileName = "RouterComponentImpl"
@@ -114,6 +117,7 @@ class AnnotationProcessor : AbstractProcessor()
             initBuilder.addParameter("animation", animClass.copy(nullable = true))
 
             initBuilder.addStatement("this.startPath = startPath")
+            initBuilder.addStatement("")
 
             val kaptKotlinGeneratedDir = processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]!!
 
@@ -123,6 +127,13 @@ class AnnotationProcessor : AbstractProcessor()
             processorManager.register(RouteControllerCProcessor(processingEnv, kaptKotlinGeneratedDir, MAIN_ROUTER_PACK))
             processorManager.register(RouteControllerProcessor(processingEnv, kaptKotlinGeneratedDir, MAIN_ROUTER_PACK))
 
+            middlewares.forEach {
+                initBuilder.addStatement("val ${it.varName} = %T()", it.className)
+                if (it.typeElement.hasParent("MiddlewareControllerComponent", true))
+                    initBuilder.addStatement("${it.varName}.onInject(component)")
+            }
+            initBuilder.addStatement("")
+
             elements.forEach {
                 if (it.kind != ElementKind.CLASS)
                 {
@@ -130,7 +141,7 @@ class AnnotationProcessor : AbstractProcessor()
                     return true
                 }
 
-                processAnnotation(it, initBuilder, processorManager)
+                processAnnotation(it, initBuilder, processorManager, processorMiddleware)
             }
 
             val routerClass = if (processorManager.hadComponent)
@@ -176,7 +187,8 @@ class AnnotationProcessor : AbstractProcessor()
         return false
     }
 
-    private fun processAnnotation(element: Element, initBuilder: FunSpec.Builder, processorManager: RouteControllerProcessorManager)
+    private fun processAnnotation(element: Element, initBuilder: FunSpec.Builder, processorManager: RouteControllerProcessorManager,
+                                  middlewareProcessor: MiddlewareProcessor)
     {
         val elementClass = element as TypeElement
         val routeClass = processorManager.createClass(elementClass)
@@ -189,6 +201,9 @@ class AnnotationProcessor : AbstractProcessor()
         initBuilder.addStatement("${valName}.pathClass = %T::class", routeClass.pathName)
         if (routeClass.componentName != null)
             initBuilder.addStatement("${valName}.componentClass = %T::class", routeClass.componentName)
+
+        val middlewares = middlewareProcessor.buildMiddlewares(elementClass)
+        initBuilder.addStatement("${valName}.middlewares = listOf(${middlewares.map { it.varName }.joinToString(", ")})")
 
         val annotation = element.getAnnotation(Route::class.java)
         if (annotation.uri.isNotEmpty())
@@ -242,6 +257,8 @@ class AnnotationProcessor : AbstractProcessor()
         val MAIN_ROUTER_PACK = "com.speakerboxlite.router"
         val CONTROLLERS_PACK = "com.speakerboxlite.router.controllers"
 
+        val MIDDLEWARE_CLASSES = listOf("MiddlewareController", "MiddlewareControllerComponent")
+
         const val CREATE_INJECTOR = "onCreateInjector"
 
         const val KAPT_KOTLIN_GENERATED_OPTION_NAME = "kapt.kotlin.generated"
@@ -261,12 +278,27 @@ fun TypeElement.getExecutables(): List<ExecutableElement>
     return methods
 }
 
-fun TypeElement.hasParent(name: String): Boolean
+fun TypeElement.hasParent(name: String, interfaces: Boolean = false): Boolean
 {
     val sc = superclass as? DeclaredType ?: return false
     val sd = sc.asElement() as TypeElement
-    if (sd.simpleName.contentEquals(name))
+
+    if (sd.simpleName.contentEquals(name) || (interfaces && this.interfaces.firstOrNull { (it as? DeclaredType)?.asElement()?.simpleName?.contentEquals(name) == true } != null))
         return true
 
     return sd.hasParent(name)
+}
+
+fun TypeElement.hasAnyParent(names: List<String>, interfaces: Boolean = false): Boolean =
+    names.firstOrNull { hasParent(it, interfaces) } != null
+
+fun TypeElement.collectAnnotations(): List<TypeElement>
+{
+    val anns = annotationMirrors
+        .mapNotNull { it.annotationType.asElement() as? TypeElement }
+
+    val sc = superclass as? DeclaredType ?: return anns
+    val sd = sc.asElement() as TypeElement
+
+    return anns + sd.collectAnnotations()
 }
