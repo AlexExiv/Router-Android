@@ -20,6 +20,8 @@ interface RouterTabs
      */
     var tabChangeCallback: OnTabChangeCallback?
 
+    fun route(index: Int): Boolean
+
     /**
      * Creates a host view, binds a router to it, and sets the view specified by `path` as its root screen.
      * It's important to create all screens at adapter creation time to ensure proper functionality, especially for singleton screens.

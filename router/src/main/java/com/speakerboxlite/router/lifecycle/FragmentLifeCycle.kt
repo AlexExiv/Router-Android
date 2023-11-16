@@ -11,6 +11,7 @@ import com.speakerboxlite.router.R
 import com.speakerboxlite.router.RouterManager
 import com.speakerboxlite.router.RouterManagerImpl
 import com.speakerboxlite.router.View
+import com.speakerboxlite.router.ViewTabs
 import com.speakerboxlite.router.exceptions.RouterNotFoundException
 import com.speakerboxlite.router.ext.isPoppedRecursive
 import com.speakerboxlite.router.ext.isRemovingRecursive
@@ -66,6 +67,9 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
 
             f.localRouter = f.router.createRouterLocal(f.viewKey)
             f.router.onComposeView(f)
+
+            if (f is ViewTabs)
+                f.routerTabs = f.router.createRouterTabs(f.viewKey)
         }
     }
 
@@ -86,6 +90,9 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
         {
             f.localRouter.bindExecutor(CommandExecutorAndroid(f.requireActivity(), R.id.root, f.childFragmentManager, hostActivityFactory))
             f.resultProvider.start()
+
+            if (f is ViewTabs)
+                f.routerTabs.bindExecutor(CommandExecutorAndroid(f.requireActivity(), 0, f.childFragmentManager, hostActivityFactory))
         }
     }
 
@@ -126,6 +133,9 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
         {
             f.localRouter.unbindExecutor()
             f.resultProvider.pause()
+
+            if (f is ViewTabs)
+                f.routerTabs.unbindExecutor()
         }
     }
 

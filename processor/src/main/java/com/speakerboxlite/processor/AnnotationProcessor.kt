@@ -1,8 +1,10 @@
 package com.speakerboxlite.processor
 
 import com.google.auto.service.AutoService
+import com.speakerboxlite.router.annotations.Chain
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.annotations.Route
+import com.speakerboxlite.router.annotations.Tab
 import com.squareup.kotlinpoet.ANY
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
@@ -14,8 +16,10 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.asTypeName
+import com.squareup.kotlinpoet.joinToCode
 import java.io.File
 import java.lang.Exception
+import java.util.Collections
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.Processor
@@ -27,6 +31,7 @@ import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.MirroredTypeException
+import javax.lang.model.type.MirroredTypesException
 import javax.lang.model.type.TypeMirror
 import javax.tools.Diagnostic
 
@@ -202,6 +207,9 @@ class AnnotationProcessor : AbstractProcessor()
         if (routeClass.componentName != null)
             initBuilder.addStatement("${valName}.componentClass = %T::class", routeClass.componentName)
 
+        if (routeClass.componentCntrl)
+            initBuilder.addStatement("${valName}.onInject(component)")
+
         val middlewares = middlewareProcessor.buildMiddlewares(elementClass)
         initBuilder.addStatement("${valName}.middlewares = listOf(${middlewares.map { it.varName }.joinToString(", ")})")
 
@@ -218,7 +226,9 @@ class AnnotationProcessor : AbstractProcessor()
             initBuilder.addStatement("${valName}.preferredPresentation = %T.%L", presentationEnum, annotation.presentation.toString())
         }
 
-        if (annotation.singleTop)
+        val tabAnnotation = element.getAnnotation(Tab::class.java)
+
+        if (annotation.singleTop || tabAnnotation != null)
             initBuilder.addStatement("${valName}.singleTop = true")
 
         val animationMirror = try
@@ -244,6 +254,35 @@ class AnnotationProcessor : AbstractProcessor()
         }
         else
             initBuilder.addStatement("${valName}.preferredAnimationController = animation")
+
+        val chainAnnotation = element.getAnnotation(Chain::class.java)
+        if (chainAnnotation != null)
+        {
+            println("TRY TO CHAIN")
+
+            val chainMirrors = try
+            {
+                (chainAnnotation.closeItems as Array<TypeMirror>).toList()
+            }
+            catch (e: MirroredTypesException)
+            {
+                e.typeMirrors as List<TypeMirror>
+            }
+
+            val chins = chainMirrors.mapNotNull {
+                println("TRY TO CHAIN STEP 1")
+                val animDecl = it as? DeclaredType
+                if (animDecl != null)
+                {
+                    val typeE = animDecl.asElement() as TypeElement
+                    return@mapNotNull typeE.asClassName()
+                }
+
+                return@mapNotNull null
+            }
+
+            initBuilder.addStatement("${valName}.chainPaths = " + chins.map { CodeBlock.of("%T::class", it) }.joinToCode(prefix = "listOf(", separator = ",", suffix = ")").toString())
+        }
 
         val names = elementClass.getExecutables().map { it.simpleName.toString() }
         if (names.contains(CREATE_INJECTOR))

@@ -71,6 +71,8 @@ interface RouteControllerComponent<Path: RoutePath, V: View, C: Component>
 {
     val componentClass: KClass<C>
 
+    fun onInject(component: Any) {}
+
     fun onCreateInjector(path: Path, component: Any): Any
     fun onComposeView(router: Router, view: V, path: Path, component: Any)
 }

@@ -2,7 +2,6 @@ package com.speakerboxlite.router
 
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.result.ResultManager
-import kotlin.reflect.KClass
 
 class RouterTab(callerKey: String?,
                 parent: RouterSimple,
@@ -10,18 +9,18 @@ class RouterTab(callerKey: String?,
                 routerManager: RouterManager,
                 resultManager: ResultManager,
                 val index: Int,
-                val routerTab: RouterTabsImpl): RouterSimple(callerKey, parent, routeManager, routerManager, resultManager)
+                val routerTabs: RouterTabsImpl): RouterSimple(callerKey, parent, routeManager, routerManager, resultManager)
 {
     override val hasPreviousScreen: Boolean get() = viewsStack.size > 1 || parent!!.hasPreviousScreen
 
     override fun route(path: RoutePath, presentation: Presentation?): String =
-        if (routerTab.presentInTab && viewsStack.isNotEmpty())
+        if (routerTabs.presentInTab && viewsStack.isNotEmpty())
             super.route(path, Presentation.Modal)
         else
             super.route(path, presentation)
 
     override fun <R : Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation?, result: Result<R>): String =
-        if (routerTab.presentInTab && viewsStack.isNotEmpty())
+        if (routerTabs.presentInTab && viewsStack.isNotEmpty())
             super.routeWithResult(path, Presentation.Modal, result)
         else
             super.routeWithResult(path, presentation, result)
@@ -30,10 +29,10 @@ class RouterTab(callerKey: String?,
     {
         if (viewsStack.size > 1)
             super.back()
-        else if (routerTab.tabChangeCallback != null && index != 0)
-            routerTab.showFirstTab()
+        else if (routerTabs.tabChangeCallback != null && index != 0)
+            routerTabs.showFirstTab()
         else if (hasPreviousScreen)
-            routerTab.closeTabs()
+            routerTabs.closeTabs()
     }
 
     override fun close()
@@ -41,7 +40,7 @@ class RouterTab(callerKey: String?,
         if (viewsStack.size > 1)
             super.close()
         else
-            routerTab.closeTabs()
+            routerTabs.closeTabs()
     }
 
     override fun closeTo(key: String)
@@ -51,9 +50,9 @@ class RouterTab(callerKey: String?,
         {
             _closeTo(i)
         }
-        else
+        else if (!routerTabs.closeTabsTo(key))
         {
-            routerTab.closeTabsTo(key)
+            parent?.closeTo(key)
         }
     }
 
@@ -65,15 +64,15 @@ class RouterTab(callerKey: String?,
         }
         else
         {
-            routerTab.closeTabsToTop()
+            routerTabs.closeTabsToTop()
         }
     }
-
+/*
     override fun scanForPath(clazz: KClass<*>, recursive: Boolean): ViewMeta?
     {
         if (recursive)
         {
-            val v = routerTab.scanForPath(clazz)
+            val v = routerTabs.scanForPath(clazz)
             if (v != null)
                 return v
 
@@ -84,5 +83,5 @@ class RouterTab(callerKey: String?,
         }
 
         return viewsStack.lastOrNull { it.path == clazz }
-    }
+    }*/
 }

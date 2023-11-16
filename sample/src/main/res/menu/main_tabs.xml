@@ -8,12 +8,12 @@
 
     <item
         android:id="@+id/tab1"
-        android:title="Tab2"
+        android:title="SingleTab2"
         android:icon="@drawable/baseline_add_moderator_24"/>
 
     <item
         android:id="@+id/tab2"
-        android:title="Tab3"
+        android:title="AuthTab3"
         android:icon="@drawable/baseline_airplay_24"/>
 
 </menu>

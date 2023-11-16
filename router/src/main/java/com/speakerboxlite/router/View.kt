@@ -16,3 +16,8 @@ interface ViewVM<VM: ViewModel>: View
 {
     var viewModel: VM
 }
+
+interface ViewTabs
+{
+    var routerTabs: RouterTabs
+}

@@ -119,7 +119,7 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
     override fun routeInContainer(containerId: Int, path: RoutePath): String
     {
         val router = router ?: return ""
-        val route = router.findRoute(path) ?: throw RouteNotFoundException(path)
+        val route = router.findRoute(path)
         val view = route.onCreateView(path)
         view.viewKey = UUID.randomUUID().toString()
         router.setPath(view.viewKey, path)

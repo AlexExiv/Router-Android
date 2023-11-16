@@ -64,8 +64,9 @@ open class RouterSimple(protected val callerKey: String?,
 
     protected var isClosing = false
 
-    protected val routerTabsByKey = mutableMapOf<String, RouterTabs>()
-    protected var rootPath: RoutePath? = null
+    protected val routerTabsByKey = mutableMapOf<String, RouterTabsImpl>()
+    internal var rootPath: RoutePath? = null
+        private set
 
     override fun route(url: String): String?
     {
@@ -84,7 +85,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun replace(path: RoutePath): String
     {
-        val route = findRoute(path) ?: throw RouteNotFoundException(path)
+        val route = findRoute(path)
         val routeParams = RouteParamsGen(path = path, isReplace = true)
         if (tryRouteMiddlewares(routeParams, route))
             return ""
@@ -99,7 +100,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun routeDialog(path: RoutePath)
     {
-        val route = routeManager.find(path) ?: throw RouteNotFoundException(path)
+        val route = findRoute(path)
         val routeParams = RouteParamsGen(path = path, isDialog = true)
         if (tryRouteMiddlewares(routeParams, route))
             return
@@ -109,7 +110,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun <R: Any> routeDialogWithResult(path: RoutePathResult<R>, result: Result<R>)
     {
-        val route = routeManager.find(path) ?: throw RouteNotFoundException(path)
+        val route = findRoute(path)
         val routeParams = RouteParamsGen(path = path, isDialog = true) { result(it as R) }
         if (tryRouteMiddlewares(routeParams, route)  )
             return
@@ -119,7 +120,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun routeBTS(path: RoutePath)
     {
-        val route = routeManager.find(path) ?: throw RouteNotFoundException(path)
+        val route = findRoute(path)
         val routeParams = RouteParamsGen(path = path, isBts = true)
         if (tryRouteMiddlewares(routeParams, route))
             return
@@ -129,7 +130,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun <R : Any> routeBTSWithResult(path: RoutePathResult<R>, result: Result<R>)
     {
-        val route = routeManager.find(path) ?: throw RouteNotFoundException(path)
+        val route = findRoute(path)
         val routeParams = RouteParamsGen(path = path, isBts = true) { result(it as R) }
         if (tryRouteMiddlewares(routeParams, route))
             return
@@ -205,6 +206,7 @@ open class RouterSimple(protected val callerKey: String?,
     {
         resultManager.unbind(key)
         pathData.remove(key)
+        routerTabsByKey.remove(key)
         unbindRouter(key)
 /*
         if (isClosing)
@@ -213,10 +215,28 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun closeTo(key: String)
     {
-        val i = viewsStack.indexOfFirst { it.key == key }
-        if (i != -1)
+        var toIndex = -1
+        for (i in viewsStack.indices)
         {
-            _closeTo(i)
+            if (viewsStack[i].key == key)
+            {
+                toIndex = i
+                break
+            }
+
+            if (routerTabsByKey[viewsStack[i].key]?.closeTabsTo(key) == true)
+            {
+                if (i == (viewsStack.size - 1))
+                    return
+
+                toIndex = i
+                break
+            }
+        }
+
+        if (toIndex != -1)
+        {
+            _closeTo(toIndex)
         }
         else if (callerKey == null || parent == null)
         {
@@ -259,7 +279,7 @@ open class RouterSimple(protected val callerKey: String?,
     override fun onComposeView(view: View)
     {
         val path = pathData[view.viewKey]!!
-        val route = routeManager.find(path) ?: throw RouteNotFoundException(path)
+        val route = findRoute(path)
 
         (route as? RouteControllerComposable<RoutePath, View>)?.also {
             it.onComposeView(this, view, path)
@@ -271,7 +291,7 @@ open class RouterSimple(protected val callerKey: String?,
     override fun onComposeAnimation(view: View)
     {
         val path = pathData[view.viewKey]!!
-        val route = routeManager.find(path) ?: throw RouteNotFoundException(path)
+        val route = findRoute(path)
 
         route.animationController()?.onConfigureView(path, view)
     }
@@ -301,7 +321,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     internal open fun createRouterTab(callerKey: String, index: Int, tabs: RouterTabsImpl): Router = RouterTab(callerKey, this, routeManager, routerManager, resultManager, index, tabs)
 
-    internal fun findRoute(path: RoutePath): RouteControllerInterface<RoutePath, *>? = routeManager.find(path)
+    internal fun findRoute(path: RoutePath): RouteControllerInterface<RoutePath, *> = routeManager.find(path) ?: throw RouteNotFoundException(path)
 
     internal fun setPath(key: String, path: RoutePath)
     {
@@ -341,9 +361,15 @@ open class RouterSimple(protected val callerKey: String?,
 
     internal open fun scanForPath(clazz: KClass<*>, recursive: Boolean = true): ViewMeta?
     {
-        val v = viewsStack.lastOrNull { it.path == clazz }
-        if (v != null)
-            return v
+        for (v in viewsStack)
+        {
+            if (v.path == clazz)
+                return v
+
+            val vs = routerTabsByKey[v.key]?.scanForPath(clazz)
+            if (vs != null)
+                return vs
+        }
 
         if (parent != null && recursive)
             return parent.scanForPath(clazz)
@@ -360,7 +386,7 @@ open class RouterSimple(protected val callerKey: String?,
         if (viewsStack.isNotEmpty())
         {
             val curPath = pathData[viewsStack.last().key]!!
-            val curRoute = findRoute(curPath) ?: throw RouteNotFoundException(curPath)
+            val curRoute = findRoute(curPath)
             if (curRoute.onBeforeRoute(this, curPath, params))
                 return true
 
@@ -433,8 +459,9 @@ open class RouterSimple(protected val callerKey: String?,
         if (viewsStack.isNotEmpty() && viewsStack.last().routeType.isNoStackStructure)
             close()
 
-        viewsStack.clear()
-        isClosing = true
+        val count = viewsStack.size
+        for (i in 0 until count)
+            popViewStack()
 
         commandBuffer.apply(Command.CloseAll)
     }
@@ -443,7 +470,7 @@ open class RouterSimple(protected val callerKey: String?,
     {
         Log.i("Router", "Start route with path: ${path::class}")
 
-        val route = findRoute(path) ?: throw RouteNotFoundException(path)
+        val route = findRoute(path)
         val routeParams = RouteParamsGen(path = path, presentation = presentation, result = result)
         if (tryRouteMiddlewares(routeParams, route))
             return ""

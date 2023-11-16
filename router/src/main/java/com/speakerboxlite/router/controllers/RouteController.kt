@@ -19,7 +19,7 @@ abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterfa
     final override var creatingInjector: Boolean = false
     final override var preferredPresentation: Presentation = Presentation.Push
 
-    open val chainPaths: List<KClass<*>> get() = listOf()
+    var chainPaths: List<KClass<*>> = listOf()
     final override val isChain: Boolean get() = chainPaths.isNotEmpty()
 
     final override var middlewares: List<MiddlewareController> = listOf()

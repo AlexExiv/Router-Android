@@ -10,9 +10,10 @@ import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.viewModelScope
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterLocal
+import com.speakerboxlite.router.RouterTabs
+import com.speakerboxlite.router.ViewTabs
 import com.speakerboxlite.router.ViewVM
 import com.speakerboxlite.router.result.RouterResultProvider
 import com.speakerboxlite.router.sample.R
@@ -90,4 +91,11 @@ abstract class BaseViewModelFragment<VM: BaseViewModel, VDB: ViewDataBinding>(@L
     {
 
     }
+}
+
+abstract class BaseViewModelTabFragment<VM: BaseViewModel, VDB: ViewDataBinding>(
+    @LayoutRes layoutId: Int,
+    @MenuRes  menuId: Int = 0): BaseViewModelFragment<VM, VDB>(layoutId, menuId), ViewTabs
+{
+    override lateinit var routerTabs: RouterTabs
 }

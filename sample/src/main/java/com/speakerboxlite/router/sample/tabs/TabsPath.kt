@@ -9,6 +9,6 @@ import com.speakerboxlite.router.sample.base.middlewares.MiddlewarePro
 class TabsPath: RoutePath
 
 @Route
-@MiddlewareAuth
-@MiddlewarePro
+//@MiddlewareAuth
+//@MiddlewarePro
 abstract class TabsRouteController: RouteControllerApp<TabsPath, TabsViewModel, TabsFragment>()

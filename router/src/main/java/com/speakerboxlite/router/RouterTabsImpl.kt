@@ -5,35 +5,57 @@ import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
 import com.speakerboxlite.router.command.CommandBufferImpl
 import com.speakerboxlite.router.command.CommandExecutor
+import com.speakerboxlite.router.controllers.RouteParamsGen
+import java.lang.ref.WeakReference
 import java.util.UUID
 import kotlin.reflect.KClass
 
 class RouterTabsImpl(val callerKey: String,
-                     val router: RouterSimple,
+                     router: RouterSimple,
                      val presentInTab: Boolean): RouterTabs
 {
+    protected val weakRouter = WeakReference(router)
+    protected val router: RouterSimple get() = weakRouter.get()!!
+
     override var tabChangeCallback: OnTabChangeCallback? = null
 
     protected val commandBuffer: CommandBuffer = CommandBufferImpl()
-    protected val tabRoutes = mutableMapOf<Int, RouterSimple>()
-    protected val tabRoutesKeys = mutableMapOf<Int, String>()
+    protected val tabRouters = mutableMapOf<Int, RouterSimple>()
+    protected val tabRoutersKeys = mutableMapOf<Int, String>()
+
+    protected var tabIndex = 0
+
+    override fun route(index: Int): Boolean
+    {
+        if (index == tabIndex)
+            return true
+
+        val tabRouter = tabRouters[index]!!
+        val route = router.findRoute(tabRouter.rootPath!!)
+        val routeParams = RouteParamsGen(path = tabRouter.rootPath!!, presentation = Presentation.Push)
+        if (router.tryRouteMiddlewares(routeParams, route))
+            return false
+
+        showTab(index)
+        return true
+    }
 
     override fun route(index: Int, path: RoutePath, recreate: Boolean): String
     {
-        val viewKey = if (tabRoutesKeys[index] == null || recreate)
+        val viewKey = if (tabRoutersKeys[index] == null || recreate)
         {
             val viewKey = UUID.randomUUID().toString()
             val routerTab = router.createRouterTab(callerKey, index, this)
             routerTab.route(path, Presentation.Push)
 
-            tabRoutes[index] = routerTab as RouterSimple
-            tabRoutes[index]!!.bindRouter(viewKey)
-            tabRoutesKeys[index] = viewKey
+            tabRouters[index] = routerTab as RouterSimple
+            tabRouters[index]!!.bindRouter(viewKey)
+            tabRoutersKeys[index] = viewKey
 
             viewKey
         }
         else
-            tabRoutesKeys[index]!!
+            tabRoutersKeys[index]!!
 
         return viewKey
     }
@@ -59,31 +81,30 @@ class RouterTabsImpl(val callerKey: String,
         router.close()
     }
 
-    fun closeTabsTo(key: String)
+    internal fun closeTabsTo(key: String): Boolean
     {
-        for (i in tabRoutes.keys)
+        for (i in tabRouters.keys)
         {
-            if (tabRoutes[i]!!.containsView(key))
+            if (tabRouters[i]!!.containsView(key))
             {
                 showTab(i)
-                tabRoutes[i]!!.closeTo(key)
-                return
+                tabRouters[i]!!.closeTo(key)
+                return true
             }
         }
 
-        releaseRouters()
-        router.closeTo(key)
+        return false
     }
 
-    fun closeTabsToTop()
+    internal fun closeTabsToTop()
     {
         releaseRouters()
         router.closeToTop()
     }
 
-    fun scanForPath(clazz: KClass<*>): ViewMeta?
+    internal fun scanForPath(clazz: KClass<*>): ViewMeta?
     {
-        for (kv in tabRoutes)
+        for (kv in tabRouters)
         {
             val v = kv.value.scanForPath(clazz, false)
             if (v != null)
@@ -100,6 +121,7 @@ class RouterTabsImpl(val callerKey: String,
 
     protected fun showTab(i: Int)
     {
+        tabIndex = i
         if (tabChangeCallback != null)
             commandBuffer.apply(Command.ChangeTab(tabChangeCallback!!, i))
     }

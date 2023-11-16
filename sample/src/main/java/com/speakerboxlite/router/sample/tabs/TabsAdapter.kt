@@ -6,6 +6,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.speakerboxlite.router.RouterTabs
 import com.speakerboxlite.router.sample.base.HostFragment
+import com.speakerboxlite.router.sample.tabs.tab.TabAuthPath
 import com.speakerboxlite.router.sample.tabs.tab.TabPath
 import com.speakerboxlite.router.sample.tabs.tab.TabSingletonPath
 
@@ -20,6 +21,7 @@ class TabsAdapter(val router: RouterTabs, fm: FragmentManager, lifecycle: Lifecy
             val hv = when (i)
             {
                 1 -> router.route(i, TabSingletonPath(i), false)
+                2 -> router.route(i, TabAuthPath(i), false)
                 else -> router.route(i, TabPath(i), false)
             }
 
