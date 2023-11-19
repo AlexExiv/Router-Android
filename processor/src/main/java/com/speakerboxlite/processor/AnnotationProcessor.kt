@@ -4,7 +4,7 @@ import com.google.auto.service.AutoService
 import com.speakerboxlite.router.annotations.Chain
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.annotations.Route
-import com.speakerboxlite.router.annotations.Tab
+import com.speakerboxlite.router.annotations.Tabs
 import com.squareup.kotlinpoet.ANY
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
@@ -19,7 +19,6 @@ import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.joinToCode
 import java.io.File
 import java.lang.Exception
-import java.util.Collections
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.Processor
@@ -226,10 +225,14 @@ class AnnotationProcessor : AbstractProcessor()
             initBuilder.addStatement("${valName}.preferredPresentation = %T.%L", presentationEnum, annotation.presentation.toString())
         }
 
-        val tabAnnotation = element.getAnnotation(Tab::class.java)
+        //val tabAnnotation = element.getAnnotation(Tab::class.java)
+        val tabsAnnotation = element.getAnnotation(Tabs::class.java)
 
-        if (annotation.singleTop || tabAnnotation != null)
+        if (annotation.singleTop)
             initBuilder.addStatement("${valName}.singleTop = true")
+
+        if (tabsAnnotation != null)
+            initBuilder.addStatement("${valName}.isTabs = true")
 
         val animationMirror = try
             {

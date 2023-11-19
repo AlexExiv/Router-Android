@@ -21,7 +21,7 @@ class TabsFragment: BaseViewModelTabFragment<TabsViewModel, FragmentTabsBinding>
 
         routerTabs.tabChangeCallback = {
             dataBinding.bottomNavigationView.selectedItemId = TABS_BACK_MAP[it]!!
-            dataBinding.tabs.setCurrentItem(it, true)
+            dataBinding.tabs.setCurrentItem(it, false)
         }
     }
 

@@ -13,6 +13,7 @@ interface RouteControllerInterface<Path: RoutePath, V: View>
     val creatingInjector: Boolean
     val preferredPresentation: Presentation
     val isChain: Boolean
+    val isTabs: Boolean
 
     val middlewares: List<MiddlewareController>
 

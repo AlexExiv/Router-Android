@@ -6,12 +6,12 @@ import com.speakerboxlite.router.getAndroidViewModel
 import com.speakerboxlite.router.sample.base.RouteControllerApp
 import com.speakerboxlite.router.sample.base.middlewares.MiddlewareAuth
 
-data class TabAuthPath(val index: Int): RoutePath
+class TabPath2: RoutePath
 
-@Route(singleTop = true)
+@Route
 @MiddlewareAuth
-abstract class TabAuthRouteController: RouteControllerApp<TabAuthPath, TabViewModel, TabFragment>()
+abstract class TabAuthRouteController: RouteControllerApp<TabPath2, TabViewModel, TabFragment>()
 {
-    override fun onCreateViewModel(view: TabFragment, path: TabAuthPath): TabViewModel =
-        view.getAndroidViewModel { TabViewModel(path.index, it) }
+    override fun onCreateViewModel(view: TabFragment, path: TabPath2): TabViewModel =
+        view.getAndroidViewModel { TabViewModel(2, it) }
 }

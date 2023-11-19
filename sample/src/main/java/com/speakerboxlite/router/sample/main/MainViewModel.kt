@@ -70,6 +70,6 @@ class MainViewModel(app: Application): BaseViewModel(app)
 
     fun onShowTheme()
     {
-        router.route(ThemePath(), Presentation.Modal)
+        router.route(ThemePath(), Presentation.ModalNewTask)
     }
 }

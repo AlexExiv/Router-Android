@@ -22,6 +22,8 @@ abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterfa
     var chainPaths: List<KClass<*>> = listOf()
     final override val isChain: Boolean get() = chainPaths.isNotEmpty()
 
+    final override var isTabs: Boolean = false
+
     final override var middlewares: List<MiddlewareController> = listOf()
 
     override val params: Serializable? get() = null

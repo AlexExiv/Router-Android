@@ -32,7 +32,7 @@ class RouterTabsImpl(val callerKey: String,
 
         val tabRouter = tabRouters[index]!!
         val route = router.findRoute(tabRouter.rootPath!!)
-        val routeParams = RouteParamsGen(path = tabRouter.rootPath!!, presentation = Presentation.Push)
+        val routeParams = RouteParamsGen(path = tabRouter.rootPath!!, presentation = Presentation.Push, tabIndex = index)
         if (router.tryRouteMiddlewares(routeParams, route))
             return false
 
@@ -102,6 +102,8 @@ class RouterTabsImpl(val callerKey: String,
         router.closeToTop()
     }
 
+    internal operator fun get(i: Int): Router = tabRouters[i]!!
+
     internal fun scanForPath(clazz: KClass<*>): ViewMeta?
     {
         for (kv in tabRouters)
@@ -117,6 +119,12 @@ class RouterTabsImpl(val callerKey: String,
     internal fun releaseRouters()
     {
         //tabRoutes.values.forEach { it.release() }
+    }
+
+    internal fun containsPath(clazz: KClass<*>): Int?
+    {
+        val i = tabRouters.values.indexOfFirst { it.rootPath != null && it.rootPath!!::class == clazz }
+        return if (i == -1) null else i
     }
 
     protected fun showTab(i: Int)

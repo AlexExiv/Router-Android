@@ -6,7 +6,7 @@ import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.sample.base.BaseViewModel
 import com.speakerboxlite.router.sample.step.replace.ReplacePath
 import com.speakerboxlite.router.sample.tabs.TabsPath
-import com.speakerboxlite.router.sample.tabs.tab.TabSingletonPath
+import com.speakerboxlite.router.sample.tabs.tab.TabPath1
 
 class StepViewModel(val step: Int, app: Application): BaseViewModel(app)
 {
@@ -42,7 +42,7 @@ class StepViewModel(val step: Int, app: Application): BaseViewModel(app)
 
     fun onShowSingleton()
     {
-        router.route(TabSingletonPath(100))
+        router.route(TabPath1())
     }
 
     fun onReplace()

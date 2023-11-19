@@ -17,7 +17,7 @@ class MiddlewareControllerStep: MiddlewareController
     {
         i += 1
 
-        if (i % 9 == 0 && next::class != AuthPath::class)
+        if (i % 100 == 0 && next::class != AuthPath::class)
         {
             router.routeDialog(DialogPath(message = "I'm a step middleware", okBtn = "Close"))
             return true

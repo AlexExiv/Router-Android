@@ -9,79 +9,46 @@ class RouterTab(callerKey: String?,
                 routerManager: RouterManager,
                 resultManager: ResultManager,
                 val index: Int,
-                val routerTabs: RouterTabsImpl): RouterSimple(callerKey, parent, routeManager, routerManager, resultManager)
+                routerTabs: RouterTabsImpl): RouterSimple(callerKey, parent, routeManager, routerManager, resultManager), RouterTabSuper
 {
-    override val hasPreviousScreen: Boolean get() = viewsStack.size > 1 || parent!!.hasPreviousScreen
+    private val delegate: RouterTabDelegate = RouterTabDelegateImpl(index, routerTabs, this, this, parent)
 
-    override fun route(path: RoutePath, presentation: Presentation?): String =
-        if (routerTabs.presentInTab && viewsStack.isNotEmpty())
-            super.route(path, Presentation.Modal)
-        else
-            super.route(path, presentation)
+    override val hasPreviousScreen: Boolean get() = delegate.hasPreviousScreen
+
+    override fun route(path: RoutePath, presentation: Presentation?): String = delegate.route(path, presentation)
 
     override fun <R : Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation?, result: Result<R>): String =
-        if (routerTabs.presentInTab && viewsStack.isNotEmpty())
-            super.routeWithResult(path, Presentation.Modal, result)
-        else
-            super.routeWithResult(path, presentation, result)
+        delegate.routeWithResult(path, presentation, result)
 
     override fun back()
     {
-        if (viewsStack.size > 1)
-            super.back()
-        else if (routerTabs.tabChangeCallback != null && index != 0)
-            routerTabs.showFirstTab()
-        else if (hasPreviousScreen)
-            routerTabs.closeTabs()
+        delegate.back()
     }
 
     override fun close()
     {
-        if (viewsStack.size > 1)
-            super.close()
-        else
-            routerTabs.closeTabs()
+        delegate.close()
     }
 
     override fun closeTo(key: String)
     {
-        val i = viewsStack.indexOfFirst { it.key == key }
-        if (i != -1)
-        {
-            _closeTo(i)
-        }
-        else if (!routerTabs.closeTabsTo(key))
-        {
-            parent?.closeTo(key)
-        }
+        delegate.closeTo(key)
     }
 
     override fun closeToTop()
     {
-        if (parent!!.isCurrentTop)
-        {
-            _closeTo(0)
-        }
-        else
-        {
-            routerTabs.closeTabsToTop()
-        }
+        delegate.closeToTop()
     }
-/*
-    override fun scanForPath(clazz: KClass<*>, recursive: Boolean): ViewMeta?
+
+    override fun tryRouteToTab(path: RoutePath): Router? = delegate.tryRouteToTab(path)
+
+    override fun superBack()
     {
-        if (recursive)
-        {
-            val v = routerTabs.scanForPath(clazz)
-            if (v != null)
-                return v
+        super.back()
+    }
 
-            if (parent != null)
-                return parent.scanForPath(clazz)
-
-            return null
-        }
-
-        return viewsStack.lastOrNull { it.path == clazz }
-    }*/
+    override fun superClose()
+    {
+        super.close()
+    }
 }
