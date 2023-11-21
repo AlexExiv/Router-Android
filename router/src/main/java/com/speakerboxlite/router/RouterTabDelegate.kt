@@ -6,14 +6,14 @@ interface RouterTabDelegate
 {
     val hasPreviousScreen: Boolean
 
-    fun route(path: RoutePath, presentation: Presentation?): String
-    fun <R : Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation?, result: Result<R>): String
+    fun route(path: RoutePath, presentation: Presentation?): Router?
+    fun <R : Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation?, result: Result<R>): Router?
 
-    fun back()
+    fun back(): Router?
 
-    fun close()
-    fun closeTo(key: String)
-    fun closeToTop()
+    fun close(): Router?
+    fun closeTo(key: String): Router?
+    fun closeToTop(): Router?
 
     fun tryRouteToTab(path: RoutePath): Router?
 }

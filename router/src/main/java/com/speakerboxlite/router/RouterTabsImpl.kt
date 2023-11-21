@@ -75,10 +75,10 @@ class RouterTabsImpl(val callerKey: String,
         showTab(0)
     }
 
-    fun closeTabs()
+    fun closeTabs(): Router?
     {
         releaseRouters()
-        router.close()
+        return router.close()
     }
 
     internal fun closeTabsTo(key: String): Boolean
@@ -96,10 +96,10 @@ class RouterTabsImpl(val callerKey: String,
         return false
     }
 
-    internal fun closeTabsToTop()
+    internal fun closeTabsToTop(): Router?
     {
         releaseRouters()
-        router.closeToTop()
+        return router.closeToTop()
     }
 
     internal operator fun get(i: Int): Router = tabRouters[i]!!

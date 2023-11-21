@@ -19,58 +19,31 @@ internal class RouterZombie : Router, RouterLocal
     override val hasPreviousScreen: Boolean get() = false
     override var lockBack: Boolean = false
 
-    override fun route(url: String): String? = null
+    override fun route(url: String): Router? = null
 
-    override fun route(path: RoutePath, presentation: Presentation?): String = ""
+    override fun route(path: RoutePath, presentation: Presentation?): Router? = null
 
-    override fun route(path: RouteParamsGen)
-    {
+    override fun route(path: RouteParamsGen): Router? = null
 
-    }
+    override fun <R : Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation?, result: Result<R>): Router? = null
 
-    override fun <R : Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation?, result: Result<R>): String = ""
+    override fun replace(path: RoutePath): Router? = null
 
-    override fun replace(path: RoutePath): String = ""
+    override fun routeDialog(path: RoutePath): Router? = null
 
-    override fun routeDialog(path: RoutePath)
-    {
-        
-    }
+    override fun <R : Any> routeDialogWithResult(path: RoutePathResult<R>, result: Result<R>): Router? = null
 
-    override fun <R : Any> routeDialogWithResult(path: RoutePathResult<R>, result: Result<R>)
-    {
-        
-    }
+    override fun routeBTS(path: RoutePath): Router? = null
 
-    override fun routeBTS(path: RoutePath)
-    {
-        
-    }
+    override fun <R : Any> routeBTSWithResult(path: RoutePathResult<R>, result: Result<R>): Router? = null
 
-    override fun <R : Any> routeBTSWithResult(path: RoutePathResult<R>, result: Result<R>)
-    {
-        
-    }
+    override fun back(): Router? = null
 
-    override fun back()
-    {
-        
-    }
+    override fun close(): Router? = null
 
-    override fun close()
-    {
-        
-    }
+    override fun closeTo(key: String): Router? = null
 
-    override fun closeTo(key: String)
-    {
-        
-    }
-
-    override fun closeToTop()
-    {
-        
-    }
+    override fun closeToTop(): Router? = null
 
     override fun bindExecutor(executor: CommandExecutor)
     {

@@ -62,7 +62,6 @@ class StepViewModel(val step: Int, app: Application): BaseViewModel(app)
 
     fun onCloseAndShow()
     {
-        router.close()
-        router.route(StepPath(step + 1000))
+        router.close()?.route(StepPath(step + 1000))
     }
 }

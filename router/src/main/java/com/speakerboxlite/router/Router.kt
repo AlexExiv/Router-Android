@@ -27,19 +27,19 @@ interface Router
      * Navigate to a specific URL path.
      *
      * @param url The relative URL path. Avoid using absolute URLs. This URL should correspond to a path defined by the @Route annotation.
-     * @return A unique view key associated with the displayed screen, or null if the URL path was not found.
+     * @return A router that will execute the route; may be null (usually when a middleware interrupts the route).
      */
-    fun route(url: String): String?
+    fun route(url: String): Router?
 
     /**
      * Navigate to a screen using the specified path and presentation type.
      *
      * @param path          The path to the screen connected by the RouteController.
      * @param presentation  The type of presentation (e.g., modal, full-screen).
-     * @return              A unique identifier (view key) associated with the displayed screen.
+     * @return              A router that will execute the route; may be null (usually when a middleware interrupts the route).
      * @throws RouteNotFoundException If the provided path is not found in the routes manager.
      */
-    fun route(path: RoutePath, presentation: Presentation? = null): String
+    fun route(path: RoutePath, presentation: Presentation? = null): Router?
 
     /**
      * Navigate to a screen with an expected result.
@@ -47,84 +47,96 @@ interface Router
      * @param path         The path to the screen connected by the `RouteController`.
      * @param presentation The type of presentation (e.g., modal, full-screen).
      * @param result       The callback for handling the screen result. To send a result, use `ResultProvider::send`.
-     * @return             A unique view key associated with the displayed screen.
+     * @return             A router that will execute the route; may be null (usually when a middleware interrupts the route).
      * @throws RouteNotFoundException If the provided path is not found in the routes manager.
      */
-    fun <R: Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation? = null, result: Result<R>): String
+    fun <R: Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation? = null, result: Result<R>): Router?
 
     /**
      * Replaces the top screen on the stack with a new one specified by the given `path`.
      *
      * @param path The path to the screen connected by the `RouteController`.
-     * @return A unique view key associated with the displayed screen after replacement.
+     * @return A router that will execute the route; may be null (usually when a middleware interrupts the route).
      * @throws RouteNotFoundException If the provided path is not found in the routes manager.
      */
-    fun replace(path: RoutePath): String
+    fun replace(path: RoutePath): Router?
 
     /**
      * Show a dialog screen
      *
      * @param path The path to the dialog connected by the `RouteController`
+     * @return A router that will execute the route; may be null (usually when a middleware interrupts the route).
      */
-    fun routeDialog(path: RoutePath)
+    fun routeDialog(path: RoutePath): Router?
 
     /**
      * Show a dialog screen with an expected result.
      *
      * @param path The path to the dialog connected by the `RouteController`
      * @param result The callback for handling the screen result. To send a result, use `ResultProvider::send`.
+     * @return A router that will execute the route; may be null (usually when a middleware interrupts the route).
      */
-    fun <R: Any> routeDialogWithResult(path: RoutePathResult<R>, result: Result<R>)
+    fun <R: Any> routeDialogWithResult(path: RoutePathResult<R>, result: Result<R>): Router?
 
     /**
      * Show a bottom sheet screen
      *
      * @param path The path to the dialog connected by the `RouteController`
+     * @return A router that will execute the route; may be null (usually when a middleware interrupts the route).
      */
-    fun routeBTS(path: RoutePath)
+    fun routeBTS(path: RoutePath): Router?
 
     /**
      * Show a bottom sheet screen with an expected result.
      *
      * @param path The path to the dialog connected by the `RouteController`
      * @param result The callback for handling the screen result. To send a result, use `ResultProvider::send`.
+     * @return A router that will execute the route; may be null (usually when a middleware interrupts the route).
      */
-    fun <R: Any> routeBTSWithResult(path: RoutePathResult<R>, result: Result<R>)
+    fun <R: Any> routeBTSWithResult(path: RoutePathResult<R>, result: Result<R>): Router?
 
     /**
      * Navigate to a screen using the specified path and presentation type.
      *
      * @param path          The path to the screen connected by the RouteController.
      * @param presentation  The type of presentation (e.g., modal, full-screen).
-     * @return              A unique identifier (view key) associated with the displayed screen.
+     * @return A router that will execute the route; may be null (usually when a middleware interrupts the route).
      * @throws RouteNotFoundException If the provided path is not found in the routes manager.
      */
-    fun route(path: RouteParamsGen)
+    fun route(path: RouteParamsGen): Router?
 
     /**
      * Closes the top view in the router. This method should be called when handling a physical Back button click
      * or a toolbar back button click. Unlike the `close()` method, this method does not close a chain, even if
      * the view's path is part of that chain.
+     *
+     * @return If the view stack is empty, returns the parent router; otherwise, returns this router. Null if the event hasn't occurred.
      */
-    fun back()
+    fun back(): Router?
 
     /**
      * Closes the top view in the router. This method should be called when user click `apply` button or something like that.
      * Unlike the `back()` method, this method close a chain if the view's path is a part of that chain
+     *
+     * @return If the view stack is empty, returns the parent router; otherwise, returns this router. Null if the event hasn't occurred.
      */
-    fun close()
+    fun close(): Router?
 
     /**
      * Closes all views in the router up to a specific view's key.
      *
      * @param key The view's key to which all views will be closed.
+     *
+     * @return If the view stack is empty, returns the parent router; otherwise, returns this router. Null if the event hasn't occurred.
      */
-    fun closeTo(key: String)
+    fun closeTo(key: String): Router?
 
     /**
      * Closes all views
+     *
+     * @return If the view stack is empty, returns the parent router; otherwise, returns this router. Null if the event hasn't occurred.
      */
-    fun closeToTop()
+    fun closeToTop(): Router?
 
     /**
      * Binds a command executor. This method should be called in the `onResume()` methods of the activity and fragment.

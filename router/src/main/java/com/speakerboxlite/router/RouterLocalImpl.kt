@@ -6,7 +6,6 @@ import com.speakerboxlite.router.command.CommandBuffer
 import com.speakerboxlite.router.command.CommandBufferImpl
 import com.speakerboxlite.router.command.CommandExecutor
 import com.speakerboxlite.router.controllers.RouteParamsGen
-import com.speakerboxlite.router.exceptions.RouteNotFoundException
 import com.speakerboxlite.router.result.RouterResultProvider
 import java.lang.ref.WeakReference
 import java.util.UUID
@@ -28,59 +27,35 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
 
     protected val commandBuffer: CommandBuffer = CommandBufferImpl()
 
-    override fun route(url: String): String? = router!!.route(url)
+    override fun route(url: String): Router? = router?.route(url)
 
-    override fun route(path: RoutePath, presentation: Presentation?): String = router!!.route(path, presentation)
+    override fun route(path: RoutePath, presentation: Presentation?): Router? = router?.route(path, presentation)
 
-    override fun route(path: RouteParamsGen)
-    {
-        router!!.route(path)
-    }
+    override fun route(path: RouteParamsGen): Router? = router?.route(path)
 
-    override fun <R: Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation?, result: Result<R>): String =
+    override fun <R: Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation?, result: Result<R>): Router? =
         router!!.routeWithResult(path, presentation, result)
 
-    override fun replace(path: RoutePath): String = router!!.replace(path)
+    override fun replace(path: RoutePath): Router? = router?.replace(path)
 
-    override fun routeDialog(path: RoutePath)
-    {
-        router?.routeDialog(path)
-    }
+    override fun routeDialog(path: RoutePath): Router? = router?.routeDialog(path)
 
-    override fun <R: Any> routeDialogWithResult(path: RoutePathResult<R>, result: Result<R>)
-    {
+    override fun <R: Any> routeDialogWithResult(path: RoutePathResult<R>, result: Result<R>): Router? =
         router?.routeDialogWithResult(path, result)
-    }
 
-    override fun routeBTS(path: RoutePath)
-    {
+    override fun routeBTS(path: RoutePath): Router? =
         router?.routeBTS(path)
-    }
 
-    override fun <R : Any> routeBTSWithResult(path: RoutePathResult<R>, result: Result<R>)
-    {
+    override fun <R : Any> routeBTSWithResult(path: RoutePathResult<R>, result: Result<R>): Router? =
         router?.routeBTSWithResult(path, result)
-    }
 
-    override fun back()
-    {
-        router?.back()
-    }
+    override fun back(): Router? = router?.back()
 
-    override fun close()
-    {
-        router?.close()
-    }
+    override fun close(): Router? = router?.close()
 
-    override fun closeTo(key: String)
-    {
-        router?.closeTo(key)
-    }
+    override fun closeTo(key: String): Router? = router?.closeTo(key)
 
-    override fun closeToTop()
-    {
-        router?.closeToTop()
-    }
+    override fun closeToTop(): Router? = router?.closeToTop()
 
     override fun bindExecutor(executor: CommandExecutor)
     {

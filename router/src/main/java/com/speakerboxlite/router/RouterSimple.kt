@@ -68,7 +68,7 @@ open class RouterSimple(protected val callerKey: String?,
     internal var rootPath: RoutePath? = null
         private set
 
-    override fun route(url: String): String?
+    override fun route(url: String): Router?
     {
         val route = routeManager.find(url)
         if (route != null)
@@ -77,70 +77,78 @@ open class RouterSimple(protected val callerKey: String?,
         return null
     }
 
-    override fun route(path: RoutePath, presentation: Presentation?): String =
+    override fun route(path: RoutePath, presentation: Presentation?): Router? =
         route(null, path, RouteType.Simple, presentation, null, null)
 
-    override fun <R: Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation?, result: Result<R>): String =
+    override fun <R: Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation?, result: Result<R>): Router? =
         route(null, path, RouteType.Simple, presentation, null) { result(it as  R) }
 
-    override fun replace(path: RoutePath): String
+    override fun replace(path: RoutePath): Router?
     {
         val route = findRoute(path)
         val routeParams = RouteParamsGen(path = path, isReplace = true)
         if (tryRouteMiddlewares(routeParams, route))
-            return ""
+            return null
 
         popViewStack()
 
         val view = createView(route, RouteType.Simple, path, null, null)
         commandBuffer.apply(Command.Replace(path, view, route.animationController()))
 
-        return view.viewKey
+        return this
     }
 
-    override fun routeDialog(path: RoutePath)
+    override fun routeDialog(path: RoutePath): Router?
     {
         val route = findRoute(path)
         val routeParams = RouteParamsGen(path = path, isDialog = true)
         if (tryRouteMiddlewares(routeParams, route))
-            return
+            return null
 
         commandBuffer.apply(Command.Dialog(createView(route, RouteType.Dialog, path, null, null)))
+
+        return this
     }
 
-    override fun <R: Any> routeDialogWithResult(path: RoutePathResult<R>, result: Result<R>)
+    override fun <R: Any> routeDialogWithResult(path: RoutePathResult<R>, result: Result<R>): Router?
     {
         val route = findRoute(path)
         val routeParams = RouteParamsGen(path = path, isDialog = true) { result(it as R) }
         if (tryRouteMiddlewares(routeParams, route)  )
-            return
+            return null
 
         commandBuffer.apply(Command.Dialog(createView(route, RouteType.Dialog, path, null) { result(it as  R) }))
+
+        return this
     }
 
-    override fun routeBTS(path: RoutePath)
+    override fun routeBTS(path: RoutePath): Router?
     {
         val route = findRoute(path)
         val routeParams = RouteParamsGen(path = path, isBts = true)
         if (tryRouteMiddlewares(routeParams, route))
-            return
+            return null
 
         commandBuffer.apply(Command.BottomSheet(createView(route, RouteType.BTS, path, null, null)))
+
+        return this
     }
 
-    override fun <R : Any> routeBTSWithResult(path: RoutePathResult<R>, result: Result<R>)
+    override fun <R : Any> routeBTSWithResult(path: RoutePathResult<R>, result: Result<R>): Router?
     {
         val route = findRoute(path)
         val routeParams = RouteParamsGen(path = path, isBts = true) { result(it as R) }
         if (tryRouteMiddlewares(routeParams, route))
-            return
+            return null
 
         commandBuffer.apply(Command.BottomSheet(createView(route, RouteType.BTS, path, null) { result(it as  R) }))
+
+        return this
     }
 
-    override fun route(path: RouteParamsGen)
+    override fun route(path: RouteParamsGen): Router?
     {
-        if (path.execRouter != null && path.execRouter !== this)
+        return if (path.execRouter != null && path.execRouter !== this)
         {
             path.execRouter.route(path)
         }
@@ -164,9 +172,9 @@ open class RouterSimple(protected val callerKey: String?,
         }
         else if (path.tabIndex != null)
         {
-            viewsStack.lastOrNull()?.also {
-                routerTabsByKey[it.key]?.route(path.tabIndex)
-            }
+            val r = routerTabsByKey[viewsStack.lastOrNull()?.key]
+            r?.route(path.tabIndex)
+            r?.get(path.tabIndex)
         }
         else
         {
@@ -177,25 +185,26 @@ open class RouterSimple(protected val callerKey: String?,
         }
     }
 
-    override fun back()
+    override fun back(): Router?
     {
         if (lockBack || !hasPreviousScreen)
-            return
+            return this
 
-        val v = popViewStack() ?: return
+        val v = popViewStack() ?: return (parent ?: this)
         dispatchClose(v)
 
         if (pathData[v.key] != null)
             tryCloseMiddlewares(pathData[v.key]!!)
 
         tryRepeatTopIfEmpty()
+        return if (isClosing) parent else this
     }
 
-    override fun close()
+    override fun close(): Router?
     {
-        val v = viewsStack.lastOrNull() ?: return
+        val v = viewsStack.lastOrNull() ?: return (parent ?: this)
         val chain = scanForChain()
-        if (chain != null && chain.key != v.key && chain.route.isPartOfChain(v.path))
+        val returnRouter = if (chain != null && chain.key != v.key && chain.route.isPartOfChain(v.path))
         {
             closeTo(chain.key)
             close()
@@ -207,9 +216,12 @@ open class RouterSimple(protected val callerKey: String?,
 
             if (pathData[v.key] != null)
                 tryCloseMiddlewares(pathData[v.key]!!)
+
+            if (isClosing) parent else this
         }
 
         tryRepeatTopIfEmpty()
+        return returnRouter
     }
 
     protected open fun unbind(key: String)
@@ -223,9 +235,10 @@ open class RouterSimple(protected val callerKey: String?,
             releaseRouter()*/
     }
 
-    override fun closeTo(key: String)
+    override fun closeTo(key: String): Router?
     {
         var toIndex = -1
+        var returnRouter: Router? = null
         for (i in viewsStack.indices)
         {
             if (viewsStack[i].key == key)
@@ -234,36 +247,41 @@ open class RouterSimple(protected val callerKey: String?,
                 break
             }
 
-            if (routerTabsByKey[viewsStack[i].key]?.closeTabsTo(key) == true)
+            val routerTabs = routerTabsByKey[viewsStack[i].key]
+            if (routerTabs != null && routerTabs.closeTabsTo(key))
             {
                 if (i == (viewsStack.size - 1))
-                    return
+                    return this
 
                 toIndex = i
+                returnRouter = routerTabs[i]
                 break
             }
         }
 
         if (toIndex != -1)
         {
-            _closeTo(toIndex)
+            val r = _closeTo(toIndex)
+            if (returnRouter == null)
+                returnRouter = r
         }
         else if (callerKey == null || parent == null)
         {
-            _closeTo(0)
+            returnRouter = _closeTo(0)
         }
         else
         {
             _closeAll()
-            parent.closeTo(key)
+            returnRouter = parent.closeTo(key)
         }
 
         tryRepeatTopIfEmpty()
+        return returnRouter
     }
 
-    override fun closeToTop()
+    override fun closeToTop(): Router?
     {
-        if (callerKey == null || parent == null)
+        val returnRouter = if (callerKey == null || parent == null)
         {
             _closeTo(0)
         }
@@ -274,6 +292,7 @@ open class RouterSimple(protected val callerKey: String?,
         }
 
         tryRepeatTopIfEmpty()
+        return returnRouter
     }
 
     override fun bindExecutor(executor: CommandExecutor)
@@ -452,31 +471,39 @@ open class RouterSimple(protected val callerKey: String?,
             route(null, rootPath!!, RouteType.Simple, Presentation.Push, null, null)
     }
 
-    internal fun _closeTo(i: Int)
+    internal fun _closeTo(i: Int): Router?
     {
-        if (viewsStack.isNotEmpty() && viewsStack.last().routeType.isNoStackStructure)
-            close()
+        closeAllNoStack()
 
         val deleteCount = viewsStack.size - i - 1
         for (j in 0 until deleteCount)
             popViewStack()
 
         commandBuffer.apply(Command.CloseTo(viewsStack.last().key))
+
+        return this
     }
 
-    internal fun _closeAll()
+    internal fun _closeAll(): Router?
     {
-        if (viewsStack.isNotEmpty() && viewsStack.last().routeType.isNoStackStructure)
-            close()
+        closeAllNoStack()
 
         val count = viewsStack.size
         for (i in 0 until count)
             popViewStack()
 
         commandBuffer.apply(Command.CloseAll)
+
+        return parent ?: this
     }
 
-    internal fun route(execRouter: Router?, path: RoutePath, routeType: RouteType, presentation: Presentation?, resultKey: String?, result: Result<Any>?): String
+    internal fun closeAllNoStack()
+    {
+        while (viewsStack.isNotEmpty() && viewsStack.last().routeType.isNoStackStructure)
+            close()
+    }
+
+    internal fun route(execRouter: Router?, path: RoutePath, routeType: RouteType, presentation: Presentation?, resultKey: String?, result: Result<Any>?): Router?
     {
         Log.i("Router", "Start route with path: ${path::class}")
 
@@ -485,15 +512,14 @@ open class RouterSimple(protected val callerKey: String?,
         //try to check all middlewares
         val routeParams = RouteParamsGen(execRouter = execRouter, path = path, presentation = presentation, result = result)
         if (tryRouteMiddlewares(routeParams, route))
-            return ""
+            return null
 
-        if (viewsStack.isNotEmpty() && viewsStack.last().routeType.isNoStackStructure)
-            close()
+        closeAllNoStack()
 
         //if last view has tabs try to route to its tab if it has in the root the same path
         val tabRouter = tryRouteToTab(path)
         if (tabRouter != null)
-            return  ""
+            return  tabRouter
 
         //if this router in the Closing state pass this route to its path for the execution
         if (isClosing)
@@ -509,10 +535,7 @@ open class RouterSimple(protected val callerKey: String?,
         {
             val exist = scanForPath(path::class)
             if (exist != null)
-            {
-                closeTo(exist.key)
-                return exist.key
-            }
+                return closeTo(exist.key)
         }
 
         //go to route
@@ -535,14 +558,14 @@ open class RouterSimple(protected val callerKey: String?,
         return null
     }
 
-    protected fun doRoute(route: RouteControllerInterface<RoutePath, *>, routeType: RouteType, path: RoutePath, presentation: Presentation, resultKey: String?, result: Result<Any>?): String =
+    protected fun doRoute(route: RouteControllerInterface<RoutePath, *>, routeType: RouteType, path: RoutePath, presentation: Presentation, resultKey: String?, result: Result<Any>?): Router? =
         when (presentation)
         {
             Presentation.ModalNewTask ->
             {
                 val newCallerKey = viewsStack.last().key
                 val router = createRouter(newCallerKey)
-                val viewKey = when (routeType)
+                val returnRouter = when (routeType)
                 {
                     RouteType.Simple ->
                     {
@@ -559,13 +582,13 @@ open class RouterSimple(protected val callerKey: String?,
 
                 routerManager[key] = router
                 commandBuffer.apply(Command.StartModal(key, route.params))
-                viewKey
+                returnRouter
             }
             Presentation.Push, Presentation.Modal ->
             {
                 val view = createView(route, routeType, path, resultKey, result)
                 commandBuffer.apply(Command.Push(path, view, route.animationController()))
-                view.viewKey
+                this
             }
         }
 
