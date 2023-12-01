@@ -192,10 +192,10 @@ open class RouterSimple(protected val callerKey: String?,
 
         val v = popViewStack() ?: return (parent ?: this)
         dispatchClose(v)
-
+/*
         if (pathData[v.key] != null)
             tryCloseMiddlewares(pathData[v.key]!!)
-
+*/
         tryRepeatTopIfEmpty()
         return if (isClosing) parent else this
     }

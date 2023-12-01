@@ -9,7 +9,7 @@ import kotlin.reflect.KClass
 abstract class RouteControllerVMC<Path: RoutePath, VM: ViewModel, V: ViewVM<VM>, C: Component>: RouteController<Path, V>(),
     RouteControllerComponent<Path, V, C>
 {
-    override lateinit var componentClass: KClass<C>
+    final override lateinit var componentClass: KClass<C>
 
     override fun onComposeView(router: Router, view: V, path: Path, component: Any)
     {
