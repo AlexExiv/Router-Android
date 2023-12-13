@@ -6,7 +6,7 @@ import com.speakerboxlite.router.HostView
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.sample.R
 
-class HostFragment: Fragment(R.layout.fragment_host), HostView
+open class HostFragment: Fragment(R.layout.fragment_host), HostView
 {
     override var viewKey: String
         get() = requireArguments().getString("VIEW_KEY")!!

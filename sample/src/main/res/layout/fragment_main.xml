@@ -104,6 +104,12 @@
                     android:text="Show Theme"
                     android:onClick="@{() -> viewmodel.onShowTheme()}"/>
 
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Show Compose"
+                    android:onClick="@{() -> viewmodel.onShowCompose()}"/>
+
             </LinearLayout>
 
         </ScrollView>

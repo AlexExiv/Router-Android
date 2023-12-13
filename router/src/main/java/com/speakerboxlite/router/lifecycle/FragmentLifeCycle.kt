@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import com.speakerboxlite.router.ComposeHostView
 import com.speakerboxlite.router.command.CommandExecutorAndroid
 import com.speakerboxlite.router.HostActivityFactory
 import com.speakerboxlite.router.HostView
@@ -11,12 +12,11 @@ import com.speakerboxlite.router.R
 import com.speakerboxlite.router.RouterManager
 import com.speakerboxlite.router.RouterManagerImpl
 import com.speakerboxlite.router.View
+import com.speakerboxlite.router.ViewFragment
 import com.speakerboxlite.router.ViewTabs
-import com.speakerboxlite.router.exceptions.RouterNotFoundException
 import com.speakerboxlite.router.ext.isPoppedRecursive
 import com.speakerboxlite.router.ext.isRemovingRecursive
 import com.speakerboxlite.router.ext.restartApp
-import com.speakerboxlite.router.hostActivityKey
 import com.speakerboxlite.router.zombie.RouterZombie
 
 class FragmentLifeCycle(private val routerManager: RouterManager,
@@ -28,7 +28,7 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
     {
         if (f is HostView)
         {
-            val router = routerManager.getForView(f.viewKey)
+            val router = routerManager.getForView(f.viewKey) ?: routerManager[f.viewKey]
 
             //In case of we couldn't find the router start the restarting process. It may occur after the app restores the state after the reboot maybe a better
             //solution is to serialize routers.
@@ -46,7 +46,7 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
                 f.router = router
         }
 
-        if (f is View)
+        if (f is ViewFragment)
         {
             val router = routerManager.getForView(f.viewKey)
 
@@ -75,7 +75,7 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
 
     override fun onFragmentViewCreated(fm: FragmentManager, f: Fragment, v: android.view.View, savedInstanceState: Bundle?)
     {
-        if (f is View)
+        if (f is ViewFragment)
             f.router.onComposeAnimation(f)
     }
 
@@ -84,9 +84,16 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
         super.onFragmentStarted(fm, f)
 
         if (f is HostView)
-            f.router.bindExecutor(CommandExecutorAndroid(f.requireActivity(), R.id.root, f.childFragmentManager, hostActivityFactory))
+        {
+            if (f is ComposeHostView)
+            {
 
-        if (f is View)
+            }
+            else
+                f.router.bindExecutor(CommandExecutorAndroid(f.requireActivity(), R.id.root, f.childFragmentManager, hostActivityFactory))
+        }
+
+        if (f is ViewFragment)
         {
             f.localRouter.bindExecutor(CommandExecutorAndroid(f.requireActivity(), R.id.root, f.childFragmentManager, hostActivityFactory))
             f.resultProvider.start()
@@ -107,7 +114,7 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
             }
         }
 
-        if (f is View)
+        if (f is ViewFragment)
         {
             if (f.parentFragment == null && !resumedHoster)
                 f.router.topRouter = f.router
@@ -129,7 +136,7 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
             f.router.unbindExecutor()
         }
 
-        if (f is View)
+        if (f is ViewFragment)
         {
             f.localRouter.unbindExecutor()
             f.resultProvider.pause()
@@ -151,7 +158,7 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
 
         val removingDialog = if (f is View && f is DialogFragment) f.isRemovingRecursive else false
 
-        if (f is View && (removingDialog || f.isPoppedRecursive || f.requireActivity().isFinishing))
+        if (f is ViewFragment && (removingDialog || f.isPoppedRecursive || f.requireActivity().isFinishing))
             f.router.removeView(f.viewKey)
 
         if (f is HostView && (f.isPoppedRecursive || f.requireActivity().isFinishing))

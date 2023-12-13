@@ -1,6 +1,7 @@
 package com.speakerboxlite.router.controllers
 
 import com.speakerboxlite.router.RoutePath
+import com.speakerboxlite.router.annotations.RouteType
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.pattern.UrlMatcher
@@ -22,6 +23,8 @@ abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterfa
     var chainPaths: List<KClass<*>> = listOf()
     final override val isChain: Boolean get() = chainPaths.isNotEmpty()
 
+    final override var isCompose: Boolean = false
+    final override var routeType: RouteType = RouteType.Simple
     final override var isTabs: Boolean = false
 
     final override var middlewares: List<MiddlewareController> = listOf()

@@ -2,12 +2,14 @@ package com.speakerboxlite.router.controllers
 
 import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.Router
+import com.speakerboxlite.router.View
 import com.speakerboxlite.router.ViewModel
+import com.speakerboxlite.router.ViewFragmentVM
 import com.speakerboxlite.router.ViewVM
 import kotlin.reflect.KClass
 
-abstract class RouteControllerVMC<Path: RoutePath, VM: ViewModel, V: ViewVM<VM>, C: Component>: RouteController<Path, V>(),
-    RouteControllerComponent<Path, V, C>
+abstract class RouteControllerVMC<Path: RoutePath, VM: ViewModel, V, C: Component>: RouteController<Path, V>(),
+    RouteControllerComponent<Path, V, C> where V: View, V: ViewVM<VM>
 {
     final override lateinit var componentClass: KClass<C>
 

@@ -209,6 +209,12 @@ class AnnotationProcessor : AbstractProcessor()
         if (routeClass.componentCntrl)
             initBuilder.addStatement("${valName}.onInject(component)")
 
+        if (routeClass.isCompose)
+            initBuilder.addStatement("${valName}.isCompose = true")
+
+        val routeTypeEnum = ClassName("$MAIN_ROUTER_PACK.annotations", "RouteType")
+        initBuilder.addStatement("${valName}.routeType = %T.%L", routeTypeEnum, routeClass.routeType.toString())
+
         val middlewares = middlewareProcessor.buildMiddlewares(elementClass)
         initBuilder.addStatement("${valName}.middlewares = listOf(${middlewares.map { it.varName }.joinToString(", ")})")
 
@@ -261,8 +267,6 @@ class AnnotationProcessor : AbstractProcessor()
         val chainAnnotation = element.getAnnotation(Chain::class.java)
         if (chainAnnotation != null)
         {
-            println("TRY TO CHAIN")
-
             val chainMirrors = try
             {
                 (chainAnnotation.closeItems as Array<TypeMirror>).toList()
@@ -273,7 +277,6 @@ class AnnotationProcessor : AbstractProcessor()
             }
 
             val chins = chainMirrors.mapNotNull {
-                println("TRY TO CHAIN STEP 1")
                 val animDecl = it as? DeclaredType
                 if (animDecl != null)
                 {
@@ -325,10 +328,16 @@ fun TypeElement.hasParent(name: String, interfaces: Boolean = false): Boolean
     val sc = superclass as? DeclaredType ?: return false
     val sd = sc.asElement() as TypeElement
 
-    if (sd.simpleName.contentEquals(name) || (interfaces && this.interfaces.firstOrNull { (it as? DeclaredType)?.asElement()?.simpleName?.contentEquals(name) == true } != null))
-        return true
+    println("TypeElement.hasParent: $name ; ${sd.simpleName} ; ${this.interfaces.mapNotNull { (it as? DeclaredType)?.asElement()?.simpleName }}")
+    println("TypeElement.hasParent: $name ; ${(this.interfaces.firstOrNull { (it as? DeclaredType)?.asElement()?.simpleName?.contentEquals(name) == true } != null)} ; ${this.interfaces.mapNotNull { (it as? DeclaredType)?.asElement()?.simpleName }}")
 
-    return sd.hasParent(name)
+    if (sd.simpleName.contentEquals(name) || (interfaces && this.interfaces.firstOrNull { (it as? DeclaredType)?.asElement()?.simpleName?.contentEquals(name) == true } != null))
+    {
+        println("TypeElement.hasParent: $name ; Success ; ${sd.simpleName}")
+        return true
+    }
+
+    return sd.hasParent(name, interfaces) || (interfaces && this.interfaces.mapNotNull { (it as? DeclaredType)?.asElement() as? TypeElement }.firstOrNull { it.hasParent(name, interfaces) } != null)
 }
 
 fun TypeElement.hasAnyParent(names: List<String>, interfaces: Boolean = false): Boolean =

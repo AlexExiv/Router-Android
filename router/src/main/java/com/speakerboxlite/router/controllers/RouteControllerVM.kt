@@ -2,11 +2,12 @@ package com.speakerboxlite.router.controllers
 
 import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.Router
+import com.speakerboxlite.router.View
 import com.speakerboxlite.router.ViewModel
 import com.speakerboxlite.router.ViewVM
 
-abstract class RouteControllerVM<Path: RoutePath, VM: ViewModel, V: ViewVM<VM>>: RouteController<Path, V>(),
-    RouteControllerComposable<Path, V>
+abstract class RouteControllerVM<Path: RoutePath, VM: ViewModel, V>: RouteController<Path, V>(),
+    RouteControllerComposable<Path, V> where V: View, V: ViewVM<VM>
 {
     override fun onComposeView(router: Router, view: V, path: Path)
     {

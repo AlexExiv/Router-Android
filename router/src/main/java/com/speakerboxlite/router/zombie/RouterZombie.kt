@@ -1,5 +1,6 @@
 package com.speakerboxlite.router.zombie
 
+import androidx.fragment.app.Fragment
 import com.speakerboxlite.router.Result
 import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.RoutePathResult
@@ -7,6 +8,7 @@ import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterLocal
 import com.speakerboxlite.router.RouterTabs
 import com.speakerboxlite.router.View
+import com.speakerboxlite.router.ViewFragment
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.command.CommandExecutor
 import com.speakerboxlite.router.controllers.RouteParamsGen
@@ -62,7 +64,8 @@ internal class RouterZombie : Router, RouterLocal
 
     override fun onComposeAnimation(view: View)
     {
-        view.resultProvider = createResultProvider("")
+        if (view is ViewFragment)
+            view.resultProvider = createResultProvider("")
     }
 
     override fun createRouterLocal(key: String): RouterLocal = RouterZombie()

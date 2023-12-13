@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.sample.base.BaseViewModel
 import com.speakerboxlite.router.sample.chain.ChainPath
+import com.speakerboxlite.router.sample.compose.MainComposePath
 import com.speakerboxlite.router.sample.composite.CompositePath
 import com.speakerboxlite.router.sample.dialogs.DialogPath
 import com.speakerboxlite.router.sample.shared.SharedPath
@@ -71,5 +72,10 @@ class MainViewModel(app: Application): BaseViewModel(app)
     fun onShowTheme()
     {
         router.route(ThemePath(), Presentation.ModalNewTask)
+    }
+
+    fun onShowCompose()
+    {
+        router.route(MainComposePath())
     }
 }

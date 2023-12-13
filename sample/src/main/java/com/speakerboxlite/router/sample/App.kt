@@ -2,12 +2,14 @@ package com.speakerboxlite.router.sample
 
 import android.app.Application
 import android.content.Intent
+import androidx.fragment.app.Fragment
 import com.speakerboxlite.router.lifecycle.ActivityLifeCycle
 import com.speakerboxlite.router.HostActivityFactory
 import com.speakerboxlite.router.sample.base.animations.AnimationControllerDefault
 import com.speakerboxlite.router.sample.base.HostActivity
 import com.speakerboxlite.router.sample.base.HostLandscapeActivity
 import com.speakerboxlite.router.sample.base.RouteStyle
+import com.speakerboxlite.router.sample.compose.ComposeHostFragment
 import com.speakerboxlite.router.sample.di.AppComponent
 import com.speakerboxlite.router.sample.di.DaggerAppComponent
 import com.speakerboxlite.router.sample.di.modules.AppData
@@ -47,4 +49,6 @@ class App: Application(), HostActivityFactory
             else -> Intent(this, HostActivity::class.java)
         }
     }
+
+    override fun createHost(): Fragment = ComposeHostFragment()
 }

@@ -1,6 +1,7 @@
 package com.speakerboxlite.router
 
 import com.speakerboxlite.router.annotations.Presentation
+import com.speakerboxlite.router.annotations.RouteType
 import java.lang.ref.WeakReference
 
 class RouterTabDelegateImpl(val index: Int,

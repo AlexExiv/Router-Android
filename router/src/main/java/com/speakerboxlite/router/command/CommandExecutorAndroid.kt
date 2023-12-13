@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentManager.OnBackStackChangedListener
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.speakerboxlite.router.ComposeHostView
 import com.speakerboxlite.router.HOST_ACTIVITY_INTENT_DATA_KEY
 import com.speakerboxlite.router.HOST_ACTIVITY_KEY
 import com.speakerboxlite.router.HostActivityFactory
@@ -68,6 +69,7 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
             is Command.CloseTo -> closeTo(command.key)
             is Command.CloseAll -> activity.finish()
             is Command.StartModal -> startActivity(command.key, command.params)
+            is Command.ChangeHost -> changeHost(command.key)
             is Command.Dialog -> showDialog(command.view)
             is Command.CloseDialog -> closeDialog(command.key)
             is Command.Push -> pushFragment(command.path, command.view, command.animation, false)
@@ -110,13 +112,29 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
         activity.startActivity(intent)
     }
 
-    private fun pushFragment(path: RoutePath, view: View, animation: AnimationController<RoutePath, View>?, replacing: Boolean)
+    private fun changeHost(key: String)
+    {
+        val host = activityFactory.createHost()
+        if (host is ComposeHostView)
+            host.viewKey = key
+        
+        val transaction = fragmentManager.beginTransaction()
+
+        transaction
+            .replace(containerId, host, key)
+            .addToBackStack(key)
+            .commit()
+
+        fragmentManager.executePendingTransactions()
+    }
+
+    private fun pushFragment(path: RoutePath?, view: View, animation: AnimationController<RoutePath, View>?, replacing: Boolean)
     {
         if (view is Fragment)
         {
             val transaction = fragmentManager.beginTransaction()
 
-            if (animation != null)
+            if (animation != null && path != null)
             {
                 val current = fragmentManager.findFragmentById(containerId)
 

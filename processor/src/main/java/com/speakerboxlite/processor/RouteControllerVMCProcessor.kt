@@ -38,7 +38,15 @@ class RouteControllerVMCProcessor(processingEnv: ProcessingEnvironment,
         val componentClass = ClassName(componentElement.getPack(processingEnv), componentElement.simpleName.toString())
 
         if (names.containsAll(REQUIRED_METHODS))
-            return RouteClass(elementClassName, pathClass, viewClass, true, componentClass)
+        {
+            return RouteClass(elementClassName,
+                pathClass,
+                viewClass,
+                true,
+                componentClass,
+                isCompose(viewElement),
+                getRouteType(viewElement))
+        }
 
         val classNameImpl = "${className}_IMP"
         val classBuilder = TypeSpec.classBuilder(classNameImpl)
@@ -87,7 +95,13 @@ class RouteControllerVMCProcessor(processingEnv: ProcessingEnvironment,
 
         file.writeTo(File(kaptKotlinGeneratedDir))
 
-        return RouteClass(ClassName(pack, classNameImpl), pathClass, viewClass, true, componentClass)
+        return RouteClass(ClassName(pack, classNameImpl),
+            pathClass,
+            viewClass,
+            true,
+            componentClass,
+            isCompose(viewElement),
+            getRouteType(viewElement))
     }
 
     companion object

@@ -10,10 +10,12 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.DialogFragment
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterLocal
-import com.speakerboxlite.router.ViewVM
+import com.speakerboxlite.router.ViewDialog
+import com.speakerboxlite.router.ViewFragmentVM
 import com.speakerboxlite.router.result.RouterResultProvider
 
-abstract class BaseViewModelDialogFragment<VM: BaseViewModel, VDB: ViewDataBinding>(open val layoutId: Int): DialogFragment(), ViewVM<VM>
+abstract class BaseViewModelDialogFragment<VM: BaseViewModel, VDB: ViewDataBinding>(open val layoutId: Int): DialogFragment(),
+    ViewFragmentVM<VM>, ViewDialog
 {
     override var viewKey: String
         get() = requireArguments().getString("VIEW_KEY")!!
@@ -44,11 +46,6 @@ abstract class BaseViewModelDialogFragment<VM: BaseViewModel, VDB: ViewDataBindi
     {
         super.onViewCreated(view, savedInstanceState)
         onBindData()
-    }
-
-    override fun onDismiss(dialog: DialogInterface)
-    {
-        super.onDismiss(dialog)
     }
 
     open fun onBindData()

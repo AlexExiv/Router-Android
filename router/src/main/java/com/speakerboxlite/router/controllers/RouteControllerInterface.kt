@@ -1,6 +1,8 @@
 package com.speakerboxlite.router.controllers
 
+import androidx.lifecycle.ViewModelStoreOwner
 import com.speakerboxlite.router.RoutePath
+import com.speakerboxlite.router.annotations.RouteType
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.annotations.Presentation
@@ -13,6 +15,8 @@ interface RouteControllerInterface<Path: RoutePath, V: View>
     val creatingInjector: Boolean
     val preferredPresentation: Presentation
     val isChain: Boolean
+    val isCompose: Boolean
+    val routeType: RouteType
     val isTabs: Boolean
 
     val middlewares: List<MiddlewareController>

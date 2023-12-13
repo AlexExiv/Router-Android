@@ -2,6 +2,7 @@ package com.speakerboxlite.router
 
 import android.util.Log
 import com.speakerboxlite.router.annotations.Presentation
+import com.speakerboxlite.router.annotations.RouteType
 import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
 import com.speakerboxlite.router.command.CommandBufferImpl
@@ -17,15 +18,9 @@ import com.speakerboxlite.router.result.RouterResultProviderImpl
 import java.util.UUID
 import kotlin.reflect.KClass
 
-enum class RouteType
-{
-    Simple, Dialog, BTS;
-
-    val isNoStackStructure: Boolean get() = this == Dialog || this == BTS
-}
-
 data class ViewMeta(val key: String,
                     val routeType: RouteType,
+                    val isCompose: Boolean,
                     val route: RouteControllerInterface<RoutePath, *>,
                     val path: KClass<*>,
                     val result: Result<Any>?,
@@ -314,7 +309,8 @@ open class RouterSimple(protected val callerKey: String?,
             it.onComposeView(this, view, path)
         }
 
-        view.resultProvider = RouterResultProviderImpl(view.viewKey, resultManager)
+        if (view is ViewFragment)
+            view.resultProvider = RouterResultProviderImpl(view.viewKey, resultManager)
     }
 
     override fun onComposeAnimation(view: View)
@@ -558,39 +554,43 @@ open class RouterSimple(protected val callerKey: String?,
         return null
     }
 
-    protected fun doRoute(route: RouteControllerInterface<RoutePath, *>, routeType: RouteType, path: RoutePath, presentation: Presentation, resultKey: String?, result: Result<Any>?): Router? =
-        when (presentation)
+    protected fun doRoute(route: RouteControllerInterface<RoutePath, *>, routeType: RouteType, path: RoutePath, presentation: Presentation, resultKey: String?, result: Result<Any>?): Router?
+    {
+        val lastIsCompose = viewsStack.lastOrNull()?.route?.isCompose
+        return if (presentation == Presentation.ModalNewTask || (lastIsCompose != null && lastIsCompose != route.isCompose))
         {
-            Presentation.ModalNewTask ->
+            val newCallerKey = viewsStack.last().key
+            val router = createRouter(newCallerKey)
+            val returnRouter = when (routeType)
             {
-                val newCallerKey = viewsStack.last().key
-                val router = createRouter(newCallerKey)
-                val returnRouter = when (routeType)
+                RouteType.Simple ->
                 {
-                    RouteType.Simple ->
-                    {
-                        if (result == null)
-                            router.route(path = path, presentation = Presentation.Push)
-                        else
-                            router.routeWithResult(path = path as RoutePathResult<Any>, presentation = Presentation.Push, result = result)
-                    }
-
-                    else -> throw ImpossibleRouteException("Modal route can't contains $routeType as ROOT")
+                    if (result == null)
+                        router.route(path = path, presentation = Presentation.Push)
+                    else
+                        router.routeWithResult(path = path as RoutePathResult<Any>, presentation = Presentation.Push, result = result)
                 }
 
-                val key = UUID.randomUUID().toString()
+                else -> throw ImpossibleRouteException("Modal route can't contains $routeType as ROOT")
+            }
 
-                routerManager[key] = router
+            val key = UUID.randomUUID().toString()
+            routerManager[key] = router
+
+            if (presentation == Presentation.ModalNewTask)
                 commandBuffer.apply(Command.StartModal(key, route.params))
-                returnRouter
-            }
-            Presentation.Push, Presentation.Modal ->
-            {
-                val view = createView(route, routeType, path, resultKey, result)
-                commandBuffer.apply(Command.Push(path, view, route.animationController()))
-                this
-            }
+            else
+                commandBuffer.apply(Command.ChangeHost(key))
+
+            returnRouter
         }
+        else
+        {
+            val view = createView(route, routeType, path, resultKey, result)
+            commandBuffer.apply(Command.Push(path, view, route.animationController()))
+            this
+        }
+    }
 
     protected fun createView(route: RouteControllerInterface<RoutePath, *>, routeType: RouteType, path: RoutePath, resultKey: String?, result: Result<Any>?): View
     {
@@ -615,7 +615,7 @@ open class RouterSimple(protected val callerKey: String?,
         if (viewsStack.isEmpty())
             rootPath = path
 
-        val meta = ViewMeta(view.viewKey, routeType, route, path::class, result)
+        val meta = ViewMeta(view.viewKey, routeType, route.isCompose, route, path::class, result)
         viewsStack.add(meta)
         viewsStackById[meta.key] = meta
 
