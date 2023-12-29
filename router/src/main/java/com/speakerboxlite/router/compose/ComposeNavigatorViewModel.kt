@@ -10,41 +10,41 @@ class ComposeNavigatorViewModel: ViewModel(), RouterViewModelStoreProvider
 {
     private val viewModelStores = mutableMapOf<String, ViewModelStore>()
 
-    fun clear(backStackEntryId: String) {
-        // Clear and remove the NavGraph's ViewModelStore
-        val viewModelStore = viewModelStores.remove(backStackEntryId)
-        viewModelStore?.clear()
-    }
-
-    override fun onCleared() {
-        for (store in viewModelStores.values) {
+    override fun onCleared()
+    {
+        for (store in viewModelStores.values)
             store.clear()
-        }
+
         viewModelStores.clear()
     }
 
-    override fun getStore(id: String): ViewModelStore {
+    override fun getStore(id: String): ViewModelStore
+    {
         var viewModelStore = viewModelStores[id]
-        if (viewModelStore == null) {
+        if (viewModelStore == null)
+        {
             viewModelStore = ViewModelStore()
             viewModelStores[id] = viewModelStore
         }
+
         return viewModelStore
+    }
+
+    override fun clear(id: String)
+    {
+        val viewModelStore = viewModelStores.remove(id)
+        viewModelStore?.clear()
     }
 
     companion object
     {
         private val FACTORY: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return ComposeNavigatorViewModel() as T
-            }
+            override fun <T : ViewModel> create(modelClass: Class<T>): T = ComposeNavigatorViewModel() as T
         }
 
         @JvmStatic
-        fun getInstance(viewModelStore: ViewModelStore): ComposeNavigatorViewModel {
-            val viewModelProvider = ViewModelProvider(viewModelStore, FACTORY)
-            return viewModelProvider.get()
-        }
+        fun getInstance(viewModelStore: ViewModelStore): ComposeNavigatorViewModel =
+            ViewModelProvider(viewModelStore, FACTORY).get()
     }
 }

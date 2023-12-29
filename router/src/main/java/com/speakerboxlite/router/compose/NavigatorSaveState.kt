@@ -13,17 +13,17 @@ internal val LocalComposeNavigatorStateHolder: ProvidableCompositionLocal<Saveab
 
 @Composable
 internal fun rememberComposeNavigator(key: String,
-                                      viewModelProvider: RouterViewModelStoreProvider?,
-                                      parent: ComposeNavigator?): ComposeNavigator
+                                      initialBackStack: List<StackEntrySaveable> = listOf(),
+                                      viewModelProvider: RouterViewModelStoreProvider?): ComposeNavigator
 {
     val stateHolder = LocalComposeNavigatorStateHolder.current
     val navigatorSaver = LocalNavigatorSaver.current
 
-    val saver = remember(navigatorSaver, stateHolder, parent, viewModelProvider) {
-        navigatorSaver.saver(key, stateHolder, viewModelProvider, parent)
+    val saver = remember(key, navigatorSaver, stateHolder, viewModelProvider) {
+        navigatorSaver.saver(key, stateHolder, viewModelProvider)
     }
 
-    return rememberSaveable(saver = saver, key = key) {
-        ComposeNavigator(key, stateHolder, viewModelProvider, listOf(), parent)
+    return rememberSaveable(inputs = arrayOf(key), saver = saver, key = key) {
+        ComposeNavigator(key, stateHolder, viewModelProvider, initialBackStack.map { StackEntry(it, viewModelProvider) })
     }
 }

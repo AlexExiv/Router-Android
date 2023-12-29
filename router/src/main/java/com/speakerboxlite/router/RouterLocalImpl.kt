@@ -15,9 +15,7 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
     val weakRouter = WeakReference(router)
     val router: RouterSimple? get() = weakRouter.get()
 
-    override var topRouter: Router?
-        get() = router?.topRouter
-        set(value) { router?.topRouter = value }
+    override val topRouter: Router? get() = router?.topRouter
 
     override val hasPreviousScreen: Boolean get() = router!!.hasPreviousScreen
 

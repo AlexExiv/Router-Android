@@ -10,4 +10,5 @@ interface RouterViewModelProvider<VM: ViewModel>
 interface RouterViewModelStoreProvider
 {
     fun getStore(id: String): ViewModelStore
+    fun clear(id: String)
 }

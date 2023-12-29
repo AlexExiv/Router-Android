@@ -4,7 +4,7 @@ interface RouterManager
 {
     val isAppRestarting: Boolean
 
-    var top: Router?
+    val top: Router
 
     operator fun set(key: String, value: Router?)
     operator fun get(key: String): Router?
@@ -12,4 +12,11 @@ interface RouterManager
     fun bindView(router: Router, viewKey: String)
     fun unbindView(viewKey: String)
     fun getForView(viewKey: String): Router?
+
+    fun push(viewKey: String, router: Router)
+
+    fun pushReel(viewKey: String, routerTabs: RouterTabs)
+    fun switchReel(viewKey: String, index: Int)
+
+    fun pop(toKey: String? = null): Router?
 }

@@ -10,7 +10,7 @@ typealias Result<R> = (R) -> Unit
 interface Router
 {
     /** Current top router **/
-    var topRouter: Router?
+    val topRouter: Router?
 
     /**
      * Returns information about whether the stack has a previous screen.

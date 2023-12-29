@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import com.speakerboxlite.router.compose.LocalRouter
 import com.speakerboxlite.router.compose.currentOrThrow
 import com.speakerboxlite.router.sample.base.BaseViewCompose
+import com.speakerboxlite.router.sample.step.StepPath
 
 class StepCompose(val step: Int): BaseViewCompose()
 {
@@ -39,6 +40,11 @@ fun StepComposeView(step: Int, counter: MutableState<Int>)
             Row {
                 Button(onClick = { counter.value += 1 }) {
                     Text(text = "Fake button ${counter.value}")
+                }
+            }
+            Row {
+                Button(onClick = { router.route(StepPath(step + 1)) }) {
+                    Text(text = "Next step fragment $step")
                 }
             }
         }

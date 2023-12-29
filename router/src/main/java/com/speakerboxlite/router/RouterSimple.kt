@@ -15,6 +15,7 @@ import com.speakerboxlite.router.exceptions.RouteNotFoundException
 import com.speakerboxlite.router.result.ResultManager
 import com.speakerboxlite.router.result.RouterResultProvider
 import com.speakerboxlite.router.result.RouterResultProviderImpl
+import kotlinx.coroutines.Dispatchers
 import java.util.UUID
 import kotlin.reflect.KClass
 
@@ -35,16 +36,14 @@ data class ViewMeta(val key: String,
 open class RouterSimple(protected val callerKey: String?,
                         val parent: RouterSimple?,
                         protected val routeManager: RouteManager,
-                        protected val routerManager: RouterManager,
+                        internal val routerManager: RouterManager,
                         protected val resultManager: ResultManager): Router
 {
     protected val pathData = mutableMapOf<String, RoutePath>()
 
     protected val commandBuffer: CommandBuffer = CommandBufferImpl()
 
-    override var topRouter: Router?
-        get() = routerManager.top
-        set(value) { routerManager.top = value }
+    override val topRouter: Router? get() = routerManager.top
 
     override val hasPreviousScreen: Boolean get() = parent != null || viewsStack.size > 1
 
@@ -90,6 +89,7 @@ open class RouterSimple(protected val callerKey: String?,
         val view = createView(route, RouteType.Simple, path, null, null)
         commandBuffer.apply(Command.Replace(path, view, route.animationController()))
 
+        routerManager.push(view.viewKey, this)
         return this
     }
 
@@ -100,8 +100,10 @@ open class RouterSimple(protected val callerKey: String?,
         if (tryRouteMiddlewares(routeParams, route))
             return null
 
-        commandBuffer.apply(Command.Dialog(createView(route, RouteType.Dialog, path, null, null)))
+        val view = createView(route, RouteType.Dialog, path, null, null)
+        commandBuffer.apply(Command.Dialog(view))
 
+        routerManager.push(view.viewKey, this)
         return this
     }
 
@@ -112,8 +114,10 @@ open class RouterSimple(protected val callerKey: String?,
         if (tryRouteMiddlewares(routeParams, route)  )
             return null
 
-        commandBuffer.apply(Command.Dialog(createView(route, RouteType.Dialog, path, null) { result(it as  R) }))
+        val view = createView(route, RouteType.Dialog, path, null) { result(it as  R) }
+        commandBuffer.apply(Command.Dialog(view))
 
+        routerManager.push(view.viewKey, this)
         return this
     }
 
@@ -124,8 +128,10 @@ open class RouterSimple(protected val callerKey: String?,
         if (tryRouteMiddlewares(routeParams, route))
             return null
 
-        commandBuffer.apply(Command.BottomSheet(createView(route, RouteType.BTS, path, null, null)))
+        val view = createView(route, RouteType.BTS, path, null, null)
+        commandBuffer.apply(Command.BottomSheet(view))
 
+        routerManager.push(view.viewKey, this)
         return this
     }
 
@@ -136,8 +142,10 @@ open class RouterSimple(protected val callerKey: String?,
         if (tryRouteMiddlewares(routeParams, route))
             return null
 
-        commandBuffer.apply(Command.BottomSheet(createView(route, RouteType.BTS, path, null) { result(it as  R) }))
+        val view = createView(route, RouteType.BTS, path, null) { result(it as  R) }
+        commandBuffer.apply(Command.BottomSheet(view))
 
+        routerManager.push(view.viewKey, this)
         return this
     }
 
@@ -191,8 +199,9 @@ open class RouterSimple(protected val callerKey: String?,
         if (pathData[v.key] != null)
             tryCloseMiddlewares(pathData[v.key]!!)
 */
+
         tryRepeatTopIfEmpty()
-        return if (isClosing) parent else this
+        return if (isClosing) parent else this //routerManager.pop()//
     }
 
     override fun close(): Router?
@@ -326,7 +335,10 @@ open class RouterSimple(protected val callerKey: String?,
     override fun createRouterTabs(key: String, presentInTab: Boolean): RouterTabs
     {
         if (routerTabsByKey[key] == null)
-            routerTabsByKey[key] = RouterTabsImpl(viewsStack.lastOrNull()?.key ?: "", this, presentInTab)
+        {
+            routerTabsByKey[key] = RouterTabsImpl(key, viewsStack.lastOrNull()?.key ?: "", this, presentInTab)
+            routerManager.pushReel(key, routerTabsByKey[key]!!)
+        }
 
         return routerTabsByKey[key]!!
     }
@@ -582,12 +594,13 @@ open class RouterSimple(protected val callerKey: String?,
             else
                 commandBuffer.apply(Command.ChangeHost(key))
 
-            returnRouter
+            returnRouter?.also { routerManager.push(key, it) }
         }
         else
         {
             val view = createView(route, routeType, path, resultKey, result)
             commandBuffer.apply(Command.Push(path, view, route.animationController()))
+            routerManager.push(view.viewKey, this)
             this
         }
     }
@@ -638,6 +651,7 @@ open class RouterSimple(protected val callerKey: String?,
             return null
 
         val v = viewsStack.removeLast()
+        routerManager.pop()
 
         if (viewsStack.isEmpty() && parent != null)
             isClosing = true

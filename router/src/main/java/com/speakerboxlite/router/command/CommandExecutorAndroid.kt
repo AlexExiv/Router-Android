@@ -11,6 +11,7 @@ import com.speakerboxlite.router.ComposeHostView
 import com.speakerboxlite.router.HOST_ACTIVITY_INTENT_DATA_KEY
 import com.speakerboxlite.router.HOST_ACTIVITY_KEY
 import com.speakerboxlite.router.HostActivityFactory
+import com.speakerboxlite.router.HostCloseable
 import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.controllers.AnimationController
@@ -18,10 +19,11 @@ import com.speakerboxlite.router.ext.isPopped
 import com.speakerboxlite.router.ext.isRemovingRecursive
 import java.io.Serializable
 
-class CommandExecutorAndroid(val activity: FragmentActivity,
-                             @IdRes val containerId: Int,
-                             val fragmentManager: FragmentManager,
-                             val activityFactory: HostActivityFactory): CommandExecutor
+open class CommandExecutorAndroid(val activity: FragmentActivity,
+                                  @IdRes val containerId: Int,
+                                  val fragmentManager: FragmentManager,
+                                  val activityFactory: HostActivityFactory? = null,
+                                  val hostCloseable: HostCloseable? = null): CommandExecutor
 {
     val backstackCallback = object : OnBackStackChangedListener
     {
@@ -67,7 +69,7 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
         {
             is Command.Close -> close()
             is Command.CloseTo -> closeTo(command.key)
-            is Command.CloseAll -> activity.finish()
+            is Command.CloseAll -> closeAll()
             is Command.StartModal -> startActivity(command.key, command.params)
             is Command.ChangeHost -> changeHost(command.key)
             is Command.Dialog -> showDialog(command.view)
@@ -93,7 +95,12 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
             fragmentManager.popBackStackImmediate()
         }
         else
-            activity.finish()
+            closeAll()
+    }
+
+    private fun closeAll()
+    {
+        hostCloseable?.closeHost()
     }
 
     private fun closeTo(key: String)
@@ -106,26 +113,17 @@ class CommandExecutorAndroid(val activity: FragmentActivity,
 
     private fun startActivity(key: String, params: Serializable?)
     {
-        val intent = activityFactory.create(params)
-        intent.putExtra(HOST_ACTIVITY_KEY, key)
-        params?.also { intent.putExtra(HOST_ACTIVITY_INTENT_DATA_KEY, it) }
-        activity.startActivity(intent)
+        val af = activityFactory ?: error("You are trying to start a new activity but haven't specified factory")
+        af.startActivity(params) {
+            intent ->
+            intent.putExtra(HOST_ACTIVITY_KEY, key)
+            params?.also { intent.putExtra(HOST_ACTIVITY_INTENT_DATA_KEY, it) }
+        }
     }
 
-    private fun changeHost(key: String)
+    protected open fun changeHost(key: String)
     {
-        val host = activityFactory.createHost()
-        if (host is ComposeHostView)
-            host.viewKey = key
-        
-        val transaction = fragmentManager.beginTransaction()
 
-        transaction
-            .replace(containerId, host, key)
-            .addToBackStack(key)
-            .commit()
-
-        fragmentManager.executePendingTransactions()
     }
 
     private fun pushFragment(path: RoutePath?, view: View, animation: AnimationController<RoutePath, View>?, replacing: Boolean)

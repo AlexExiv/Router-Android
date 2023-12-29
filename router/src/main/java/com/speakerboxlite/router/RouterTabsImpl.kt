@@ -10,7 +10,8 @@ import java.lang.ref.WeakReference
 import java.util.UUID
 import kotlin.reflect.KClass
 
-class RouterTabsImpl(val callerKey: String,
+class RouterTabsImpl(val viewKey: String,
+                     val callerKey: String,
                      router: RouterSimple,
                      val presentInTab: Boolean): RouterTabs
 {
@@ -102,7 +103,7 @@ class RouterTabsImpl(val callerKey: String,
         return router.closeToTop()
     }
 
-    internal operator fun get(i: Int): Router = tabRouters[i]!!
+    override operator fun get(index: Int): Router = tabRouters[index]!!
 
     internal fun scanForPath(clazz: KClass<*>): ViewMeta?
     {
@@ -131,6 +132,9 @@ class RouterTabsImpl(val callerKey: String,
     {
         tabIndex = i
         if (tabChangeCallback != null)
+        {
+            router.routerManager.switchReel(viewKey, i)
             commandBuffer.apply(Command.ChangeTab(tabChangeCallback!!, i))
+        }
     }
 }

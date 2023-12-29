@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentManager
 import com.speakerboxlite.router.ComposeHostView
 import com.speakerboxlite.router.command.CommandExecutorAndroid
 import com.speakerboxlite.router.HostActivityFactory
+import com.speakerboxlite.router.HostCloseable
 import com.speakerboxlite.router.HostView
 import com.speakerboxlite.router.R
 import com.speakerboxlite.router.RouterManager
@@ -14,13 +15,13 @@ import com.speakerboxlite.router.RouterManagerImpl
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.ViewFragment
 import com.speakerboxlite.router.ViewTabs
+import com.speakerboxlite.router.command.CommandExecutor
 import com.speakerboxlite.router.ext.isPoppedRecursive
 import com.speakerboxlite.router.ext.isRemovingRecursive
 import com.speakerboxlite.router.ext.restartApp
 import com.speakerboxlite.router.zombie.RouterZombie
 
-class FragmentLifeCycle(private val routerManager: RouterManager,
-                        private val hostActivityFactory: HostActivityFactory): FragmentManager.FragmentLifecycleCallbacks()
+open class FragmentLifeCycle(private val routerManager: RouterManager): FragmentManager.FragmentLifecycleCallbacks()
 {
     private var resumedHoster = false
 
@@ -90,16 +91,16 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
 
             }
             else
-                f.router.bindExecutor(CommandExecutorAndroid(f.requireActivity(), R.id.root, f.childFragmentManager, hostActivityFactory))
+                f.router.bindExecutor(onCreateExecutor(f))
         }
 
         if (f is ViewFragment)
         {
-            f.localRouter.bindExecutor(CommandExecutorAndroid(f.requireActivity(), R.id.root, f.childFragmentManager, hostActivityFactory))
+            f.localRouter.bindExecutor(onCreateExecutor(f))
             f.resultProvider.start()
 
             if (f is ViewTabs)
-                f.routerTabs.bindExecutor(CommandExecutorAndroid(f.requireActivity(), 0, f.childFragmentManager, hostActivityFactory))
+                f.routerTabs.bindExecutor(onCreateExecutor(f))
         }
     }
 
@@ -109,15 +110,15 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
         {
             if (!resumedHoster)
             {
-                f.router.topRouter = f.router
+                //f.router.topRouter = f.router
                 resumedHoster = true
             }
         }
 
         if (f is ViewFragment)
         {
-            if (f.parentFragment == null && !resumedHoster)
-                f.router.topRouter = f.router
+            //if (f.parentFragment == null && !resumedHoster)
+                //f.router.topRouter = f.router
         }
     }
 
@@ -164,4 +165,7 @@ class FragmentLifeCycle(private val routerManager: RouterManager,
         if (f is HostView && (f.isPoppedRecursive || f.requireActivity().isFinishing))
             f.router.removeView(f.viewKey)
     }
+
+    protected open fun onCreateExecutor(fragment: Fragment): CommandExecutor =
+        CommandExecutorAndroid(fragment.requireActivity(), R.id.root, fragment.childFragmentManager, fragment.requireActivity() as? HostActivityFactory, fragment as? HostCloseable)
 }

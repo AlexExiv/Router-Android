@@ -5,8 +5,10 @@ import androidx.annotation.IdRes
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.speakerboxlite.router.HOST_ACTIVITY_INTENT_DATA_KEY
 import com.speakerboxlite.router.HOST_ACTIVITY_KEY
+import com.speakerboxlite.router.HostCloseable
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.compose.ComposeNavigator
+import com.speakerboxlite.router.compose.FragmentContainerView
 import com.speakerboxlite.router.compose.ViewCompose
 import java.io.Serializable
 
@@ -19,7 +21,8 @@ interface ComposeViewHoster
 }
 
 class CommandExecutorCompose(val navigator: ComposeNavigator,
-                             val hoster: ComposeViewHoster? = null): CommandExecutor
+                             val hoster: ComposeViewHoster? = null,
+                             val hostCloseable: HostCloseable? = null): CommandExecutor
 {
     override fun onBind()
     {
@@ -39,7 +42,7 @@ class CommandExecutorCompose(val navigator: ComposeNavigator,
             is Command.CloseTo -> closeTo(command.key)
             is Command.CloseAll -> closeAll()
             is Command.StartModal -> startActivity(command.key, command.params)
-            is Command.ChangeHost -> {}
+            is Command.ChangeHost -> changeHost(command.key)
             is Command.Dialog -> showDialog(command.view)
             is Command.CloseDialog -> closeDialog(command.key)
             is Command.Push -> push(command.view)
@@ -61,7 +64,7 @@ class CommandExecutorCompose(val navigator: ComposeNavigator,
 
     private fun closeAll()
     {
-        hoster?.close()
+        hostCloseable?.closeHost()
     }
 
     private fun closeTo(key: String)
@@ -79,6 +82,13 @@ class CommandExecutorCompose(val navigator: ComposeNavigator,
             intent.putExtra(HOST_ACTIVITY_KEY, key)
             params?.also { intent.putExtra(HOST_ACTIVITY_INTENT_DATA_KEY, it) }
         }
+    }
+
+    private fun changeHost(key: String)
+    {
+        val host = FragmentContainerView()
+        host.viewKey = key
+        navigator.push(host)
     }
 
     private fun push(view: View)

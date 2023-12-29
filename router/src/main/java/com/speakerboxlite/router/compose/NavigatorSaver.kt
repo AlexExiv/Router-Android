@@ -17,7 +17,6 @@ public fun interface NavigatorSaver<Saveable : Any> {
         key: String,
         stateHolder: SaveableStateHolder,
         viewModelProvider: RouterViewModelStoreProvider?,
-        parent: ComposeNavigator?
     ): Saver<ComposeNavigator, Saveable>
 }
 
@@ -32,11 +31,16 @@ public fun interface NavigatorSaver<Saveable : Any> {
  *
  * If you want to use only Parcelable and want a NavigatorSaver that forces the use Parcelable, you can use [parcelableNavigatorSaver].
  */
-public fun defaultNavigatorSaver(): NavigatorSaver<Any> = NavigatorSaver { key, stateHolder, viewModelProvider, parent ->
+public fun defaultNavigatorSaver(): NavigatorSaver<Any> = NavigatorSaver { key, stateHolder, viewModelProvider ->
     listSaver(
-        save = { navigator -> navigator.items.map { StackEntrySaveable(it.view) } },
-        restore = { items -> ComposeNavigator(key, stateHolder, viewModelProvider, items.map { StackEntry(it, viewModelProvider) }, parent) }
+        save = { navigator ->
+            navigator.getStackEntriesSaveable()
+       },
+        restore = { items ->
+            ComposeNavigator(key, stateHolder, viewModelProvider, items.map { StackEntry(it, viewModelProvider) })
+        }
     )
 }
 
-data class StackEntrySaveable(val view: ViewCompose): Serializable
+data class StackEntrySaveable(val view: ViewCompose,
+                              val isPopped: Boolean): Serializable

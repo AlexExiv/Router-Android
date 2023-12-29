@@ -1,6 +1,11 @@
 package com.speakerboxlite.router.compose
 
-interface Stack<Item>
+interface IStackEntry
+{
+    fun onDispose()
+}
+
+interface Stack<Item: IStackEntry>
 {
     val items: List<Item>
     val lastItemOrNull: Item?
@@ -13,9 +18,10 @@ interface Stack<Item>
     fun push(view: ViewCompose)
     fun replace(view: ViewCompose)
 
-    fun pop(): Boolean
+    fun pop()
     fun popAll()
-    fun popUntil(predicate: (Item) -> Boolean): Boolean
+    fun popToRoot()
+    fun popUntil(predicate: (Item) -> Boolean)
 
     fun clearEvent()
 }

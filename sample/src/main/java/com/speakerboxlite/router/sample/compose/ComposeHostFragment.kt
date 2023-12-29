@@ -7,15 +7,18 @@ import android.view.ViewGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.ComposeView
+import com.speakerboxlite.router.ComposeFragmentHostView
 import com.speakerboxlite.router.ComposeHostView
 import com.speakerboxlite.router.ComposeHostViewRoot
+import com.speakerboxlite.router.HostView
 import com.speakerboxlite.router.command.ComposeViewHoster
 import com.speakerboxlite.router.command.IntentBuilder
 import com.speakerboxlite.router.compose.ComposeNavigator
+import com.speakerboxlite.router.compose.HostComposeFragmentFactory
 import com.speakerboxlite.router.sample.base.HostFragment
 import java.io.Serializable
 
-class ComposeHostFragment: HostFragment(), ComposeHostView, ComposeViewHoster
+class ComposeHostFragment: HostFragment(), ComposeHostView, ComposeViewHoster, HostComposeFragmentFactory
 {
     override var root: ComposeHostViewRoot = mutableStateOf(null)
 
@@ -32,7 +35,7 @@ class ComposeHostFragment: HostFragment(), ComposeHostView, ComposeViewHoster
     {
         super.onStart()
         root.value = {
-            ComposeNavigator(router = router, hoster = this)
+            ComposeNavigator(router = router, hoster = this, fragmentHostFactory = this)
         }
     }
 
@@ -45,4 +48,6 @@ class ComposeHostFragment: HostFragment(), ComposeHostView, ComposeViewHoster
     {
         parentFragmentManager.popBackStack()
     }
+
+    override fun onCreate(): ComposeFragmentHostView = HostFragment()
 }

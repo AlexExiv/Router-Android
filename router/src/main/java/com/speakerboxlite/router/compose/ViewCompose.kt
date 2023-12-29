@@ -9,3 +9,8 @@ interface ViewCompose: View, Serializable
     @Composable
     fun Root()
 }
+
+interface TabsView: ViewCompose
+{
+    val tabNavigators: List<ComposeNavigator>
+}

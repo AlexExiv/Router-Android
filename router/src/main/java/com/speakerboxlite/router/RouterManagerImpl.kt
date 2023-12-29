@@ -2,11 +2,9 @@ package com.speakerboxlite.router
 
 import android.util.Log
 
-class RouterManagerImpl : RouterManager
+class RouterManagerImpl: RouterManager, RouterStack by RouterStackImpl()
 {
     override var isAppRestarting: Boolean = false
-
-    override var top: Router? = null
 
     private var rootRouter: RouterSimple? = null
 

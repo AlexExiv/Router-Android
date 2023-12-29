@@ -5,11 +5,13 @@ import android.app.Application
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.speakerboxlite.router.HostActivityFactory
+import com.speakerboxlite.router.HostCloseable
 import com.speakerboxlite.router.R
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterManager
 import com.speakerboxlite.router.RouterManagerImpl
 import com.speakerboxlite.router.START_ACTIVITY_KEY
+import com.speakerboxlite.router.command.CommandExecutor
 import com.speakerboxlite.router.zombie.RouterZombie
 import com.speakerboxlite.router.command.CommandExecutorAndroid
 import com.speakerboxlite.router.ext.restartApp
@@ -21,8 +23,7 @@ interface BaseHostView
     var router: Router
 }
 
-class ActivityLifeCycle(val routerManager: RouterManager,
-                        val hostActivityFactory: HostActivityFactory): Application.ActivityLifecycleCallbacks
+open class ActivityLifeCycle(val routerManager: RouterManager): Application.ActivityLifecycleCallbacks
 {
     private val routerByActivity = mutableMapOf<Router, Activity>()
 
@@ -51,7 +52,7 @@ class ActivityLifeCycle(val routerManager: RouterManager,
 
         if (p0 is AppCompatActivity)
         {
-            p0.supportFragmentManager.registerFragmentLifecycleCallbacks(FragmentLifeCycle(routerManager, hostActivityFactory), true)
+            p0.supportFragmentManager.registerFragmentLifecycleCallbacks(FragmentLifeCycle(routerManager), true)
         }
     }
 
@@ -68,7 +69,10 @@ class ActivityLifeCycle(val routerManager: RouterManager,
                 }
 
                 routerByActivity[p0.router] = p0
-                p0.router.bindExecutor(CommandExecutorAndroid(p0, R.id.root, p0.supportFragmentManager, hostActivityFactory))
+
+                val executor = onCreateExecutor(p0)
+                if (executor != null)
+                    p0.router.bindExecutor(executor)
             }
         }
     }
@@ -77,7 +81,7 @@ class ActivityLifeCycle(val routerManager: RouterManager,
     {
         if (p0 is BaseHostView)
         {
-            routerManager.top = p0.router
+            //routerManager.top = p0.router
         }
     }
 
@@ -109,4 +113,10 @@ class ActivityLifeCycle(val routerManager: RouterManager,
         if (p0 is BaseHostView && p0.isFinishing)
             routerManager[p0.hostActivityKey] = null
     }
+
+    protected open fun onCreateExecutor(activity: Activity): CommandExecutor? =
+        if (activity is AppCompatActivity)
+            CommandExecutorAndroid(activity, R.id.root, activity.supportFragmentManager, activity as? HostActivityFactory, activity as? HostCloseable)
+        else
+            null
 }

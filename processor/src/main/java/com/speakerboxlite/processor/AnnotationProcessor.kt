@@ -161,7 +161,7 @@ class AnnotationProcessor : AbstractProcessor()
 
             val startRouterLazy = CodeBlock.builder()
                 .beginControlFlow("lazy(mode = %T.SYNCHRONIZED)", LazyThreadSafetyMode::class.asTypeName())
-                .addStatement("val router = %T(null, null, routeManager, routerManager, resultManager, componentProvider)", routerClass)
+                .addStatement("val router = %T(null, null, routeManager, routerManager, resultManager${if (processorManager.hadComponent) ", componentProvider" else ""})", routerClass)
                 .addStatement("router")
                 .endControlFlow()
                 .build()

@@ -9,14 +9,18 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.speakerboxlite.router.RouterViewModelStoreProvider
 
 class StackEntry(val view: ViewCompose,
-                 val viewModelProvider: RouterViewModelStoreProvider?): ViewModelStoreOwner
+                 val viewModelProvider: RouterViewModelStoreProvider?,
+                 isPopped: Boolean = false): IStackEntry, ViewModelStoreOwner
 {
     constructor(entry: StackEntrySaveable, viewModelProvider: RouterViewModelStoreProvider?):
-            this(entry.view, viewModelProvider)
+            this(entry.view, viewModelProvider, entry.isPopped)
 
     val id: String get() = view.viewKey
 
     override val viewModelStore: ViewModelStore get() = viewModelProvider?.getStore(id) ?: error("")
+
+    var isRemoving: Boolean = isPopped
+        private set
 
     @Composable
     fun LocalOwnersProvider(saveableStateHolder: SaveableStateHolder, content: @Composable () -> Unit)
@@ -25,5 +29,15 @@ class StackEntry(val view: ViewCompose,
         {
             saveableStateHolder.SaveableStateProvider(id, content)
         }
+    }
+
+    override fun onDispose()
+    {
+        viewModelProvider?.clear(id)
+    }
+
+    internal fun makeRemoving()
+    {
+        isRemoving = true
     }
 }
