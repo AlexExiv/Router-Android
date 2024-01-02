@@ -6,8 +6,12 @@ import androidx.compose.animation.ContentTransform
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterTabs
@@ -15,36 +19,41 @@ import com.speakerboxlite.router.command.CommandExecutorCompose
 import com.speakerboxlite.router.command.ComposeViewHoster
 
 typealias ComposeNavigatorTabsContent =
-        @Composable (router: Router, navigator: ComposeNavigator, prevTab: Int?, currentTab: Int) -> Unit
+        @Composable (router: Router, navigator: ComposeNavigator, lastTab: Int, selectedTab: Int) -> Unit
 
 @Composable
 fun CurrentScreenTab(router: Router,
                      navigator: ComposeNavigator,
-                     prevTab: Int?,
-                     currentTab: Int,
-                     transitionTabsSpec: AnimatedContentTransitionScope<StackEntry?>.(prevTab: Int?, currentTab: Int) -> ContentTransform)
+                     lastTab: Int,
+                     selectedTab: Int,
+                     transitionTabsSpec: AnimatedContentTransitionScope<StackEntry>.(prevTab: Int, currentTab: Int) -> ContentTransform)
 {
-    val stackEntry = navigator.lastItem
-
+    val stackEntry = navigator.lastFullItem ?: return
     val animation = remember(stackEntry) { AnimationControllerComposeSlide() }
 
     ComposeViewEffect(stackEntry = stackEntry, router = router)
 
+    var recomposeStep by remember(selectedTab) { mutableIntStateOf(0) }
+
+    SideEffect { recomposeStep += 1 }
+
+    navigator.beginTransition()
+
     AnimatedContent(
         targetState = stackEntry,
         transitionSpec = {
-            if (prevTab == null)
-                ContentTransformNone
-            else if (prevTab == currentTab)
-                animation.prepareAnimation(navigator, this)
+            if (recomposeStep == 0 && navigator.stateStack.size < 2)
+                transitionTabsSpec(this, lastTab, selectedTab)
             else
-                transitionTabsSpec(this, prevTab, currentTab)
+                animation.prepareAnimation(navigator, this)
         },
-        label = "") { se ->
+        label = "Tabs-Backstack",
+        contentKey = { it.id })
+    {
+        se ->
 
         CompleteTransitionEffect(stackEntry = se, navigator = navigator)
-
-        se?.LocalOwnersProvider(navigator.stateHolder) { se.view.Root() }
+        se.LocalOwnersProvider(navigator.stateHolder) { se.view.Root() }
     }
 }
 
@@ -53,11 +62,21 @@ fun ComposeNavigatorTabs(key: String = compositionUniqueId(),
                          routerTabs: RouterTabs,
                          selectedTab: Int,
                          hoster: ComposeViewHoster? = null,
-                         transitionTabsSpec: AnimatedContentTransitionScope<StackEntry?>.(prevTab: Int?, currentTab: Int) -> ContentTransform = { _, _ -> ContentTransformNone },
-                         content: ComposeNavigatorTabsContent = { router, navigator, prevTab, currentTab -> CurrentScreenTab(router, navigator, prevTab, currentTab, transitionTabsSpec) })
+                         transitionTabsSpec: AnimatedContentTransitionScope<StackEntry>.(prevTab: Int, currentTab: Int) -> ContentTransform = { p, c -> contentTransformChangeTab(p, c) },
+                         onTabChanged: (Int) -> Unit,
+                         content: ComposeNavigatorTabsContent = { router, navigator, lastTab, selectedTab -> CurrentScreenTab(router, navigator, lastTab, selectedTab, transitionTabsSpec) })
 {
     val viewModelStore = LocalViewModelStoreOwner.current
     val router = routerTabs[selectedTab]
+
+    DisposableEffect(key1 = routerTabs)
+    {
+        routerTabs.tabChangeCallback = { onTabChanged(it) }
+
+        onDispose {
+            routerTabs.tabChangeCallback = null
+        }
+    }
 
     CompositionLocalProvider(LocalComposeNavigatorTabsStateHolder providesDefault rememberSaveableStateHolder())
     {
@@ -100,7 +119,7 @@ class ComposeNavigatorTabs(val key: String,
                            backStackMap: Map<String, List<StackEntrySaveable>>)
 {
     val backStackMap = mutableMapOf<String, List<StackEntrySaveable>>()
-    var lastTab: Int? = null
+    var lastTab = 0
 
     init
     {

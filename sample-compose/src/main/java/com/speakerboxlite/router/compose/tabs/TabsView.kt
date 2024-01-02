@@ -15,6 +15,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.animation.with
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -93,7 +94,7 @@ fun Tabs(key: String)
             listOf(routerTabs[0], routerTabs[1], routerTabs[2])
         }
 
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxSize()) {
 
             val pagerState = rememberPagerState { 3 }
             val page = remember { mutableIntStateOf(0) }
@@ -110,16 +111,10 @@ fun Tabs(key: String)
                 }
             }
 
-            DisposableEffect(key1 = routerTabs)
-            {
-                routerTabs.tabChangeCallback = { runBlocking { page.intValue = it }  }
-
-                onDispose {
-                    routerTabs.tabChangeCallback = null
-                }
-            }
-
-            ComposeNavigatorTabs(routerTabs = routerTabs, selectedTab = page.intValue)
+            ComposeNavigatorTabs(
+                routerTabs = routerTabs,
+                selectedTab = page.intValue,
+                onTabChanged = { page.intValue = it })
         }
     }
 }

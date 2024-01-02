@@ -7,6 +7,8 @@ import com.speakerboxlite.router.HOST_ACTIVITY_INTENT_DATA_KEY
 import com.speakerboxlite.router.HOST_ACTIVITY_KEY
 import com.speakerboxlite.router.HostCloseable
 import com.speakerboxlite.router.View
+import com.speakerboxlite.router.ViewBTS
+import com.speakerboxlite.router.ViewDialog
 import com.speakerboxlite.router.compose.ComposeNavigator
 import com.speakerboxlite.router.compose.FragmentContainerView
 import com.speakerboxlite.router.compose.ViewCompose
@@ -105,36 +107,26 @@ class CommandExecutorCompose(val navigator: ComposeNavigator,
 
     private fun showBottomSheet(view: View)
     {
-        if (view is BottomSheetDialogFragment)
-        {
-            //view.show(fragmentManager, view.viewKey)
-        }
+        view as? ViewBTS ?: error("")
+        val cv = view as? ViewCompose ?: error("")
+        navigator.push(cv)
     }
 
     private fun closeBottomSheet(key: String)
     {
-        /*val f = fragmentManager.findFragmentByTag(key)
-        if (f is BottomSheetDialogFragment)
-        {
-            f.dismiss()
-        }*/
+        navigator.pop()
     }
 
     private fun showDialog(view: View)
     {
-        /*if (view is DialogFragment)
-        {
-            view.show(fragmentManager, view.viewKey)
-        }*/
+        view as? ViewDialog ?: error("")
+        val cv = view as? ViewCompose ?: error("")
+        navigator.push(cv)
     }
 
     private fun closeDialog(key: String)
     {
-        /*val f = fragmentManager.findFragmentByTag(key)
-        if (f is DialogFragment)
-        {
-            f.dismiss()
-        }*/
+        navigator.pop()
     }
 
     private fun showSubFragment(@IdRes containerId: Int, view: View)

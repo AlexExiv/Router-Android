@@ -8,22 +8,33 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import com.speakerboxlite.router.ViewBTS
+import com.speakerboxlite.router.ViewDialog
 
 interface AnimationControllerCompose
 {
-    fun prepareAnimation(navigator: ComposeNavigator, scope: AnimatedContentTransitionScope<StackEntry?>): ContentTransform
+    fun prepareAnimation(navigator: ComposeNavigator, scope: AnimatedContentTransitionScope<StackEntry>): ContentTransform
 }
 
 class AnimationControllerComposeSlide: AnimationControllerCompose
 {
-    override fun prepareAnimation(navigator: ComposeNavigator, scope: AnimatedContentTransitionScope<StackEntry?>): ContentTransform
+    override fun prepareAnimation(navigator: ComposeNavigator, scope: AnimatedContentTransitionScope<StackEntry>): ContentTransform
     {
-        if (scope.initialState == null)
+        if (navigator.lastFullItem == null)
             return ContentTransformNone
 
-        return fadeIn(animationSpec = tween(12200)) +
-                slideInHorizontally(initialOffsetX = { (it + 0.5*it).toInt() }) togetherWith
-                fadeOut(animationSpec = tween(12200)) +
-                slideOutHorizontally(targetOffsetX = { -it / 2 })
+        val lastEntry = navigator.poppingEntries?.lastOrNull()
+        val isPopping = if (lastEntry?.view is ViewDialog || lastEntry?.view is ViewBTS)
+            false
+        else
+            lastEntry?.isRemoving == true
+
+        val animTime = 300
+        val fadeIn = fadeIn(animationSpec = tween(animTime)) +
+                slideInHorizontally(animationSpec = tween(animTime), initialOffsetX = { if (isPopping) -it/2 else it })
+        val fadeOut = fadeOut(animationSpec = tween(animTime)) +
+                slideOutHorizontally(animationSpec = tween(animTime), targetOffsetX = { if (isPopping) it else -it/2 })
+
+        return ContentTransform(fadeIn, fadeOut, navigator.size.toFloat())
     }
 }

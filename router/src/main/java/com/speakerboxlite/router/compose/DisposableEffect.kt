@@ -25,7 +25,7 @@ fun CompleteTransitionEffect(stackEntry: StackEntry?, navigator: ComposeNavigato
     DisposableEffect(key1 = stackEntry) {
 
         onDispose {
-            navigator.completeTransition(stackEntry)
+            navigator.completeTransition()
         }
     }
 }

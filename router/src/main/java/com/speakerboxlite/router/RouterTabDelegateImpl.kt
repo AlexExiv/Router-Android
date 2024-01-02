@@ -27,7 +27,7 @@ class RouterTabDelegateImpl(val index: Int,
     override fun route(path: RoutePath, presentation: Presentation?): Router?
     {
         val route = routerTab?.findRoute(path) ?: return null
-        val _presentation = presentation ?: route.preferredPresentation
+        val _presentation = if (route.routeType.isNoStackStructure) Presentation.Modal else (presentation ?: route.preferredPresentation)
 
         routerTab?.closeAllNoStack()
         return if ((routerTabs?.presentInTab == true && stackSize > 0) || route.isTabs || _presentation == Presentation.Modal)
@@ -39,8 +39,10 @@ class RouterTabDelegateImpl(val index: Int,
     override fun <R : Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation?, result: Result<R>): Router?
     {
         val route = routerTab?.findRoute(path) ?: return null
+        val _presentation = if (route.routeType.isNoStackStructure) Presentation.Modal else (presentation ?: route.preferredPresentation)
+
         routerTab?.closeAllNoStack()
-        return if ((routerTabs?.presentInTab == true && stackSize > 0) || route.isTabs || presentation == Presentation.Modal)
+        return if ((routerTabs?.presentInTab == true && stackSize > 0) || route.isTabs || _presentation == Presentation.Modal)
             parent?.route(null, path, RouteType.Simple, Presentation.Modal, routerTab?.viewsStack?.lastOrNull()?.key) { result(it as R) }
         else
             routerTab?.route(routerTab, path, RouteType.Simple, presentation, null) { result(it as  R) }

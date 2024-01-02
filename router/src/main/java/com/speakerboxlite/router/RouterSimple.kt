@@ -505,10 +505,16 @@ open class RouterSimple(protected val callerKey: String?,
         return parent ?: this
     }
 
-    internal fun closeAllNoStack()
+    internal fun closeAllNoStack(): Boolean
     {
+        var was = false
         while (viewsStack.isNotEmpty() && viewsStack.last().routeType.isNoStackStructure)
+        {
             close()
+            was = true
+        }
+
+        return was
     }
 
     internal fun route(execRouter: Router?, path: RoutePath, routeType: RouteType, presentation: Presentation?, resultKey: String?, result: Result<Any>?): Router?
@@ -522,32 +528,57 @@ open class RouterSimple(protected val callerKey: String?,
         if (tryRouteMiddlewares(routeParams, route))
             return null
 
-        closeAllNoStack()
-
-        //if last view has tabs try to route to its tab if it has in the root the same path
-        val tabRouter = tryRouteToTab(path)
-        if (tabRouter != null)
-            return  tabRouter
-
-        //if this router in the Closing state pass this route to its path for the execution
-        if (isClosing)
+        when (route.routeType)
         {
-            return if (result == null)
-                parent!!.route(path, presentation)
-            else
-                parent!!.routeWithResult(path as RoutePathResult<Any>, presentation, result)
-        }
+            RouteType.Dialog, RouteType.BTS ->
+            {
+                val view = if (result == null)
+                    createView(route, route.routeType, path, null, null)
+                else
+                    createView(route, route.routeType, path, null) { result(it as  R) }
 
-        //if this route has singleTop flag try to find it in the hierarchy and route to the instance
-        if (route.singleTop)
-        {
-            val exist = scanForPath(path::class)
-            if (exist != null)
-                return closeTo(exist.key)
-        }
+                val command = if (route.routeType == RouteType.Dialog)
+                    Command.Dialog(view)
+                else
+                    Command.BottomSheet(view)
 
-        //go to route
-        return doRoute(route, routeType, path, presentation ?: route.preferredPresentation, resultKey, result)
+                commandBuffer.apply(command)
+                routerManager.push(view.viewKey, this)
+                return this
+            }
+
+            RouteType.Simple ->
+            {
+                val b = closeAllNoStack()
+                if (b && topRouter != this)
+                    return topRouter?.route(path, presentation)
+
+                //if last view has tabs try to route to its tab if it has in the root the same path
+                val tabRouter = tryRouteToTab(path)
+                if (tabRouter != null)
+                    return tabRouter
+
+                //if this router in the Closing state pass this route to its path for the execution
+                if (isClosing)
+                {
+                    return if (result == null)
+                        parent!!.route(path, presentation)
+                    else
+                        parent!!.routeWithResult(path as RoutePathResult<Any>, presentation, result)
+                }
+
+                //if this route has singleTop flag try to find it in the hierarchy and route to the instance
+                if (route.singleTop)
+                {
+                    val exist = scanForPath(path::class)
+                    if (exist != null)
+                        return closeTo(exist.key)
+                }
+
+                //go to route
+                return doRoute(route, routeType, path, presentation ?: route.preferredPresentation, resultKey, result)
+            }
+        }
     }
 
     internal open fun tryRouteToTab(path: RoutePath): Router?
