@@ -30,3 +30,8 @@ interface ViewTabs
 interface ViewDialog
 
 interface ViewBTS
+interface BaseHostView
+{
+    var routerManager: RouterManager
+    var router: Router
+}

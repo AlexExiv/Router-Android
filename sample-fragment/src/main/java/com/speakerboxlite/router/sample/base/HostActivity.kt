@@ -5,12 +5,12 @@ import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.speakerboxlite.router.HostActivityFactory
-import com.speakerboxlite.router.lifecycle.BaseHostView
+import com.speakerboxlite.router.BaseHostView
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterManager
-import com.speakerboxlite.router.command.HostClosableActivity
-import com.speakerboxlite.router.command.IHostClosableActivity
-import com.speakerboxlite.router.command.IntentBuilder
+import com.speakerboxlite.fragment.HostClosableActivity
+import com.speakerboxlite.fragment.IHostClosableActivity
+import com.speakerboxlite.compose.IntentBuilder
 import com.speakerboxlite.router.sample.R
 import java.io.Serializable
 
@@ -33,7 +33,7 @@ open class BaseHostActivity: AppCompatActivity(R.layout.activity_host), BaseHost
         router.topRouter?.back()
     }
 
-    override fun startActivity(params: Serializable?, builder: IntentBuilder)
+    override fun startActivity(params: Serializable?, builder: com.speakerboxlite.compose.IntentBuilder)
     {
         val p = params as? RouteStyle
         val intent = when (p)

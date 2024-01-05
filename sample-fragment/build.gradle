@@ -5,12 +5,12 @@ plugins {
 }
 
 android {
-    namespace 'com.speakerboxlite.router.sample'
+    namespace 'com.speakerboxlite.router.samplefragment'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.speakerboxlite.router.sample"
-        minSdk 24
+        applicationId "com.speakerboxlite.router.samplefragment"
+        minSdk minSdk_version
         targetSdk 33
         versionCode 1
         versionName "1.0"
@@ -56,6 +56,7 @@ android {
 dependencies {
     implementation project(':router')
     implementation project(':annotations')
+    implementation project(':fragment')
     kapt project(':processor')
 
     implementation 'androidx.core:core-ktx:1.10.1'

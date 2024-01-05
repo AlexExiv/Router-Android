@@ -1,6 +1,9 @@
 
 buildscript {
     ext.kotlin_version = '1.8.10'
+    ext.compose_version = '1.5.4'
+    ext.minSdk_version = 21
+
     repositories {
         google()
         gradlePluginPortal()

@@ -3,3 +3,5 @@ rootProject.name = "Router"
 include ':processor', ':router', ':sample-fragment'
 include ':annotations'
 include ':sample-compose'
+include ':fragment'
+include ':compose'

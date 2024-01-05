@@ -14,7 +14,7 @@ abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterfa
 {
     lateinit var pathClass: KClass<Path>
     var pattern: UrlMatcher? = null
-    var preferredAnimationController: AnimationController<RoutePath, View>? = null
+    var preferredAnimationController: AnimationController? = null
 
     final override var singleTop: Boolean = false
     final override var creatingInjector: Boolean = false
@@ -66,7 +66,7 @@ abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterfa
 
     override fun isPartOfChain(clazz: KClass<*>): Boolean = chainPaths.indexOfFirst { it == clazz } != -1
 
-    override fun animationController(): AnimationController<RoutePath, View>? = preferredAnimationController
+    override fun animationController(): AnimationController? = preferredAnimationController
 
     abstract override fun onCreateView(path: Path): V
 

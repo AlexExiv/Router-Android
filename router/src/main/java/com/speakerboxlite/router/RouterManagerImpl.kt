@@ -1,6 +1,7 @@
 package com.speakerboxlite.router
 
 import android.util.Log
+import com.speakerboxlite.router.annotations.InternalApi
 
 class RouterManagerImpl: RouterManager, RouterStack by RouterStackImpl()
 {
@@ -41,7 +42,8 @@ class RouterManagerImpl: RouterManager, RouterStack by RouterStackImpl()
 
     override fun getForView(viewKey: String): Router? = routerByView[viewKey]
 
-    internal fun resetToTop()
+    @InternalApi
+    fun resetToTop()
     {
         isAppRestarting = true
     }

@@ -1,10 +1,11 @@
 package com.speakerboxlite.router.controllers
 
-import androidx.lifecycle.ViewModelStoreOwner
 import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.annotations.RouteType
 import com.speakerboxlite.router.Router
+import com.speakerboxlite.router.RouterModelProvider
 import com.speakerboxlite.router.View
+import com.speakerboxlite.router.ViewModel
 import com.speakerboxlite.router.annotations.Presentation
 import java.io.Serializable
 import kotlin.reflect.KClass
@@ -29,7 +30,7 @@ interface RouteControllerInterface<Path: RoutePath, V: View>
 
     fun isPartOfChain(clazz: KClass<*>): Boolean
 
-    fun animationController(): AnimationController<RoutePath, View>?
+    fun animationController(): AnimationController?
     fun onCreateView(path: Path): V
 
     /**
@@ -67,7 +68,12 @@ interface RouteControllerInterface<Path: RoutePath, V: View>
 
 interface RouteControllerComposable<Path: RoutePath, V: View>
 {
-    fun onComposeView(router: Router, view: V, path: Path)
+    fun onPrepareView(router: Router, view: V, path: Path)
+}
+
+interface RouteControllerViewModelProvider<Path: RoutePath, VM: ViewModel>
+{
+    fun onProvideViewModel(modelProvider: RouterModelProvider, path: Path): VM
 }
 
 interface Component
@@ -79,5 +85,5 @@ interface RouteControllerComponent<Path: RoutePath, V: View, C: Component>
     fun onInject(component: Any) {}
 
     fun onCreateInjector(path: Path, component: Any): Any
-    fun onComposeView(router: Router, view: V, path: Path, component: Any)
+    fun onPrepareView(router: Router, view: V, path: Path, component: Any)
 }

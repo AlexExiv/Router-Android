@@ -2,11 +2,11 @@ package com.speakerboxlite.router
 
 import android.app.Activity
 import androidx.fragment.app.Fragment
-import com.speakerboxlite.router.command.IntentBuilder
+import com.speakerboxlite.compose.IntentBuilder
 import java.io.Serializable
 
-internal const val HOST_ACTIVITY_KEY = "com.speakerboxlite.router.HOST_ACTIVITY_KEY"
-internal const val HOST_ACTIVITY_INTENT_DATA_KEY = "com.speakerboxlite.router.HOST_ACTIVITY_INTENT_DATA_KEY"
+const val HOST_ACTIVITY_KEY = "com.speakerboxlite.router.HOST_ACTIVITY_KEY"
+const val HOST_ACTIVITY_INTENT_DATA_KEY = "com.speakerboxlite.router.HOST_ACTIVITY_INTENT_DATA_KEY"
 
 const val START_ACTIVITY_KEY = "START_ACTIVITY"
 
@@ -15,7 +15,7 @@ val Activity.hostActivityParams: Serializable? get() = intent.extras?.getSeriali
 
 interface HostActivityFactory
 {
-    fun startActivity(params: Serializable?, builder: IntentBuilder)
+    fun startActivity(params: Serializable?, builder: com.speakerboxlite.compose.IntentBuilder)
 }
 
 interface HostFragmentComposeFactory

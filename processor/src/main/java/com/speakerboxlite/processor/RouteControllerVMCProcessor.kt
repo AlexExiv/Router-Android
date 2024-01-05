@@ -108,8 +108,8 @@ class RouteControllerVMCProcessor(processingEnv: ProcessingEnvironment,
     {
         val PATH_INDEX = 0
         val VM_INDEX = 1
-        val V_INDEX = 2
-        val COMPONENT_INDEX = 3
+        val V_INDEX = 3
+        val COMPONENT_INDEX = 4
 
         const val CREATE_VIEW = "onCreateView"
         const val CREATE_VIEWMODEL = "onCreateViewModel"

@@ -12,3 +12,5 @@ interface RouterViewModelStoreProvider
     fun getStore(id: String): ViewModelStore
     fun clear(id: String)
 }
+
+interface RouterModelProvider

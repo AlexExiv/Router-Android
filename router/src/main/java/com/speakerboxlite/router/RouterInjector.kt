@@ -26,9 +26,9 @@ open class RouterInjector(callerKey: String?,
 
     protected val metaComponents = mutableMapOf<String, ViewMetaComponent>()
 
-    override fun onComposeView(view: View)
+    override fun onPrepareView(view: View)
     {
-        super.onComposeView(view)
+        super.onPrepareView(view)
 
         val path = pathData[view.viewKey]!!
         val route = routeManager.find(path) ?: throw RouteNotFoundException(path)
@@ -37,7 +37,7 @@ open class RouterInjector(callerKey: String?,
         if (routeComponent != null)
         {
             val component = onComposeInjector(view.viewKey, route)
-            routeComponent.onComposeView(this, view, path, component)
+            routeComponent.onPrepareView(this, view, path, component)
         }
     }
 

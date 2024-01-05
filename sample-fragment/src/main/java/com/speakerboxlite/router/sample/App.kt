@@ -1,7 +1,7 @@
 package com.speakerboxlite.router.sample
 
 import android.app.Application
-import com.speakerboxlite.router.lifecycle.ActivityLifeCycle
+import com.speakerboxlite.fragment.ActivityLifeCycle
 import com.speakerboxlite.router.sample.base.animations.AnimationControllerDefault
 import com.speakerboxlite.router.sample.di.AppComponent
 import com.speakerboxlite.router.sample.di.DaggerAppComponent

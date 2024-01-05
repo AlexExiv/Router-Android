@@ -9,6 +9,7 @@ import com.speakerboxlite.router.command.CommandBufferImpl
 import com.speakerboxlite.router.command.CommandExecutor
 import com.speakerboxlite.router.controllers.RouteControllerComposable
 import com.speakerboxlite.router.controllers.RouteControllerInterface
+import com.speakerboxlite.router.controllers.RouteControllerViewModelProvider
 import com.speakerboxlite.router.controllers.RouteParamsGen
 import com.speakerboxlite.router.exceptions.ImpossibleRouteException
 import com.speakerboxlite.router.exceptions.RouteNotFoundException
@@ -309,17 +310,25 @@ open class RouterSimple(protected val callerKey: String?,
         commandBuffer.unbind()
     }
 
-    override fun onComposeView(view: View)
+    override fun onPrepareView(view: View)
     {
         val path = pathData[view.viewKey]!!
         val route = findRoute(path)
 
         (route as? RouteControllerComposable<RoutePath, View>)?.also {
-            it.onComposeView(this, view, path)
+            it.onPrepareView(this, view, path)
         }
 
         if (view is ViewFragment)
             view.resultProvider = RouterResultProviderImpl(view.viewKey, resultManager)
+    }
+
+    override fun <VM : ViewModel> provideViewModel(view: View, modelProvider: RouterModelProvider): VM
+    {
+        val path = pathData[view.viewKey]!!
+        val route = findRoute(path)
+        route as? RouteControllerViewModelProvider<RoutePath, VM> ?: error("${route::class} is not a RouteControllerViewModelProvider")
+        return route.onProvideViewModel(modelProvider, path)
     }
 
     override fun onComposeAnimation(view: View)
@@ -327,7 +336,7 @@ open class RouterSimple(protected val callerKey: String?,
         val path = pathData[view.viewKey]!!
         val route = findRoute(path)
 
-        route.animationController()?.onConfigureView(path, view)
+        //route.animationController()?.onConfigureView(path, view)
     }
 
     override fun createRouterLocal(key: String): RouterLocal = RouterLocalImpl(key, this)

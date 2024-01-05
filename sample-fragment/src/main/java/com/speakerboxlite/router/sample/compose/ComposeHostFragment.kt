@@ -4,21 +4,21 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.ComposeView
 import com.speakerboxlite.router.ComposeFragmentHostView
 import com.speakerboxlite.router.ComposeHostView
 import com.speakerboxlite.router.ComposeHostViewRoot
-import com.speakerboxlite.router.HostView
-import com.speakerboxlite.router.command.ComposeViewHoster
-import com.speakerboxlite.router.command.IntentBuilder
-import com.speakerboxlite.router.compose.ComposeNavigator
-import com.speakerboxlite.router.compose.HostComposeFragmentFactory
+import com.speakerboxlite.compose.ComposeViewHoster
+import com.speakerboxlite.compose.IntentBuilder
+import com.speakerboxlite.compose.ComposeNavigator
+import com.speakerboxlite.compose.HostComposeFragmentFactory
 import com.speakerboxlite.router.sample.base.HostFragment
 import java.io.Serializable
 
-class ComposeHostFragment: HostFragment(), ComposeHostView, ComposeViewHoster, HostComposeFragmentFactory
+class ComposeHostFragment: HostFragment(), ComposeHostView,
+    com.speakerboxlite.compose.ComposeViewHoster,
+    com.speakerboxlite.compose.HostComposeFragmentFactory
 {
     override var root: ComposeHostViewRoot = mutableStateOf(null)
 
@@ -35,11 +35,11 @@ class ComposeHostFragment: HostFragment(), ComposeHostView, ComposeViewHoster, H
     {
         super.onStart()
         root.value = {
-            ComposeNavigator(router = router, hoster = this, fragmentHostFactory = this)
+            com.speakerboxlite.compose.ComposeNavigator(router = router, hoster = this, fragmentHostFactory = this)
         }
     }
 
-    override fun start(params: Serializable?, builder: IntentBuilder)
+    override fun start(params: Serializable?, builder: com.speakerboxlite.compose.IntentBuilder)
     {
 
     }

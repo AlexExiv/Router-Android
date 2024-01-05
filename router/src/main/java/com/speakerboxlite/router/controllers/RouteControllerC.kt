@@ -9,7 +9,7 @@ abstract class RouteControllerC<Path: RoutePath, V: View, C: Component>: RouteCo
 {
     final override lateinit var componentClass: KClass<C>
 
-    override fun onComposeView(router: Router, view: V, path: Path, component: Any)
+    override fun onPrepareView(router: Router, view: V, path: Path, component: Any)
     {
         onInject(view, component as C)
     }
