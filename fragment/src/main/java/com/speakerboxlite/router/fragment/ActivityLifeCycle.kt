@@ -14,8 +14,15 @@ import com.speakerboxlite.router.START_ACTIVITY_KEY
 import com.speakerboxlite.router.command.CommandExecutor
 import com.speakerboxlite.router.hostActivityKey
 
+fun interface FragmentLifeCycleFactory
+{
+    fun onCreate(): FragmentLifeCycle
+}
+
 open class ActivityLifeCycle(routerManager: RouterManager,
-                             private val modelProvider: FragmentModelProvider? = null): com.speakerboxlite.router.lifecycle.ActivityLifeCycle(routerManager)
+                             private val modelProvider: FragmentModelProvider? = null,
+                             val flFactory: FragmentLifeCycleFactory = FragmentLifeCycleFactory { FragmentLifeCycle(routerManager, modelProvider) }):
+    com.speakerboxlite.router.lifecycle.ActivityLifeCycle(routerManager)
 {
     private val routerByActivity = mutableMapOf<Router, Activity>()
 
@@ -25,7 +32,7 @@ open class ActivityLifeCycle(routerManager: RouterManager,
 
         if (p0 is AppCompatActivity)
         {
-            p0.supportFragmentManager.registerFragmentLifecycleCallbacks(FragmentLifeCycle(routerManager, modelProvider), true)
+            p0.supportFragmentManager.registerFragmentLifecycleCallbacks(flFactory.onCreate(), true)
         }
     }
 

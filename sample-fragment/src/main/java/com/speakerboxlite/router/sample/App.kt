@@ -30,7 +30,7 @@ class App: Application()
 
         routerComponent.initialize(MainPath(), AnimationControllerDefault(), component)
 
-        lifeCycle = ActivityLifeCycle(routerComponent.routerManager) { AndroidViewModelProvider(it.fragment) }
+        lifeCycle = ActivityLifeCycle(routerComponent.routerManager, { AndroidViewModelProvider(it.fragment) })
         registerActivityLifecycleCallbacks(lifeCycle)
     }
 }

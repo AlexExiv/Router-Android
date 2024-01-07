@@ -1,10 +1,7 @@
 package com.speakerboxlite.router.fragmentcompose
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import com.speakerboxlite.router.HostView
-
-typealias ComposeHostViewRoot = MutableState<@Composable (() -> Unit)?>
+import com.speakerboxlite.router.compose.ComposeHostViewRoot
 
 /**
  * Host fragment that contains compose views and provides smooth transition from a fragment view to a compose view.
@@ -19,5 +16,5 @@ interface ComposeHostView: HostView
  */
 interface ComposeFragmentHostView: HostView
 {
-    var closeCallback: (() -> Unit)?
+    var onCloseCallback: (() -> Unit)?
 }

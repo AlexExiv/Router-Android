@@ -13,12 +13,19 @@ class HostClosableFragment: IHostClosableFragment
 {
     var fragment = WeakReference<Fragment>(null)
 
-    override fun closeHost()
+    override fun onCloseHost()
     {
-        if (fragment.get()?.parentFragment == null)
-            fragment.get()?.requireActivity()?.finish()
+        val f = fragment.get() ?: return
+
+        if (f.parentFragment == null)
+        {
+            if (f.parentFragmentManager.backStackEntryCount > 1)
+                f.parentFragmentManager.popBackStackImmediate()
+            else
+                f.requireActivity().finish()
+        }
         else
-            fragment.get()?.requireParentFragment()?.childFragmentManager?.popBackStackImmediate()
+            f.requireParentFragment().childFragmentManager.popBackStackImmediate()
     }
 
     override fun withFragment(fragment: Fragment)

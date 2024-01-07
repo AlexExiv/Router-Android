@@ -13,20 +13,18 @@ import androidx.fragment.app.Fragment
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterLocal
 import com.speakerboxlite.router.fragment.ViewFragment
+import com.speakerboxlite.router.fragment._viewKey
 import com.speakerboxlite.router.result.RouterResultProvider
 import com.speakerboxlite.router.samplefragment.R
 
 abstract class BaseFragment<VDB: ViewDataBinding>(@LayoutRes val layoutId: Int,
-                                                  @MenuRes val menuId: Int = 0): Fragment(),
-    ViewFragment
+                                                  @MenuRes val menuId: Int = 0): Fragment(), ViewFragment
 {
     override var viewKey: String
-        get() = requireArguments().getString("VIEW_KEY")!!
+        get() = _viewKey
         set(value)
         {
-            if (arguments == null)
-                arguments = Bundle()
-            requireArguments().putString("VIEW_KEY", value)
+            _viewKey = value
         }
 
     override lateinit var router: Router

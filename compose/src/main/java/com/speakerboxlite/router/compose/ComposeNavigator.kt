@@ -20,10 +20,12 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.speakerboxlite.router.HostCloseable
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterTabs
 import com.speakerboxlite.router.ViewBTS
 import com.speakerboxlite.router.ViewDialog
+import com.speakerboxlite.router.command.CommandExecutor
 import kotlinx.coroutines.launch
 
 typealias ComposeNavigatorContent = @Composable (router: Router, navigator: ComposeNavigator) -> Unit
@@ -111,11 +113,18 @@ fun CurrentScreen(router: Router, navigator: ComposeNavigator)
     }
 }
 
+fun interface CommandExecutorFactory
+{
+    fun onCreate(navigator: ComposeNavigator): CommandExecutor
+}
+
 @Composable 
 fun ComposeNavigator(
     key: String = compositionUniqueId(),
     router: Router,
     hoster: ComposeViewHoster? = null,
+    hostCloseable: HostCloseable? = null,
+    executorFactory: CommandExecutorFactory = CommandExecutorFactory { CommandExecutorCompose(it, hoster, hostCloseable) },
     content: ComposeNavigatorContent = { router, navigator -> CurrentScreen(router, navigator) })
 {
     require(key.isNotEmpty()) { "ComposeNavigator key can't be empty" }
@@ -130,7 +139,7 @@ fun ComposeNavigator(
 
         DisposableEffect(navigator) 
         {
-            router.bindExecutor(CommandExecutorCompose(navigator, hoster, null))
+            router.bindExecutor(executorFactory.onCreate(navigator))
             
             onDispose {
                 router.unbindExecutor()

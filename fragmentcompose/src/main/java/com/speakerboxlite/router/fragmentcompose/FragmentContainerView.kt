@@ -11,7 +11,7 @@ import com.speakerboxlite.router.compose.ViewCompose
 import com.speakerboxlite.router.compose.currentOrThrow
 import java.util.UUID
 
-interface HostComposeFragmentFactory
+fun interface HostComposeFragmentFactory
 {
     fun onCreate(): ComposeFragmentHostView
 }
@@ -32,7 +32,7 @@ class FragmentContainerView: ViewCompose
             commit = {
                 val view = factory.onCreate()
                 view.viewKey = viewKey
-                view.closeCallback = { navigator.pop() }
+                view.onCloseCallback = { navigator.pop() }
                 replace(it, view as Fragment, viewKey)
             })
     }

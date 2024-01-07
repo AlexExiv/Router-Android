@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.speakerboxlite.router.HostCloseable
 import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterTabs
@@ -61,8 +62,10 @@ fun ComposeNavigatorTabs(key: String = compositionUniqueId(),
                          tabPaths: List<RoutePath>,
                          selectedTab: Int,
                          hoster: ComposeViewHoster? = null,
+                         hostCloseable: HostCloseable? = null,
                          transitionTabsSpec: AnimatedContentTransitionScope<StackEntry>.(prevTab: Int, currentTab: Int) -> ContentTransform = { p, c -> contentTransformChangeTab(p, c) },
                          onTabChanged: (Int) -> Unit,
+                         executorFactory: CommandExecutorFactory = CommandExecutorFactory { CommandExecutorCompose(it, hoster, hostCloseable) },
                          content: ComposeNavigatorTabsContent = { router, navigator, lastTab, selectedTab -> CurrentScreenTab(router, navigator, lastTab, selectedTab, transitionTabsSpec) })
 {
     val viewModelStore = LocalViewModelStoreOwner.current
@@ -99,7 +102,7 @@ fun ComposeNavigatorTabs(key: String = compositionUniqueId(),
 
         DisposableEffect(navigator)
         {
-            router.bindExecutor(CommandExecutorCompose(navigator, hoster, null))
+            router.bindExecutor(executorFactory.onCreate(navigator))
 
             onDispose {
                 router.unbindExecutor()

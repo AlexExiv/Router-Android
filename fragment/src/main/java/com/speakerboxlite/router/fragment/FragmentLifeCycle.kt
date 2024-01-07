@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import com.speakerboxlite.router.ComposeHostView
 import com.speakerboxlite.router.HostActivityFactory
 import com.speakerboxlite.router.HostCloseable
 import com.speakerboxlite.router.HostView
@@ -76,13 +75,13 @@ open class FragmentLifeCycle(private val routerManager: RouterManager,
 
             f.localRouter = f.router.createRouterLocal(f.viewKey)
 
-            if (f is ViewVM<*>)
+            if (f as? ViewVM<ViewModel> != null)
             {
                 val mp = modelProvider?.invoke(FragmentModelProviderArgs(f.requireActivity(), f)) ?: error("You use ViewModel without specifying FragmentModelProvider")
                 f.viewModel = f.router.provideViewModel(f, mp)
             }
 
-            f.router.onPrepareView(f, (f as? ViewVM<*>)?.viewModel)
+            f.router.onPrepareView(f, (f as? ViewVM<ViewModel>)?.viewModel)
 
             if (f is ViewTabs)
                 f.routerTabs = f.router.createRouterTabs(f.viewKey)

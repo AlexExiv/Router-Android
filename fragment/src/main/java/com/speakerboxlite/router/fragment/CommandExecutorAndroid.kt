@@ -71,11 +71,11 @@ open class CommandExecutorAndroid(val activity: FragmentActivity,
             is Command.CloseTo -> closeTo(command.key)
             is Command.CloseAll -> closeAll()
             is Command.StartModal -> startActivity(command.key, command.params)
-            is Command.ChangeHost -> changeHost(command.key, command.path, command.animation as AnimationControllerFragment<RoutePath, View>)
+            is Command.ChangeHost -> changeHost(command.key, command.path, command.animation as? AnimationControllerFragment<RoutePath, View>)
             is Command.Dialog -> showDialog(command.view)
             is Command.CloseDialog -> closeDialog(command.key)
-            is Command.Push -> pushFragment(command.path, command.view, command.animation as AnimationControllerFragment<RoutePath, View>, false)
-            is Command.Replace -> replaceFragment(command.path, command.byView, command.animation as AnimationControllerFragment<RoutePath, View>)
+            is Command.Push -> pushFragment(command.path, command.view, command.animation as? AnimationControllerFragment<RoutePath, View>, false)
+            is Command.Replace -> replaceFragment(command.path, command.byView, command.animation as? AnimationControllerFragment<RoutePath, View>)
             is Command.BottomSheet -> showBottomSheet(command.view)
             is Command.CloseBottomSheet -> closeBottomSheet(command.key)
             is Command.SubFragment -> showSubFragment(command.containerId, command.view)
@@ -100,7 +100,7 @@ open class CommandExecutorAndroid(val activity: FragmentActivity,
 
     protected fun closeAll()
     {
-        hostCloseable?.closeHost()
+        hostCloseable?.onCloseHost()
     }
 
     protected fun closeTo(key: String)
@@ -123,7 +123,7 @@ open class CommandExecutorAndroid(val activity: FragmentActivity,
 
     protected open fun changeHost(key: String, path: RoutePath?, animation: AnimationControllerFragment<RoutePath, View>?)
     {
-
+        error("You try to change a host but don't use appropriate Navigator")
     }
 
     protected fun pushFragment(path: RoutePath?, view: View, animation: AnimationControllerFragment<RoutePath, View>?, replacing: Boolean)

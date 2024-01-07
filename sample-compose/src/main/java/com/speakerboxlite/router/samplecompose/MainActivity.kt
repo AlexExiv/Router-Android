@@ -10,11 +10,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import com.speakerboxlite.router.compose.ComposeNavigator
-import com.speakerboxlite.router.ComposeHostViewRoot
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterManager
 import com.speakerboxlite.router.samplecompose.ui.theme.RouterTheme
 import com.speakerboxlite.router.BaseHostView
+import com.speakerboxlite.router.compose.ComposeHostViewRoot
 
 class MainActivity : ComponentActivity(), BaseHostView
 {

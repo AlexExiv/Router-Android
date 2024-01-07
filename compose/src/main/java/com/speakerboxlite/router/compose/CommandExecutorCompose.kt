@@ -39,10 +39,10 @@ open class CommandExecutorCompose(val navigator: ComposeNavigator,
             is Command.CloseTo -> closeTo(command.key)
             is Command.CloseAll -> closeAll()
             is Command.StartModal -> startActivity(command.key, command.params)
-            is Command.ChangeHost -> changeHost(command.key, command.animation as AnimationControllerCompose)
+            is Command.ChangeHost -> changeHost(command.key, command.animation as? AnimationControllerCompose)
             is Command.Dialog -> showDialog(command.view)
             is Command.CloseDialog -> closeDialog(command.key)
-            is Command.Push -> push(command.view, command.animation as AnimationControllerCompose)
+            is Command.Push -> push(command.view, command.animation as? AnimationControllerCompose)
             is Command.Replace -> replace(command.byView)
             is Command.BottomSheet -> showBottomSheet(command.view)
             is Command.CloseBottomSheet -> closeBottomSheet(command.key)
@@ -61,7 +61,7 @@ open class CommandExecutorCompose(val navigator: ComposeNavigator,
 
     private fun closeAll()
     {
-        hostCloseable?.closeHost()
+        hostCloseable?.onCloseHost()
     }
 
     private fun closeTo(key: String)
@@ -83,7 +83,7 @@ open class CommandExecutorCompose(val navigator: ComposeNavigator,
 
     protected open fun changeHost(key: String, animationController: AnimationControllerCompose?)
     {
-
+        error("You try to change a host but don't use appropriate Navigator")
     }
 
     private fun push(view: View, animationController: AnimationControllerCompose?)

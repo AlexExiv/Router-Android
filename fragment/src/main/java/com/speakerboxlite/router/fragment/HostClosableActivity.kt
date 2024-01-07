@@ -13,7 +13,7 @@ class HostClosableActivity: IHostClosableActivity
 {
     var activity = WeakReference<Activity>(null)
 
-    override fun closeHost()
+    override fun onCloseHost()
     {
         activity.get()?.finish()
     }

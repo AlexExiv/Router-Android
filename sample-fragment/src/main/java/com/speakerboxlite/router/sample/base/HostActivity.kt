@@ -1,5 +1,6 @@
 package com.speakerboxlite.router.sample.base
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Bundle
@@ -27,6 +28,7 @@ open class BaseHostActivity: AppCompatActivity(R.layout.activity_host), BaseHost
         withActivity(this)
     }
 
+    @SuppressLint("MissingSuperCall")
     override fun onBackPressed()
     {
         //super.onBackPressed()
@@ -53,20 +55,9 @@ class HostActivity: BaseHostActivity()
 
 class HostLandscapeActivity: BaseHostActivity()
 {
-    override fun onCreate(savedInstanceState: Bundle?)
-    {
-        super.onCreate(savedInstanceState)
-
-    }
-
     override fun onStart()
     {
         super.onStart()
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-    }
-
-    override fun onDestroy()
-    {
-        super.onDestroy()
     }
 }

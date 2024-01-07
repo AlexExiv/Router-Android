@@ -1,4 +1,4 @@
-package com.speakerboxlite.router.sample.ui.theme
+package com.speakerboxlite.router.samplemixed.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

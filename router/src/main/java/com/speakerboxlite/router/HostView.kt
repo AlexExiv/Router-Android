@@ -2,7 +2,7 @@ package com.speakerboxlite.router
 
 interface HostCloseable
 {
-    fun closeHost()
+    fun onCloseHost()
 }
 
 interface HostView: View

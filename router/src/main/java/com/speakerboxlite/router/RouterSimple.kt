@@ -635,9 +635,9 @@ open class RouterSimple(protected val callerKey: String?,
             if (presentation == Presentation.ModalNewTask)
                 commandBuffer.apply(Command.StartModal(key, route.params))
             else
-                commandBuffer.apply(Command.ChangeHost(key, route.animationController()))
+                commandBuffer.apply(Command.ChangeHost(key, path, route.animationController()))
 
-            returnRouter?.also { routerManager.push(key, it) }
+            returnRouter//?.also { routerManager.push(key, it) }
         }
         else
         {
