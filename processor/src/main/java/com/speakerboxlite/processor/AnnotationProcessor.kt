@@ -117,7 +117,7 @@ class AnnotationProcessor : AbstractProcessor()
             initBuilder.addModifiers(listOf(KModifier.PUBLIC))
             initBuilder.addParameter("startPath", ClassName(MAIN_ROUTER_PACK, "RoutePath"))
 
-            val animClass = ClassName(CONTROLLERS_PACK, "AnyAnimationController")
+            val animClass = ClassName(CONTROLLERS_PACK, "AnimationController")
             initBuilder.addParameter("animation", animClass.copy(nullable = true))
 
             initBuilder.addStatement("this.startPath = startPath")
@@ -258,7 +258,7 @@ class AnnotationProcessor : AbstractProcessor()
                 throw IllegalArgumentException("Animation must be a subclass of AnimationController")
 */
             val animClass = typeE.asClassName()
-            val anyAnimClass = ClassName(CONTROLLERS_PACK, "AnyAnimationController")
+            val anyAnimClass = ClassName(CONTROLLERS_PACK, "AnimationController")
             initBuilder.addStatement("${valName}.preferredAnimationController = %T() as %T", animClass, anyAnimClass)
         }
         else

@@ -1,7 +1,6 @@
 package com.speakerboxlite.router.sample.base
 
 import android.app.Dialog
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.appcompat.app.AlertDialog
@@ -11,7 +10,7 @@ import androidx.fragment.app.DialogFragment
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterLocal
 import com.speakerboxlite.router.ViewDialog
-import com.speakerboxlite.router.ViewFragmentVM
+import com.speakerboxlite.router.fragment.ViewFragmentVM
 import com.speakerboxlite.router.result.RouterResultProvider
 
 abstract class BaseViewModelDialogFragment<VM: BaseViewModel, VDB: ViewDataBinding>(open val layoutId: Int): DialogFragment(),

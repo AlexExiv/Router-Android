@@ -1,4 +1,4 @@
-package com.speakerboxlite.fragment
+package com.speakerboxlite.router.fragment
 
 import android.app.Activity
 import android.os.Bundle
@@ -14,7 +14,7 @@ import com.speakerboxlite.router.RouterManager
 import com.speakerboxlite.router.RouterManagerImpl
 import com.speakerboxlite.router.RouterModelProvider
 import com.speakerboxlite.router.View
-import com.speakerboxlite.router.ViewFragment
+import com.speakerboxlite.router.ViewModel
 import com.speakerboxlite.router.ViewTabs
 import com.speakerboxlite.router.ViewVM
 import com.speakerboxlite.router.annotations.InternalApi
@@ -82,7 +82,7 @@ open class FragmentLifeCycle(private val routerManager: RouterManager,
                 f.viewModel = f.router.provideViewModel(f, mp)
             }
 
-            f.router.onPrepareView(f)
+            f.router.onPrepareView(f, (f as? ViewVM<*>)?.viewModel)
 
             if (f is ViewTabs)
                 f.routerTabs = f.router.createRouterTabs(f.viewKey)
@@ -101,21 +101,22 @@ open class FragmentLifeCycle(private val routerManager: RouterManager,
 
         if (f is HostView)
         {
-            if (f is ComposeHostView)
-            {
-
+            onCreateExecutor(f)?.let {
+                f.router.bindExecutor(it)
             }
-            else
-                f.router.bindExecutor(onCreateExecutor(f))
         }
 
         if (f is ViewFragment)
         {
-            f.localRouter.bindExecutor(onCreateExecutor(f))
+            onCreateExecutor(f)?.let { f.localRouter.bindExecutor(it) }
             f.resultProvider.start()
 
             if (f is ViewTabs)
-                f.routerTabs.bindExecutor(onCreateExecutor(f))
+            {
+                onCreateExecutor(f)?.let {
+                    f.routerTabs.bindExecutor(it)
+                }
+            }
         }
     }
 
@@ -157,6 +158,6 @@ open class FragmentLifeCycle(private val routerManager: RouterManager,
             f.router.removeView(f.viewKey)
     }
 
-    protected open fun onCreateExecutor(fragment: Fragment): CommandExecutor =
+    protected open fun onCreateExecutor(fragment: Fragment): CommandExecutor? =
         CommandExecutorAndroid(fragment.requireActivity(), R.id.root, fragment.childFragmentManager, fragment.requireActivity() as? HostActivityFactory, fragment as? HostCloseable)
 }

@@ -14,12 +14,13 @@ import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterLocal
 import com.speakerboxlite.router.RouterTabs
 import com.speakerboxlite.router.ViewTabs
-import com.speakerboxlite.router.ViewFragmentVM
+import com.speakerboxlite.router.fragment.ViewFragmentVM
 import com.speakerboxlite.router.result.RouterResultProvider
-import com.speakerboxlite.router.sample.R
+import com.speakerboxlite.router.samplefragment.R
 
 abstract class BaseViewModelFragment<VM: BaseViewModel, VDB: ViewDataBinding>(@LayoutRes val layoutId: Int,
-                                                                              @MenuRes val menuId: Int = 0): Fragment(), ViewFragmentVM<VM>
+                                                                              @MenuRes val menuId: Int = 0): Fragment(),
+    ViewFragmentVM<VM>
 {
     override var viewKey: String
         get() = requireArguments().getString("VIEW_KEY")!!

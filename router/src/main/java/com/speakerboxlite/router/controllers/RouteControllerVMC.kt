@@ -5,31 +5,20 @@ import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterModelProvider
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.ViewModel
-import com.speakerboxlite.router.ViewVM
 import kotlin.reflect.KClass
 
-abstract class RouteControllerVMC<Path: RoutePath, VM: ViewModel, ModelProvider: RouterModelProvider, V, C: Component>: RouteController<Path, V>(),
+abstract class RouteControllerVMC<Path: RoutePath, VM: ViewModel, ModelProvider: RouterModelProvider, V, C: Component>:
+    RouteController<Path, V>(),
     RouteControllerComponent<Path, V, C>,
-    RouteControllerViewModelProvider<Path, VM> where V: View, V: ViewVM<VM>
+    RouteControllerViewModelProvider<Path, VM>,
+    RouteControllerViewModelHolderComponent<VM> where V: View
 {
     final override lateinit var componentClass: KClass<C>
+    val viewModelInit = mutableMapOf<String, Boolean>()
 
     override fun onPrepareView(router: Router, view: V, path: Path, component: Any)
     {
-        if (!view.viewModel.isInit)
-        {
-            view.viewModel.router = router
-            view.viewModel.resultProvider = router.createResultProvider(view.viewKey)
-                .also { it.start() }
-        }
-
-        onInject(view, view.viewModel, component as C)
-
-        if (!view.viewModel.isInit)
-        {
-            view.viewModel.onInit()
-            view.viewModel.isInit = true
-        }
+        onInject(view, component as C)
     }
 
     override fun onProvideViewModel(modelProvider: RouterModelProvider, path: Path): VM
@@ -37,9 +26,29 @@ abstract class RouteControllerVMC<Path: RoutePath, VM: ViewModel, ModelProvider:
         return onCreateViewModel(modelProvider as ModelProvider, path)
     }
 
-    abstract protected fun onCreateViewModel(modelProvider: ModelProvider, path: Path): VM
+    override fun onPrepareViewModel(router: Router, key: String, vm: VM, component: Any)
+    {
+        if (viewModelInit[key] != true)
+        {
+            vm.router = router
+            vm.resultProvider = router.createResultProvider(key)
+                .also { it.start() }
+        }
+
+        onInject(vm, component as C)
+
+        if (viewModelInit[key] != true)
+        {
+            vm.onInit()
+            viewModelInit[key] = true
+        }
+    }
+
+    protected abstract fun onCreateViewModel(modelProvider: ModelProvider, path: Path): VM
 
     override fun onCreateInjector(path: Path, component: Any): Any = component
 
-    abstract protected fun onInject(view: V, vm: VM, component: C)
+    protected abstract fun onInject(vm: VM, component: C)
+
+    protected open fun onInject(view: V, component: C) {}
 }

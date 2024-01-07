@@ -13,7 +13,6 @@ import androidx.compose.runtime.currentCompositeKeyHash
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
@@ -23,7 +22,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterTabs
-import com.speakerboxlite.router.RouterViewModelStoreProvider
 import com.speakerboxlite.router.ViewBTS
 import com.speakerboxlite.router.ViewDialog
 import kotlinx.coroutines.launch
@@ -39,8 +37,6 @@ val <T> ProvidableCompositionLocal<T?>.currentOrThrow: T @Composable
 val LocalRouter: ProvidableCompositionLocal<Router?> = staticCompositionLocalOf { null }
 
 val LocalRouterTabs: ProvidableCompositionLocal<RouterTabs?> = staticCompositionLocalOf { null }
-
-val LocalRouterViewModelStoreProvider: ProvidableCompositionLocal<RouterViewModelStoreProvider?> = staticCompositionLocalOf { null }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -120,15 +116,13 @@ fun ComposeNavigator(
     key: String = compositionUniqueId(),
     router: Router,
     hoster: ComposeViewHoster? = null,
-    fragmentHostFactory: HostComposeFragmentFactory? = null,
     content: ComposeNavigatorContent = { router, navigator -> CurrentScreen(router, navigator) })
 {
     require(key.isNotEmpty()) { "ComposeNavigator key can't be empty" }
 
     val viewModelStore = LocalViewModelStoreOwner.current
 
-    CompositionLocalProvider(LocalComposeNavigatorStateHolder providesDefault rememberSaveableStateHolder(),
-        LocalHostComposeFragmentFactory provides fragmentHostFactory)
+    CompositionLocalProvider(LocalComposeNavigatorStateHolder providesDefault rememberSaveableStateHolder())
     {
         val navigator = rememberComposeNavigator(key,
             listOf(),
@@ -212,15 +206,10 @@ class ComposeNavigator(val key: String,
             removeLast()
     }
 
-    fun popAll()
-    {
-        popUntil { false }
-    }
-
     fun popToRoot()
     {
         while (stateStack.size > minSize)
-            removeLast()
+            removeLast(stateStack.size - 1)
     }
 
     fun popUntil(predicate: (StackEntry) -> Boolean)
@@ -228,9 +217,10 @@ class ComposeNavigator(val key: String,
         var n = 0
         while (canPop && stateStack.isNotEmpty())
         {
-            n += 1
-            if (predicate(stateStack[stateStack.size - n]))
+            if (predicate(stateStack[stateStack.size - n - 1]))
                 break
+
+            n += 1
         }
 
         if (n > 0)

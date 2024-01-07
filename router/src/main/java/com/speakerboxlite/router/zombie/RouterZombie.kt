@@ -5,9 +5,10 @@ import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.RoutePathResult
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterLocal
+import com.speakerboxlite.router.RouterModelProvider
 import com.speakerboxlite.router.RouterTabs
 import com.speakerboxlite.router.View
-import com.speakerboxlite.router.ViewFragment
+import com.speakerboxlite.router.ViewModel
 import com.speakerboxlite.router.annotations.InternalApi
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.command.CommandExecutor
@@ -58,15 +59,19 @@ class RouterZombie : Router, RouterLocal
         
     }
 
-    override fun onPrepareView(view: View)
+    override fun onPrepareView(view: View, viewModel: ViewModel?)
     {
-        
+
+    }
+
+    override fun <VM : ViewModel> provideViewModel(view: View, modelProvider: RouterModelProvider): VM
+    {
+        TODO("Not yet implemented")
     }
 
     override fun onComposeAnimation(view: View)
     {
-        if (view is ViewFragment)
-            view.resultProvider = createResultProvider("")
+
     }
 
     override fun createRouterLocal(key: String): RouterLocal = RouterZombie()

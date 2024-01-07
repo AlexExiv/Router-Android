@@ -1,0 +1,3 @@
+package com.speakerboxlite.router
+
+interface RouterModelProvider

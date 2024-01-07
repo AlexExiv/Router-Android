@@ -65,10 +65,13 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
         commandBuffer.unbind()
     }
 
-    override fun onPrepareView(view: View)
+    override fun onPrepareView(view: View, viewModel: ViewModel?)
     {
-        router?.onPrepareView(view)
+        router?.onPrepareView(view, viewModel)
     }
+
+    override fun <VM : ViewModel> provideViewModel(view: View, modelProvider: RouterModelProvider): VM =
+        router!!.provideViewModel(view, modelProvider)
 
     override fun onComposeAnimation(view: View)
     {

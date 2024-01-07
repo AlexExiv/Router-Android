@@ -85,12 +85,19 @@ class RouterStackReel(override val viewKey: String): RouterStackEntry
 
     override fun push(router: Router): Boolean
     {
-        if (router is RouterTab)
+        if (router is RouterTab || router is RouterTabInjector)
         {
-            if (stacks[router.index] == null)
-                stacks[router.index] = mutableListOf()
+            val index = when (router)
+            {
+                is RouterTab -> router.index
+                is RouterTabInjector -> router.index
+                else -> 0
+            }
 
-            stacks[router.index]!!.add(router)
+            if (stacks[index] == null)
+                stacks[index] = mutableListOf()
+
+            stacks[index]!!.add(router)
 
             return true
         }

@@ -6,7 +6,6 @@ import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import com.speakerboxlite.router.RouterViewModelStoreProvider
 
 class StackEntry(val view: ViewCompose,
                  val viewModelProvider: RouterViewModelStoreProvider?,

@@ -2,6 +2,7 @@ package com.speakerboxlite.router
 
 import com.speakerboxlite.router.controllers.RouteControllerComponent
 import com.speakerboxlite.router.controllers.RouteControllerInterface
+import com.speakerboxlite.router.controllers.RouteControllerViewModelHolderComponent
 import com.speakerboxlite.router.exceptions.RouteNotFoundException
 import com.speakerboxlite.router.result.ResultManager
 import kotlin.reflect.KClass
@@ -26,9 +27,9 @@ open class RouterInjector(callerKey: String?,
 
     protected val metaComponents = mutableMapOf<String, ViewMetaComponent>()
 
-    override fun onPrepareView(view: View)
+    override fun onPrepareView(view: View, viewModel: ViewModel?)
     {
-        super.onPrepareView(view)
+        super.onPrepareView(view, viewModel)
 
         val path = pathData[view.viewKey]!!
         val route = routeManager.find(path) ?: throw RouteNotFoundException(path)
@@ -38,6 +39,11 @@ open class RouterInjector(callerKey: String?,
         {
             val component = onComposeInjector(view.viewKey, route)
             routeComponent.onPrepareView(this, view, path, component)
+
+            if (viewModel != null)
+            {
+                (route as? RouteControllerViewModelHolderComponent<ViewModel>)?.onPrepareViewModel(this, view.viewKey, viewModel, component)
+            }
         }
     }
 

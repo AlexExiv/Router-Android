@@ -9,6 +9,7 @@ import com.speakerboxlite.router.command.CommandBufferImpl
 import com.speakerboxlite.router.command.CommandExecutor
 import com.speakerboxlite.router.controllers.RouteControllerComposable
 import com.speakerboxlite.router.controllers.RouteControllerInterface
+import com.speakerboxlite.router.controllers.RouteControllerViewModelHolder
 import com.speakerboxlite.router.controllers.RouteControllerViewModelProvider
 import com.speakerboxlite.router.controllers.RouteParamsGen
 import com.speakerboxlite.router.exceptions.ImpossibleRouteException
@@ -16,7 +17,6 @@ import com.speakerboxlite.router.exceptions.RouteNotFoundException
 import com.speakerboxlite.router.result.ResultManager
 import com.speakerboxlite.router.result.RouterResultProvider
 import com.speakerboxlite.router.result.RouterResultProviderImpl
-import kotlinx.coroutines.Dispatchers
 import java.util.UUID
 import kotlin.reflect.KClass
 
@@ -310,16 +310,19 @@ open class RouterSimple(protected val callerKey: String?,
         commandBuffer.unbind()
     }
 
-    override fun onPrepareView(view: View)
+    override fun onPrepareView(view: View, viewModel: ViewModel?)
     {
         val path = pathData[view.viewKey]!!
         val route = findRoute(path)
 
-        (route as? RouteControllerComposable<RoutePath, View>)?.also {
-            it.onPrepareView(this, view, path)
+        (route as? RouteControllerComposable<RoutePath, View>)?.onPrepareView(this, view, path)
+
+        if (viewModel != null)
+        {
+            (route as? RouteControllerViewModelHolder<ViewModel>)?.onPrepareViewModel(this, view.viewKey, viewModel)
         }
 
-        if (view is ViewFragment)
+        if (view is ViewResult)
             view.resultProvider = RouterResultProviderImpl(view.viewKey, resultManager)
     }
 
@@ -632,7 +635,7 @@ open class RouterSimple(protected val callerKey: String?,
             if (presentation == Presentation.ModalNewTask)
                 commandBuffer.apply(Command.StartModal(key, route.params))
             else
-                commandBuffer.apply(Command.ChangeHost(key))
+                commandBuffer.apply(Command.ChangeHost(key, route.animationController()))
 
             returnRouter?.also { routerManager.push(key, it) }
         }

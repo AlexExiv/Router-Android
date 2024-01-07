@@ -71,11 +71,6 @@ interface RouteControllerComposable<Path: RoutePath, V: View>
     fun onPrepareView(router: Router, view: V, path: Path)
 }
 
-interface RouteControllerViewModelProvider<Path: RoutePath, VM: ViewModel>
-{
-    fun onProvideViewModel(modelProvider: RouterModelProvider, path: Path): VM
-}
-
 interface Component
 
 interface RouteControllerComponent<Path: RoutePath, V: View, C: Component>
@@ -86,4 +81,19 @@ interface RouteControllerComponent<Path: RoutePath, V: View, C: Component>
 
     fun onCreateInjector(path: Path, component: Any): Any
     fun onPrepareView(router: Router, view: V, path: Path, component: Any)
+}
+
+interface RouteControllerViewModelProvider<Path: RoutePath, VM: ViewModel>
+{
+    fun onProvideViewModel(modelProvider: RouterModelProvider, path: Path): VM
+}
+
+interface RouteControllerViewModelHolder<VM: ViewModel>
+{
+    fun onPrepareViewModel(router: Router, key: String, vm: VM)
+}
+
+interface RouteControllerViewModelHolderComponent<VM: ViewModel>
+{
+    fun onPrepareViewModel(router: Router, key: String, vm: VM, component: Any)
 }

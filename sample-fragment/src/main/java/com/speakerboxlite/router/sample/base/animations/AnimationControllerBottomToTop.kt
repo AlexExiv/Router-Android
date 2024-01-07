@@ -2,10 +2,10 @@ package com.speakerboxlite.router.sample.base.animations
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
-import com.speakerboxlite.fragment.AnyAnimationController
+import com.speakerboxlite.router.fragment.AnyAnimationController
 import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.View
-import com.speakerboxlite.router.sample.R
+import com.speakerboxlite.router.samplefragment.R
 
 class AnimationControllerBottomToTop: AnyAnimationController
 {

@@ -155,7 +155,7 @@ interface Router
     /**
      * Prepares the view by injecting the ViewModel, Router, and ResultProvider and so on. This method should be called in the `onCreate` method of the fragment.
      */
-    fun onPrepareView(view: View)
+    fun onPrepareView(view: View, viewModel: ViewModel?)
 
     fun <VM: ViewModel> provideViewModel(view: View, modelProvider: RouterModelProvider): VM
 

@@ -7,16 +7,16 @@ import com.speakerboxlite.router.Router
 @Composable
 fun ComposeViewEffect(stackEntry: StackEntry?, router: Router)
 {
-    DisposableEffect(key1 = stackEntry)
+    /*DisposableEffect(key1 = stackEntry)
     {
 
         stackEntry?.also {
-            if (it.view !is FragmentContainerView)
+            if (it.view !is com.speakerboxlite.router.fragmentcompose.FragmentContainerView)
                 router.onPrepareView(it.view)
         }
 
         onDispose { }
-    }
+    }*/
 }
 
 @Composable

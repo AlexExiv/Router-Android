@@ -58,15 +58,16 @@ class RouteControllerVMProcessor(processingEnv: ProcessingEnvironment,
 
         if (!names.contains(CREATE_VIEWMODEL))
         {
-            val getAndroidViewModel = MemberName(mainRouterPack, "getAndroidViewModel")
+            val mpElement = typeArguments[MP_INDEX].asElement() as TypeElement
+            val mpClass = ClassName(mpElement.getPack(processingEnv), mpElement.simpleName.toString())
 
             val func = FunSpec.builder(CREATE_VIEWMODEL)
             func.addModifiers(KModifier.OVERRIDE)
             func.addModifiers(KModifier.PROTECTED)
-            func.addParameter("view", viewClass)
+            func.addParameter("modelProvider", mpClass)
             func.addParameter("path", pathClass)
             func.returns(vmClass)
-            func.addStatement("return view.%M()", getAndroidViewModel)
+            func.addStatement("return modelProvider.getViewModel()")
             classBuilder.addFunction(func.build())
         }
 
@@ -91,6 +92,7 @@ class RouteControllerVMProcessor(processingEnv: ProcessingEnvironment,
     {
         val PATH_INDEX = 0
         val VM_INDEX = 1
+        val MP_INDEX = 2
         val V_INDEX = 3
 
         const val CREATE_VIEW = "onCreateView"

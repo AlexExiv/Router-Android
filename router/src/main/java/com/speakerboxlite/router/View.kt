@@ -7,11 +7,8 @@ interface View
     var viewKey: String
 }
 
-interface ViewFragment: View
+interface ViewResult
 {
-    var router: Router
-    var localRouter: RouterLocal
-
     var resultProvider: RouterResultProvider
 }
 
@@ -19,8 +16,6 @@ interface ViewVM<VM: ViewModel>
 {
     var viewModel: VM
 }
-
-interface ViewFragmentVM<VM: ViewModel>: ViewFragment, ViewVM<VM>
 
 interface ViewTabs
 {
@@ -30,6 +25,7 @@ interface ViewTabs
 interface ViewDialog
 
 interface ViewBTS
+
 interface BaseHostView
 {
     var routerManager: RouterManager

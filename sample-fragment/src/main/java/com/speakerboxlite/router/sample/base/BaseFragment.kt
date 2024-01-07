@@ -12,12 +12,13 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterLocal
-import com.speakerboxlite.router.ViewFragment
+import com.speakerboxlite.router.fragment.ViewFragment
 import com.speakerboxlite.router.result.RouterResultProvider
-import com.speakerboxlite.router.sample.R
+import com.speakerboxlite.router.samplefragment.R
 
 abstract class BaseFragment<VDB: ViewDataBinding>(@LayoutRes val layoutId: Int,
-                                                  @MenuRes val menuId: Int = 0): Fragment(), ViewFragment
+                                                  @MenuRes val menuId: Int = 0): Fragment(),
+    ViewFragment
 {
     override var viewKey: String
         get() = requireArguments().getString("VIEW_KEY")!!

@@ -2,15 +2,14 @@ package com.speakerboxlite.router.samplecompose.step
 
 import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.annotations.Route
-import com.speakerboxlite.router.controllers.RouteController
+import com.speakerboxlite.router.compose.AndroidComposeViewModelProvider
+import com.speakerboxlite.router.samplecompose.base.RouteControllerApp
 
 class StepPath(val step: Int): RoutePath
 
 @Route
-class StepRouteController: RouteController<StepPath, StepView>()
+abstract class StepRouteController: RouteControllerApp<StepPath, StepViewModel, StepView>()
 {
-    override fun onCreateView(path: StepPath): StepView = StepView()
-        .also {
-            it.step.intValue = path.step
-        }
+    override fun onCreateViewModel(modelProvider: AndroidComposeViewModelProvider, path: StepPath): StepViewModel =
+        modelProvider.getViewModel { StepViewModel(path.step, it) }
 }

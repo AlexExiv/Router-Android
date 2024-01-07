@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.get
-import com.speakerboxlite.router.RouterViewModelStoreProvider
 
 class ComposeNavigatorViewModel: ViewModel(), RouterViewModelStoreProvider
 {

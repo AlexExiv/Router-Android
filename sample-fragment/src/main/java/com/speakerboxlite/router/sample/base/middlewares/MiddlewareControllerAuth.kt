@@ -1,6 +1,5 @@
 package com.speakerboxlite.router.sample.base.middlewares
 
-import com.speakerboxlite.router.Result
 import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.annotations.Middleware

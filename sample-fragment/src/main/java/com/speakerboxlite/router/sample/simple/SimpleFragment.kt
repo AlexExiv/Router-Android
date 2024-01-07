@@ -1,8 +1,8 @@
 package com.speakerboxlite.router.sample.simple
 
-import com.speakerboxlite.router.sample.R
+import com.speakerboxlite.router.samplefragment.R
 import com.speakerboxlite.router.sample.base.BaseFragment
-import com.speakerboxlite.router.sample.databinding.FragmentSimpleBinding
+import com.speakerboxlite.router.samplefragment.databinding.FragmentSimpleBinding
 
 class SimpleFragment: BaseFragment<FragmentSimpleBinding>(R.layout.fragment_simple)
 {

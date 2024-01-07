@@ -1,8 +1,8 @@
 package com.speakerboxlite.router.sample.tabs
 
-import com.speakerboxlite.router.sample.R
+import com.speakerboxlite.router.samplefragment.R
 import com.speakerboxlite.router.sample.base.BaseViewModelTabFragment
-import com.speakerboxlite.router.sample.databinding.FragmentTabsBinding
+import com.speakerboxlite.router.samplefragment.databinding.FragmentTabsBinding
 
 class TabsFragment: BaseViewModelTabFragment<TabsViewModel, FragmentTabsBinding>(R.layout.fragment_tabs)
 {

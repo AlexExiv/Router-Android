@@ -10,7 +10,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterLocal
 import com.speakerboxlite.router.ViewBTS
-import com.speakerboxlite.router.ViewFragmentVM
+import com.speakerboxlite.router.fragment.ViewFragmentVM
 import com.speakerboxlite.router.result.RouterResultProvider
 
 abstract class BaseViewModelBottomFragment<VM: BaseViewModel, VDB: ViewDataBinding>(open val layoutId: Int): BottomSheetDialogFragment(),

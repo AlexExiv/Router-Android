@@ -1,4 +1,4 @@
-package com.speakerboxlite.fragment
+package com.speakerboxlite.router.fragment
 
 import androidx.annotation.IdRes
 import androidx.fragment.app.DialogFragment
@@ -71,7 +71,7 @@ open class CommandExecutorAndroid(val activity: FragmentActivity,
             is Command.CloseTo -> closeTo(command.key)
             is Command.CloseAll -> closeAll()
             is Command.StartModal -> startActivity(command.key, command.params)
-            is Command.ChangeHost -> changeHost(command.key)
+            is Command.ChangeHost -> changeHost(command.key, command.path, command.animation as AnimationControllerFragment<RoutePath, View>)
             is Command.Dialog -> showDialog(command.view)
             is Command.CloseDialog -> closeDialog(command.key)
             is Command.Push -> pushFragment(command.path, command.view, command.animation as AnimationControllerFragment<RoutePath, View>, false)
@@ -83,12 +83,12 @@ open class CommandExecutorAndroid(val activity: FragmentActivity,
         }
     }
 
-    private fun checkFragmentManager()
+    protected fun checkFragmentManager()
     {
         fragmentManager.executePendingTransactions()
     }
 
-    private fun close()
+    protected fun close()
     {
         if (fragmentManager.backStackEntryCount > 1)
         {
@@ -98,12 +98,12 @@ open class CommandExecutorAndroid(val activity: FragmentActivity,
             closeAll()
     }
 
-    private fun closeAll()
+    protected fun closeAll()
     {
         hostCloseable?.closeHost()
     }
 
-    private fun closeTo(key: String)
+    protected fun closeTo(key: String)
     {
         if (fragmentManager.backStackEntryCount > 1)
         {
@@ -111,7 +111,7 @@ open class CommandExecutorAndroid(val activity: FragmentActivity,
         }
     }
 
-    private fun startActivity(key: String, params: Serializable?)
+    protected fun startActivity(key: String, params: Serializable?)
     {
         val af = activityFactory ?: error("You are trying to start a new activity but haven't specified factory")
         af.startActivity(params) {
@@ -121,12 +121,12 @@ open class CommandExecutorAndroid(val activity: FragmentActivity,
         }
     }
 
-    protected open fun changeHost(key: String)
+    protected open fun changeHost(key: String, path: RoutePath?, animation: AnimationControllerFragment<RoutePath, View>?)
     {
 
     }
 
-    private fun pushFragment(path: RoutePath?, view: View, animation: AnimationControllerFragment<RoutePath, View>?, replacing: Boolean)
+    protected fun pushFragment(path: RoutePath?, view: View, animation: AnimationControllerFragment<RoutePath, View>?, replacing: Boolean)
     {
         if (view is Fragment)
         {
@@ -149,7 +149,7 @@ open class CommandExecutorAndroid(val activity: FragmentActivity,
         }
     }
 
-    private fun replaceFragment(path: RoutePath, byView: View, animation: AnimationControllerFragment<RoutePath, View>?)
+    protected fun replaceFragment(path: RoutePath, byView: View, animation: AnimationControllerFragment<RoutePath, View>?)
     {
         if (byView is Fragment)
         {
@@ -158,7 +158,7 @@ open class CommandExecutorAndroid(val activity: FragmentActivity,
         }
     }
 
-    private fun showBottomSheet(view: View)
+    protected fun showBottomSheet(view: View)
     {
         if (view is BottomSheetDialogFragment)
         {
@@ -166,7 +166,7 @@ open class CommandExecutorAndroid(val activity: FragmentActivity,
         }
     }
 
-    private fun closeBottomSheet(key: String)
+    protected fun closeBottomSheet(key: String)
     {
         val f = fragmentManager.findFragmentByTag(key)
         if (f is BottomSheetDialogFragment)
@@ -175,7 +175,7 @@ open class CommandExecutorAndroid(val activity: FragmentActivity,
         }
     }
 
-    private fun showDialog(view: View)
+    protected fun showDialog(view: View)
     {
         if (view is DialogFragment)
         {
@@ -183,7 +183,7 @@ open class CommandExecutorAndroid(val activity: FragmentActivity,
         }
     }
 
-    private fun closeDialog(key: String)
+    protected fun closeDialog(key: String)
     {
         val f = fragmentManager.findFragmentByTag(key)
         if (f is DialogFragment)
@@ -192,7 +192,7 @@ open class CommandExecutorAndroid(val activity: FragmentActivity,
         }
     }
 
-    private fun showSubFragment(@IdRes containerId: Int, view: View)
+    protected fun showSubFragment(@IdRes containerId: Int, view: View)
     {
         if (view is Fragment)
         {

@@ -6,7 +6,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.staticCompositionLocalOf
-import com.speakerboxlite.router.RouterViewModelStoreProvider
 
 internal val LocalComposeNavigatorStateHolder: ProvidableCompositionLocal<SaveableStateHolder> =
     staticCompositionLocalOf { error("LocalNavigatorStateHolder not initialized") }

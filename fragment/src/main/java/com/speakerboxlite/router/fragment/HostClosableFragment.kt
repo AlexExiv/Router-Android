@@ -1,4 +1,4 @@
-package com.speakerboxlite.fragment
+package com.speakerboxlite.router.fragment
 
 import androidx.fragment.app.Fragment
 import com.speakerboxlite.router.HostCloseable

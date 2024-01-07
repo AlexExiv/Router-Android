@@ -1,8 +1,8 @@
 package com.speakerboxlite.router.sample.simple.component
 
-import com.speakerboxlite.router.sample.R
+import com.speakerboxlite.router.samplefragment.R
 import com.speakerboxlite.router.sample.base.BaseFragment
-import com.speakerboxlite.router.sample.databinding.FragmentSimpleComponentBinding
+import com.speakerboxlite.router.samplefragment.databinding.FragmentSimpleComponentBinding
 import com.speakerboxlite.router.sample.di.modules.AppData
 import javax.inject.Inject
 

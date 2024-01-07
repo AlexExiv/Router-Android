@@ -1,11 +1,6 @@
-package com.speakerboxlite.router
+package com.speakerboxlite.router.compose
 
 import androidx.lifecycle.ViewModelStore
-
-interface RouterViewModelProvider<VM: ViewModel>
-{
-    fun getViewModel(id: String): VM
-}
 
 interface RouterViewModelStoreProvider
 {
@@ -13,4 +8,3 @@ interface RouterViewModelStoreProvider
     fun clear(id: String)
 }
 
-interface RouterModelProvider

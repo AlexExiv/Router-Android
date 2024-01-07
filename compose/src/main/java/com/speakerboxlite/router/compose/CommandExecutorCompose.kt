@@ -1,10 +1,10 @@
 package com.speakerboxlite.router.compose
 
-import android.content.Intent
 import androidx.annotation.IdRes
 import com.speakerboxlite.router.HOST_ACTIVITY_INTENT_DATA_KEY
 import com.speakerboxlite.router.HOST_ACTIVITY_KEY
 import com.speakerboxlite.router.HostCloseable
+import com.speakerboxlite.router.IntentBuilder
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.ViewBTS
 import com.speakerboxlite.router.ViewDialog
@@ -12,17 +12,14 @@ import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandExecutor
 import java.io.Serializable
 
-typealias IntentBuilder = (Intent) -> Unit
-
 interface ComposeViewHoster
 {
     fun start(params: Serializable?, builder: IntentBuilder)
-    fun close()
 }
 
-class CommandExecutorCompose(val navigator: ComposeNavigator,
-                             val hoster: ComposeViewHoster? = null,
-                             val hostCloseable: HostCloseable? = null): CommandExecutor
+open class CommandExecutorCompose(val navigator: ComposeNavigator,
+                                  val hoster: ComposeViewHoster? = null,
+                                  val hostCloseable: HostCloseable? = null): CommandExecutor
 {
     override fun onBind()
     {
@@ -42,7 +39,7 @@ class CommandExecutorCompose(val navigator: ComposeNavigator,
             is Command.CloseTo -> closeTo(command.key)
             is Command.CloseAll -> closeAll()
             is Command.StartModal -> startActivity(command.key, command.params)
-            is Command.ChangeHost -> changeHost(command.key)
+            is Command.ChangeHost -> changeHost(command.key, command.animation as AnimationControllerCompose)
             is Command.Dialog -> showDialog(command.view)
             is Command.CloseDialog -> closeDialog(command.key)
             is Command.Push -> push(command.view, command.animation as AnimationControllerCompose)
@@ -84,11 +81,9 @@ class CommandExecutorCompose(val navigator: ComposeNavigator,
         }
     }
 
-    private fun changeHost(key: String)
+    protected open fun changeHost(key: String, animationController: AnimationControllerCompose?)
     {
-        val host = FragmentContainerView()
-        host.viewKey = key
-        navigator.push(host, null)
+
     }
 
     private fun push(view: View, animationController: AnimationControllerCompose?)

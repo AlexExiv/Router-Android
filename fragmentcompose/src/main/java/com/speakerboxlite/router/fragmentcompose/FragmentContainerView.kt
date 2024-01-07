@@ -1,4 +1,4 @@
-package com.speakerboxlite.router.compose
+package com.speakerboxlite.router.fragmentcompose
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -6,7 +6,9 @@ import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.fragment.app.Fragment
-import com.speakerboxlite.router.ComposeFragmentHostView
+import com.speakerboxlite.router.compose.LocalComposeNavigator
+import com.speakerboxlite.router.compose.ViewCompose
+import com.speakerboxlite.router.compose.currentOrThrow
 import java.util.UUID
 
 interface HostComposeFragmentFactory
