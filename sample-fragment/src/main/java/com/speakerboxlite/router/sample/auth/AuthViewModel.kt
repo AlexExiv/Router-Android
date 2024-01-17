@@ -15,7 +15,6 @@ class AuthViewModel(val refPath: RouteParamsGen, app: Application): BaseViewMode
     {
         userData.isLogin.value = true
 
-        router.close()
-        router.route(refPath)
+        router.close()?.route(refPath)
     }
 }

@@ -6,7 +6,7 @@
 
         <variable
             name="viewmodel"
-            type="com.speakerboxlite.router.samplemixed.main.MainViewModel" />
+            type="com.speakerboxlite.router.sample.main.MainViewModel" />
 
     </data>
 

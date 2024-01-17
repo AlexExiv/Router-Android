@@ -13,6 +13,7 @@ import com.speakerboxlite.router.samplecompose.base.BaseViewCompose
 import com.speakerboxlite.router.samplecompose.bts.BottomSheetPath
 import com.speakerboxlite.router.compose.currentOrThrow
 import com.speakerboxlite.router.samplecompose.dialog.DialogPath
+import com.speakerboxlite.router.samplecompose.step.StepAuthPath
 import com.speakerboxlite.router.samplecompose.step.StepPath
 import com.speakerboxlite.router.samplecompose.tabs.TabsPath
 
@@ -35,6 +36,10 @@ fun Main()
             Column {
                 Button(onClick = { router.route(StepPath(0)) }) {
                     Text(text = "Show steps")
+                }
+
+                Button(onClick = { router.route(StepAuthPath(0)) }) {
+                    Text(text = "Show auth steps")
                 }
 
                 Button(onClick = { router.route(TabsPath()) }) {

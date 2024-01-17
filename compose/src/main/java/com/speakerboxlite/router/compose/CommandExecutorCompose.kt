@@ -5,6 +5,7 @@ import com.speakerboxlite.router.HOST_ACTIVITY_INTENT_DATA_KEY
 import com.speakerboxlite.router.HOST_ACTIVITY_KEY
 import com.speakerboxlite.router.HostCloseable
 import com.speakerboxlite.router.IntentBuilder
+import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.ViewBTS
 import com.speakerboxlite.router.ViewDialog
@@ -42,8 +43,8 @@ open class CommandExecutorCompose(val navigator: ComposeNavigator,
             is Command.ChangeHost -> changeHost(command.key, command.animation as? AnimationControllerCompose)
             is Command.Dialog -> showDialog(command.view)
             is Command.CloseDialog -> closeDialog(command.key)
-            is Command.Push -> push(command.view, command.animation as? AnimationControllerCompose)
-            is Command.Replace -> replace(command.byView)
+            is Command.Push -> push(command.path, command.view, command.animation as? AnimationControllerCompose)
+            is Command.Replace -> replace(command.path, command.byView)
             is Command.BottomSheet -> showBottomSheet(command.view)
             is Command.CloseBottomSheet -> closeBottomSheet(command.key)
             is Command.SubFragment -> showSubFragment(command.containerId, command.view)
@@ -86,40 +87,40 @@ open class CommandExecutorCompose(val navigator: ComposeNavigator,
         error("You try to change a host but don't use appropriate Navigator")
     }
 
-    private fun push(view: View, animationController: AnimationControllerCompose?)
+    protected open fun push(path: RoutePath?, view: View, animationController: AnimationControllerCompose?)
     {
         val cv = view as? ViewCompose ?: error("")
         navigator.push(cv, animationController)
     }
 
-    private fun replace(view: View)
+    protected open fun replace(path: RoutePath?, view: View)
     {
         val cv = view as? ViewCompose ?: error("")
         navigator.replace(cv)
     }
 
-    private fun showBottomSheet(view: View)
+    protected open fun showBottomSheet(view: View)
     {
         view as? ViewBTS ?: error("")
         val cv = view as? ViewCompose ?: error("")
         navigator.push(cv, null)
     }
 
-    private fun closeBottomSheet(key: String)
+    protected open fun closeBottomSheet(key: String)
     {
-        navigator.pop()
+        close()
     }
 
-    private fun showDialog(view: View)
+    protected open fun showDialog(view: View)
     {
         view as? ViewDialog ?: error("")
         val cv = view as? ViewCompose ?: error("")
         navigator.push(cv, null)
     }
 
-    private fun closeDialog(key: String)
+    protected open fun closeDialog(key: String)
     {
-        navigator.pop()
+        close()
     }
 
     private fun showSubFragment(@IdRes containerId: Int, view: View)

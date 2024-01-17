@@ -7,6 +7,7 @@ import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
 import com.speakerboxlite.router.command.CommandBufferImpl
 import com.speakerboxlite.router.command.CommandExecutor
+import com.speakerboxlite.router.controllers.AnimationHostChanged
 import com.speakerboxlite.router.controllers.RouteControllerComposable
 import com.speakerboxlite.router.controllers.RouteControllerInterface
 import com.speakerboxlite.router.controllers.RouteControllerViewModelHolder
@@ -88,9 +89,9 @@ open class RouterSimple(protected val callerKey: String?,
         popViewStack()
 
         val view = createView(route, RouteType.Simple, path, null, null)
-        commandBuffer.apply(Command.Replace(path, view, route.animationController()))
-
         routerManager.push(view.viewKey, this)
+        commandBuffer.apply(Command.Replace(path, view, route.animationController(null, view, null)))
+
         return this
     }
 
@@ -102,9 +103,9 @@ open class RouterSimple(protected val callerKey: String?,
             return null
 
         val view = createView(route, RouteType.Dialog, path, null, null)
+        routerManager.push(view.viewKey, this)
         commandBuffer.apply(Command.Dialog(view))
 
-        routerManager.push(view.viewKey, this)
         return this
     }
 
@@ -116,9 +117,9 @@ open class RouterSimple(protected val callerKey: String?,
             return null
 
         val view = createView(route, RouteType.Dialog, path, null) { result(it as  R) }
+        routerManager.push(view.viewKey, this)
         commandBuffer.apply(Command.Dialog(view))
 
-        routerManager.push(view.viewKey, this)
         return this
     }
 
@@ -130,9 +131,9 @@ open class RouterSimple(protected val callerKey: String?,
             return null
 
         val view = createView(route, RouteType.BTS, path, null, null)
+        routerManager.push(view.viewKey, this)
         commandBuffer.apply(Command.BottomSheet(view))
 
-        routerManager.push(view.viewKey, this)
         return this
     }
 
@@ -144,9 +145,9 @@ open class RouterSimple(protected val callerKey: String?,
             return null
 
         val view = createView(route, RouteType.BTS, path, null) { result(it as  R) }
+        routerManager.push(view.viewKey, this)
         commandBuffer.apply(Command.BottomSheet(view))
 
-        routerManager.push(view.viewKey, this)
         return this
     }
 
@@ -544,7 +545,7 @@ open class RouterSimple(protected val callerKey: String?,
         {
             RouteType.Dialog, RouteType.BTS ->
             {
-                val view = if (result == null)
+                /*val view = if (result == null)
                     createView(route, route.routeType, path, null, null)
                 else
                     createView(route, route.routeType, path, null) { result(it as  R) }
@@ -554,9 +555,9 @@ open class RouterSimple(protected val callerKey: String?,
                 else
                     Command.BottomSheet(view)
 
-                commandBuffer.apply(command)
                 routerManager.push(view.viewKey, this)
-                return this
+                commandBuffer.apply(command)*/
+                return doDialogRoute(route, path, result)
             }
 
             RouteType.Simple ->
@@ -609,6 +610,43 @@ open class RouterSimple(protected val callerKey: String?,
         return null
     }
 
+    protected fun doDialogRoute(route: RouteControllerInterface<RoutePath, *>, path: RoutePath, result: Result<Any>?): Router?
+    {
+        val lastIsCompose = viewsStack.lastOrNull()?.route?.isCompose
+        val view = if (lastIsCompose != null && lastIsCompose != route.isCompose)
+        {
+            val newCallerKey = viewsStack.last().key
+            val router = createRouter(newCallerKey)
+            if (result == null)
+                router.route(path = path, presentation = Presentation.Push)
+            else
+                router.routeWithResult(path = path as RoutePathResult<Any>, presentation = Presentation.Push, result = result)
+
+            val key = UUID.randomUUID().toString()
+            routerManager[key] = router
+
+            route.onCreateView(path).also { it.viewKey = key }
+        }
+        else
+        {
+            val view = if (result == null)
+                createView(route, route.routeType, path, null, null)
+            else
+                createView(route, route.routeType, path, null) { result(it as  R) }
+
+            routerManager.push(view.viewKey, this)
+            view
+        }
+
+        val command = if (route.routeType == RouteType.Dialog)
+            Command.Dialog(view)
+        else
+            Command.BottomSheet(view)
+
+        commandBuffer.apply(command)
+        return routerManager.top
+    }
+
     protected fun doRoute(route: RouteControllerInterface<RoutePath, *>, routeType: RouteType, path: RoutePath, presentation: Presentation, resultKey: String?, result: Result<Any>?): Router?
     {
         val lastIsCompose = viewsStack.lastOrNull()?.route?.isCompose
@@ -635,15 +673,19 @@ open class RouterSimple(protected val callerKey: String?,
             if (presentation == Presentation.ModalNewTask)
                 commandBuffer.apply(Command.StartModal(key, route.params))
             else
-                commandBuffer.apply(Command.ChangeHost(key, path, route.animationController()))
+            {
+                val view = route.onCreateView(path)
+                view.viewKey = key
+                commandBuffer.apply(Command.Push(path, view, null))
+            }
 
             returnRouter//?.also { routerManager.push(key, it) }
         }
         else
         {
             val view = createView(route, routeType, path, resultKey, result)
-            commandBuffer.apply(Command.Push(path, view, route.animationController()))
             routerManager.push(view.viewKey, this)
+            commandBuffer.apply(Command.Push(path, view, route.animationController(presentation, view, null)))
             this
         }
     }

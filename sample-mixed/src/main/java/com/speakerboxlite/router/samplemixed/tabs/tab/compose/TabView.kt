@@ -1,4 +1,4 @@
-package com.speakerboxlite.router.samplemixed.tabs.tab
+package com.speakerboxlite.router.samplemixed.tabs.tab.compose
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

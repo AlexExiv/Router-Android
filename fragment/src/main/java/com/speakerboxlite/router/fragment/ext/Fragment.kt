@@ -1,4 +1,4 @@
-package com.speakerboxlite.router.ext
+package com.speakerboxlite.router.fragment.ext
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment

@@ -15,8 +15,8 @@ import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandExecutor
-import com.speakerboxlite.router.ext.isPopped
-import com.speakerboxlite.router.ext.isRemovingRecursive
+import com.speakerboxlite.router.fragment.ext.isPopped
+import com.speakerboxlite.router.fragment.ext.isRemovingRecursive
 import java.io.Serializable
 
 open class CommandExecutorAndroid(val activity: FragmentActivity,
@@ -126,7 +126,7 @@ open class CommandExecutorAndroid(val activity: FragmentActivity,
         error("You try to change a host but don't use appropriate Navigator")
     }
 
-    protected fun pushFragment(path: RoutePath?, view: View, animation: AnimationControllerFragment<RoutePath, View>?, replacing: Boolean)
+    protected open fun pushFragment(path: RoutePath?, view: View, animation: AnimationControllerFragment<RoutePath, View>?, replacing: Boolean)
     {
         if (view is Fragment)
         {
@@ -149,7 +149,7 @@ open class CommandExecutorAndroid(val activity: FragmentActivity,
         }
     }
 
-    protected fun replaceFragment(path: RoutePath, byView: View, animation: AnimationControllerFragment<RoutePath, View>?)
+    protected open fun replaceFragment(path: RoutePath, byView: View, animation: AnimationControllerFragment<RoutePath, View>?)
     {
         if (byView is Fragment)
         {
@@ -158,7 +158,7 @@ open class CommandExecutorAndroid(val activity: FragmentActivity,
         }
     }
 
-    protected fun showBottomSheet(view: View)
+    protected open fun showBottomSheet(view: View)
     {
         if (view is BottomSheetDialogFragment)
         {
@@ -166,16 +166,19 @@ open class CommandExecutorAndroid(val activity: FragmentActivity,
         }
     }
 
-    protected fun closeBottomSheet(key: String)
+    protected open fun closeBottomSheet(key: String)
     {
         val f = fragmentManager.findFragmentByTag(key)
         if (f is BottomSheetDialogFragment)
         {
             f.dismiss()
+
+            if (fragmentManager.backStackEntryCount == 0)
+                closeAll()
         }
     }
 
-    protected fun showDialog(view: View)
+    protected open fun showDialog(view: View)
     {
         if (view is DialogFragment)
         {
@@ -183,12 +186,15 @@ open class CommandExecutorAndroid(val activity: FragmentActivity,
         }
     }
 
-    protected fun closeDialog(key: String)
+    protected open fun closeDialog(key: String)
     {
         val f = fragmentManager.findFragmentByTag(key)
         if (f is DialogFragment)
         {
             f.dismiss()
+
+            if (fragmentManager.backStackEntryCount == 0)
+                closeAll()
         }
     }
 

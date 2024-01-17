@@ -1,21 +1,25 @@
 package com.speakerboxlite.router.samplemixed.base.fragment
 
+import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.fragment.app.Fragment
 import com.speakerboxlite.router.HostCloseable
 import com.speakerboxlite.router.HostView
+import com.speakerboxlite.router.IntentBuilder
+import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.Router
-import com.speakerboxlite.router.compose.ComposeHostViewRoot
-import com.speakerboxlite.router.fragment.HostClosableFragment
-import com.speakerboxlite.router.fragment.IHostClosableFragment
+import com.speakerboxlite.router.View
+import com.speakerboxlite.router.compose.ComposeNavigator
+import com.speakerboxlite.router.fragment.AnimationControllerFragment
 import com.speakerboxlite.router.fragment._viewKey
+import com.speakerboxlite.router.fragmentcompose.CommandExecutorComposeMixed
 import com.speakerboxlite.router.fragmentcompose.ComposeFragmentHostView
-import com.speakerboxlite.router.fragmentcompose.ComposeHostView
-import com.speakerboxlite.router.fragmentcompose.ComposeNavigatorMixed
+import com.speakerboxlite.router.fragmentcompose.ComposeViewHoster
 import com.speakerboxlite.router.samplemixed.R
+import com.speakerboxlite.router.samplemixed.base.animations.AnimationControllerFragmentDefault
+import java.io.Serializable
 
-abstract class BaseHostFragment: Fragment(R.layout.fragment_host),
+open class BaseHostFragment: Fragment(R.layout.fragment_host),
     HostView
 {
     override var viewKey: String
@@ -41,14 +45,40 @@ class ComposeHostFragment: BaseHostFragment(),
     }
 }
 
+class ComposeViewHosterImpl(val context: Context): ComposeViewHoster
+{
+    override fun onCreateComposeFragmentHostView(): ComposeFragmentHostView =
+        ComposeHostFragment()
+
+    override fun onCreateAnimation(): AnimationControllerFragment<RoutePath, View>? =
+        AnimationControllerFragmentDefault()
+
+    override fun start(params: Serializable?, builder: IntentBuilder)
+    {
+        TODO("Not yet implemented")
+    }
+}
+
 class HostComposeFragment: com.speakerboxlite.router.fragmentcompose.HostComposeFragment()
 {
     @Composable
-    override fun ComposeNavigator()
+    override fun Navigator()
     {
-        ComposeNavigatorMixed(
+        ComposeNavigator(
             router = router,
             hostCloseable = this,
-            fragmentHostFactory = { ComposeHostFragment() })
+            executorFactory = { CommandExecutorComposeMixed(it, R.id.root, parentFragmentManager, ComposeViewHosterImpl(requireContext()), this) })
+    }
+}
+
+class TabHostComposeFragment: com.speakerboxlite.router.fragmentcompose.TabHostComposeFragment()
+{
+    @Composable
+    override fun Navigator()
+    {
+        ComposeNavigator(
+            router = router,
+            hostCloseable = this,
+            executorFactory = { CommandExecutorComposeMixed(it, R.id.root, parentFragmentManager, ComposeViewHosterImpl(requireContext()), this) })
     }
 }

@@ -40,7 +40,7 @@ class StepViewModel(val step: Int, app: Application): BaseViewModel(app)
         if (step < 4)
             router.route(StepComposePath(step + 1), Presentation.Push)
         else
-            router.route(StepComposePath(step*10), Presentation.Modal)
+            router.route(StepComposePath(step + 10), Presentation.Modal)
     }
 
     fun onNextFragment()
@@ -48,7 +48,7 @@ class StepViewModel(val step: Int, app: Application): BaseViewModel(app)
         if (step < 4)
             router.route(StepFragmentPath(step + 1), Presentation.Push)
         else
-            router.route(StepFragmentPath(step*10), Presentation.Modal)
+            router.route(StepFragmentPath(step + 10), Presentation.Modal)
     }
 
     fun onCloseToRoot()

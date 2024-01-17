@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
-        android:name=".App"
+        android:name="com.speakerboxlite.router.sample.App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -11,7 +11,7 @@
         android:theme="@style/Theme.Router">
 
         <activity
-            android:name=".base.StartActivity"
+            android:name="com.speakerboxlite.router.sample.base.StartActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Router"
@@ -24,13 +24,13 @@
         </activity>
 
         <activity
-            android:name=".base.HostActivity"
+            android:name="com.speakerboxlite.router.sample.base.HostActivity"
             android:theme="@style/Theme.Router">
 
         </activity>
 
         <activity
-            android:name=".base.HostLandscapeActivity"
+            android:name="com.speakerboxlite.router.sample.base.HostLandscapeActivity"
             android:theme="@style/Theme.Router"
             android:screenOrientation="landscape">
 

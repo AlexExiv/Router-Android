@@ -30,7 +30,7 @@ interface RouteControllerInterface<Path: RoutePath, V: View>
 
     fun isPartOfChain(clazz: KClass<*>): Boolean
 
-    fun animationController(): AnimationController?
+    fun animationController(presentation: Presentation?, view: View?, hostChanged: AnimationHostChanged?): AnimationController?
     fun onCreateView(path: Path): V
 
     /**

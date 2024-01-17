@@ -15,6 +15,7 @@ import com.speakerboxlite.router.samplemixed.bts.BottomSheetPath
 import com.speakerboxlite.router.compose.currentOrThrow
 import com.speakerboxlite.router.compose.routerViewModel
 import com.speakerboxlite.router.samplemixed.dialog.DialogPath
+import com.speakerboxlite.router.samplemixed.dialog.fragment.DialogFragmentPath
 import com.speakerboxlite.router.samplemixed.step.StepViewModel
 
 class StepView: BaseViewCompose()
@@ -55,6 +56,10 @@ fun Step(viewModel: StepViewModel)
 
                 Button(onClick = { router.route(DialogPath()) }) {
                     Text(text = "Show dialog")
+                }
+
+                Button(onClick = { router.route(DialogFragmentPath(message = "Im fragment", okBtn = "Close")) }) {
+                    Text(text = "Show dialog fragment")
                 }
 
                 Button(onClick = { router.route(BottomSheetPath()) }) {

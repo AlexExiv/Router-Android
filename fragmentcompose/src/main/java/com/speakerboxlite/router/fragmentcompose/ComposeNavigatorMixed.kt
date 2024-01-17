@@ -8,6 +8,8 @@ import com.speakerboxlite.router.HostCloseable
 import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterTabs
+import com.speakerboxlite.router.compose.CommandExecutorCompose
+import com.speakerboxlite.router.compose.CommandExecutorFactory
 import com.speakerboxlite.router.compose.ComposeNavigator
 import com.speakerboxlite.router.compose.ComposeNavigatorContent
 import com.speakerboxlite.router.compose.ComposeNavigatorTabs
@@ -25,6 +27,7 @@ fun ComposeNavigatorMixed(key: String = compositionUniqueId(),
                           router: Router,
                           hoster: ComposeViewHoster? = null,
                           hostCloseable: HostCloseable? = null,
+                          executorFactory: CommandExecutorFactory,
                           fragmentHostFactory: HostComposeFragmentFactory,
                           content: ComposeNavigatorContent = { router, navigator -> CurrentScreen(router, navigator) })
 {
@@ -35,7 +38,7 @@ fun ComposeNavigatorMixed(key: String = compositionUniqueId(),
             router = router,
             hoster = hoster,
             hostCloseable = hostCloseable,
-            executorFactory = { CommandExecutorComposeMixed(it, hoster, hostCloseable) },
+            executorFactory = executorFactory,
             content = content)
     }
 }
@@ -54,7 +57,7 @@ fun ComposeNavigatorTabsMixed(key: String = compositionUniqueId(),
 {
     CompositionLocalProvider(LocalHostComposeFragmentFactory provides fragmentHostFactory)
     {
-        ComposeNavigatorTabs(
+        /*ComposeNavigatorTabs(
             key = key,
             routerTabs = routerTabs,
             tabPaths = tabPaths,
@@ -64,6 +67,6 @@ fun ComposeNavigatorTabsMixed(key: String = compositionUniqueId(),
             transitionTabsSpec = transitionTabsSpec,
             executorFactory = { CommandExecutorComposeMixed(it, hoster, hostCloseable) },
             onTabChanged = onTabChanged,
-            content = content)
+            content = content)*/
     }
 }

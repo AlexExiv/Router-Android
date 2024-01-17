@@ -13,7 +13,9 @@ import androidx.compose.runtime.currentCompositeKeyHash
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
 import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -44,15 +46,11 @@ val LocalRouterTabs: ProvidableCompositionLocal<RouterTabs?> = staticComposition
 @Composable
 fun CurrentScreen(router: Router, navigator: ComposeNavigator)
 {
-    val stackEntry = navigator.lastFullItem ?: return
+    val stackEntry = navigator.lastFullItem
     val stackDialog = navigator.lastDialog
     val stackBottomSheet = navigator.lastBottomSheet
 
     val coroutineScope = rememberCoroutineScope()
-
-    ComposeViewEffect(stackEntry = stackEntry, router = router)
-    ComposeViewEffect(stackEntry = stackDialog, router = router)
-    ComposeViewEffect(stackEntry = stackBottomSheet, router = router)
 
     val sheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
@@ -71,20 +69,23 @@ fun CurrentScreen(router: Router, navigator: ComposeNavigator)
         },
         sheetState = sheetState)
     {
-        navigator.beginTransition()
+        if (stackEntry != null)
+        {
+            navigator.beginTransition()
 
-        AnimatedContent(targetState = stackEntry,
-            transitionSpec = {
-                stackEntry.animationController?.prepareAnimation(navigator, this) ?: ContentTransformNone
-            },
-            label = "Backstack",
-            contentKey = { it.id })
-        { se ->
+            AnimatedContent(targetState = stackEntry,
+                transitionSpec = {
+                    stackEntry.animationController?.prepareAnimation(navigator, this) ?: ContentTransformNone
+                },
+                label = "Backstack",
+                contentKey = { it.id })
+            { se ->
 
-            CompleteTransitionEffect(stackEntry = se, navigator = navigator)
-            se.LocalOwnersProvider(navigator.stateHolder)
-            {
-                se.view.Root()
+                CompleteTransitionEffect(stackEntry = se, navigator = navigator)
+                se.LocalOwnersProvider(navigator.stateHolder)
+                {
+                    se.view.Root()
+                }
             }
         }
     }

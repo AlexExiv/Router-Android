@@ -18,8 +18,8 @@ import com.speakerboxlite.router.ViewTabs
 import com.speakerboxlite.router.ViewVM
 import com.speakerboxlite.router.annotations.InternalApi
 import com.speakerboxlite.router.command.CommandExecutor
-import com.speakerboxlite.router.ext.isPoppedRecursive
-import com.speakerboxlite.router.ext.isRemovingRecursive
+import com.speakerboxlite.router.fragment.ext.isPoppedRecursive
+import com.speakerboxlite.router.fragment.ext.isRemovingRecursive
 import com.speakerboxlite.router.ext.restartApp
 import com.speakerboxlite.router.zombie.RouterZombie
 
@@ -56,7 +56,7 @@ open class FragmentLifeCycle(private val routerManager: RouterManager,
 
         if (f is ViewFragment)
         {
-            val router = routerManager.getForView(f.viewKey)
+            val router = routerManager.getForView(f.viewKey) ?: routerManager[f.viewKey]
 
             //In case of we couldn't find the router start the restarting process. It may occur after the app restores the state after the reboot maybe better
             //solution is to serialize routers.

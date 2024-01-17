@@ -30,8 +30,6 @@ fun CurrentScreenTab(router: Router,
 {
     val stackEntry = navigator.lastFullItem ?: return
 
-    ComposeViewEffect(stackEntry = stackEntry, router = router)
-
     var recomposeStep by remember(selectedTab) { mutableIntStateOf(0) }
 
     SideEffect { recomposeStep += 1 }

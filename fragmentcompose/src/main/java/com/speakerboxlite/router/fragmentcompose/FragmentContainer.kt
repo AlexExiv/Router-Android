@@ -34,20 +34,26 @@ fun FragmentContainer(modifier: Modifier = Modifier,
         }
         catch (e: IllegalStateException)
         {
-            null// findFragment throws if no parent fragment is found
+            null
         }
     }
 
     val containerId by rememberSaveable { mutableStateOf(View.generateViewId()) }
-    val container = remember { mutableStateOf<FragmentContainerView?>(null) }
+    val container = remember { mutableStateOf<View?>(null) }
     val viewBlock: (Context) -> View = remember(localView) {
         {
             context ->
 
-            FragmentContainerView(context)
-                .apply { id = containerId }
+            var containerView = parentFragment?.view?.findViewById<View>(com.speakerboxlite.router.R.id.root)
+            if (containerView == null)
+            {
+                containerView = FragmentContainerView(context)
+                    .apply { id = containerId }
+            }
+
+            containerView
                 .also {
-                    val fragmentManager = parentFragment?.childFragmentManager ?: (context as? FragmentActivity)?.supportFragmentManager
+                    val fragmentManager = parentFragment?.parentFragmentManager ?: (context as? FragmentActivity)?.supportFragmentManager
                     fragmentManager?.commit { commit(it.id) }
                     container.value = it
                 }
@@ -58,9 +64,10 @@ fun FragmentContainer(modifier: Modifier = Modifier,
 
     // Set up a DisposableEffect that will clean up fragments when the FragmentContainer is disposed
     val localContext = LocalContext.current
-    DisposableEffect(localView, localContext, container) {
+    DisposableEffect(localView, localContext, container)
+    {
         onDispose {
-            val fragmentManager = parentFragment?.childFragmentManager ?: (localContext as? FragmentActivity)?.supportFragmentManager // Now find the fragment inflated via the FragmentContainerView
+            val fragmentManager = parentFragment?.parentFragmentManager ?: (localContext as? FragmentActivity)?.supportFragmentManager
             val existingFragment = fragmentManager?.findFragmentById(container.value?.id ?: 0)
 
             if (existingFragment != null && !fragmentManager.isStateSaved)

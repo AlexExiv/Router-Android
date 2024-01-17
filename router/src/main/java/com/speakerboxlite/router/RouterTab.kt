@@ -2,6 +2,7 @@ package com.speakerboxlite.router
 
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.result.ResultManager
+import java.lang.ref.WeakReference
 
 class RouterTab(callerKey: String?,
                 parent: RouterSimple,
@@ -11,6 +12,8 @@ class RouterTab(callerKey: String?,
                 val index: Int,
                 routerTabs: RouterTabsImpl): RouterSimple(callerKey, parent, routeManager, routerManager, resultManager), RouterTabSuper
 {
+    private val weakRouterTabs = WeakReference(routerTabs)
+
     private val delegate: RouterTabDelegate = RouterTabDelegateImpl(index, routerTabs, this, this, parent)
 
     override val hasPreviousScreen: Boolean get() = delegate.hasPreviousScreen
@@ -33,4 +36,6 @@ class RouterTab(callerKey: String?,
     override fun superBack() = super.back()
 
     override fun superClose() = super.close()
+
+    override fun createRouter(callerKey: String): Router = RouterTab(callerKey, this, routeManager, routerManager, resultManager, index, weakRouterTabs.get()!!)
 }

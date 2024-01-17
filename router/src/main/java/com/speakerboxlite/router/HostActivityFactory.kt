@@ -2,7 +2,6 @@ package com.speakerboxlite.router
 
 import android.app.Activity
 import android.content.Intent
-import androidx.fragment.app.Fragment
 import java.io.Serializable
 
 const val HOST_ACTIVITY_KEY = "com.speakerboxlite.router.HOST_ACTIVITY_KEY"

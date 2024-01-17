@@ -117,8 +117,8 @@ class AnnotationProcessor : AbstractProcessor()
             initBuilder.addModifiers(listOf(KModifier.PUBLIC))
             initBuilder.addParameter("startPath", ClassName(MAIN_ROUTER_PACK, "RoutePath"))
 
-            val animClass = ClassName(CONTROLLERS_PACK, "AnimationController")
-            initBuilder.addParameter("animation", animClass.copy(nullable = true))
+            val animClass = ClassName(CONTROLLERS_PACK, "AnimationControllerFactory")
+            initBuilder.addParameter("animationFactory", animClass.copy(nullable = true))
 
             initBuilder.addStatement("this.startPath = startPath")
             initBuilder.addStatement("")
@@ -261,8 +261,8 @@ class AnnotationProcessor : AbstractProcessor()
             val anyAnimClass = ClassName(CONTROLLERS_PACK, "AnimationController")
             initBuilder.addStatement("${valName}.preferredAnimationController = %T() as %T", animClass, anyAnimClass)
         }
-        else
-            initBuilder.addStatement("${valName}.preferredAnimationController = animation")
+
+        initBuilder.addStatement("${valName}.animationControllerFactory = animationFactory")
 
         val chainAnnotation = element.getAnnotation(Chain::class.java)
         if (chainAnnotation != null)
