@@ -6,7 +6,6 @@ import com.speakerboxlite.router.HostCloseable
 import com.speakerboxlite.router.R
 import com.speakerboxlite.router.RouterManager
 import com.speakerboxlite.router.command.CommandExecutor
-import com.speakerboxlite.router.fragment.CommandExecutorAndroid
 import com.speakerboxlite.router.fragment.FragmentLifeCycle
 import com.speakerboxlite.router.fragment.FragmentModelProvider
 
@@ -18,5 +17,5 @@ class FragmentLifeCycleMixed(routerManager: RouterManager,
         if (fragment is ComposeHostView)
             null
         else
-            CommandExecutorAndroidMixed(fragment.requireActivity(), R.id.root, fragment.childFragmentManager, fragment.requireActivity() as? HostActivityFactory, fragment as? HostCloseable, fragmentFactory)
+            CommandExecutorFragmentMixed(fragment.requireActivity(), R.id.root, fragment.childFragmentManager, fragment.requireActivity() as? HostActivityFactory, fragment as? HostCloseable, fragmentFactory)
 }

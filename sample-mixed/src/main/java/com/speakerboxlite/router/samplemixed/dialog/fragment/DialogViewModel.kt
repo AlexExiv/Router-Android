@@ -23,6 +23,6 @@ class DialogViewModel(val title: String,
 
     fun onShowAnotherDialog()
     {
-        router.routeDialog(DialogFragmentPath("I'm a additional dialog", "", "Close"))
+        router.route(DialogFragmentPath("I'm a additional dialog", "", "Close"))
     }
 }

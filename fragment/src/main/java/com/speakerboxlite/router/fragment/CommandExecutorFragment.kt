@@ -19,11 +19,11 @@ import com.speakerboxlite.router.fragment.ext.isPopped
 import com.speakerboxlite.router.fragment.ext.isRemovingRecursive
 import java.io.Serializable
 
-open class CommandExecutorAndroid(val activity: FragmentActivity,
-                                  @IdRes val containerId: Int,
-                                  val fragmentManager: FragmentManager,
-                                  val activityFactory: HostActivityFactory? = null,
-                                  val hostCloseable: HostCloseable? = null): CommandExecutor
+open class CommandExecutorFragment(val activity: FragmentActivity,
+                                   @IdRes val containerId: Int,
+                                   val fragmentManager: FragmentManager,
+                                   val activityFactory: HostActivityFactory? = null,
+                                   val hostCloseable: HostCloseable? = null): CommandExecutor
 {
     val backstackCallback = object : OnBackStackChangedListener
     {
@@ -59,6 +59,25 @@ open class CommandExecutorAndroid(val activity: FragmentActivity,
         {
             activity.window.decorView.post { _execute(command) }
         }
+    }
+
+    override fun sync(items: List<String>): List<String>
+    {
+        val backstack = mutableListOf<String>()
+        for (i in 0 until fragmentManager.backStackEntryCount)
+        {
+            val en = fragmentManager.getBackStackEntryAt(i).name ?: continue
+            backstack.add(en)
+        }
+
+        val remove = mutableListOf<String>()
+        for (i in items)
+        {
+            if (!backstack.contains(i))
+                remove.add(i)
+        }
+
+        return remove
     }
 
     private fun _execute(command: Command)

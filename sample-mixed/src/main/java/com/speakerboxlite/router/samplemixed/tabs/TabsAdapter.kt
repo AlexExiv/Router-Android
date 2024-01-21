@@ -5,6 +5,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.speakerboxlite.router.RouterTabs
+import com.speakerboxlite.router.fragment.ext._viewKey
 import com.speakerboxlite.router.samplemixed.base.fragment.BaseHostFragment
 import com.speakerboxlite.router.samplemixed.base.fragment.TabHostComposeFragment
 import com.speakerboxlite.router.samplemixed.tabs.tab.TabPath0
@@ -39,7 +40,7 @@ class TabsAdapter(val router: RouterTabs, fm: FragmentManager, lifecycle: Lifecy
             else -> TabHostComposeFragment()
         }
 
-        return hostFrag.also { it.viewKey = hosterViews[position] }
+        return hostFrag.also { it._viewKey = hosterViews[position] }
     }
 
     override fun getItemCount(): Int = 3

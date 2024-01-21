@@ -85,7 +85,7 @@ open class ActivityLifeCycle(routerManager: RouterManager,
 
     protected open fun onCreateExecutor(activity: Activity): CommandExecutor? =
         if (activity is AppCompatActivity)
-            CommandExecutorAndroid(activity, R.id.root, activity.supportFragmentManager, activity as? HostActivityFactory, activity as? HostCloseable)
+            CommandExecutorFragment(activity, R.id.root, activity.supportFragmentManager, activity as? HostActivityFactory, activity as? HostCloseable)
         else
             null
 }

@@ -124,7 +124,7 @@ class RouterTabsImpl(val viewKey: String,
 
     internal fun containsPath(clazz: KClass<*>): Int?
     {
-        val i = tabRouters.values.indexOfFirst { it.rootPath != null && it.rootPath!!::class == clazz }
+        val i = tabRouters.values.indexOfFirst { it.viewsStack.isNotEmpty() && it.viewsStack.first()::class == clazz }
         return if (i == -1) null else i
     }
 

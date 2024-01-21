@@ -11,7 +11,7 @@ class RouterTabInjector(callerKey: String?,
                         resultManager: ResultManager,
                         componentProvider: ComponentProvider,
                         val index: Int,
-                        routerTabs: RouterTabsImpl): RouterInjector(callerKey, parent, routeManager, routerManager, resultManager, componentProvider), RouterTabSuper
+                        routerTabs: RouterTabsImpl): RouterInjector(callerKey, parent, routeManager, routerManager, resultManager, componentProvider), RouterTabSuper, RouterTab
 {
     private val weakRouterTabs = WeakReference(routerTabs)
 

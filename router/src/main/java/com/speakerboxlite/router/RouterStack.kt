@@ -8,6 +8,7 @@ interface RouterStack
 
     fun pushReel(viewKey: String, routerTabs: RouterTabs)
     fun switchReel(viewKey: String, index: Int)
+    fun remove(viewKey: String)
 
     fun pop(toKey: String?): Router?
 }
@@ -20,10 +21,10 @@ class RouterStackImpl: RouterStack
 
     override fun push(viewKey: String, router: Router)
     {
-        if (router is RouterTab || router is RouterTabInjector)
+        if (router is RouterTab)
         {
             val reel = stack.last() as? RouterStackReel ?: error("The last item is not a Reel")
-            reel.push(router)
+            reel.push(viewKey, router)
         }
         else
             stack.add(RouterStackSingle(viewKey, router))
@@ -45,6 +46,25 @@ class RouterStackImpl: RouterStack
         reel.currentIndex = index
     }
 
+    override fun remove(viewKey: String)
+    {
+        for (i in stack.indices)
+        {
+            val s = stack[i]
+            if (s.remove(viewKey))
+                break
+
+            if (s.viewKey == viewKey)
+            {
+                stack.removeAt(i)
+                if ((i < stack.size) && (stack[i].viewKey == viewKey))
+                    stack.removeAt(i)
+
+                break
+            }
+        }
+    }
+
     override fun pop(toKey: String?): Router?
     {
         val ret = stack.last().pop(toKey)
@@ -64,32 +84,35 @@ interface RouterStackEntry
     val viewKey: String
     val top: Router?
 
-    fun push(router: Router): Boolean
+    fun push(viewKey: String, router: Router): Boolean
     fun pop(toKey: String?): Router?
+    fun remove(key: String): Boolean
 }
 
 class RouterStackSingle(override val viewKey: String,
                         override val top: Router?): RouterStackEntry
 {
-    override fun push(router: Router): Boolean = false
+    override fun push(viewKey: String, router: Router): Boolean = false
 
     override fun pop(toKey: String?): Router? = null
+
+    override fun remove(key: String): Boolean = false
 }
 
 class RouterStackReel(override val viewKey: String): RouterStackEntry
 {
-    override val top: Router? get() = if (currentIndex == -1) null else stacks[currentIndex]?.lastOrNull()
+    override val top: Router? get() = if (currentIndex == -1) null else stacks[currentIndex]?.lastOrNull()?.top
 
     internal var currentIndex = 0
-    private val stacks = mutableMapOf<Int, MutableList<Router>>()
+    private val stacks = mutableMapOf<Int, MutableList<RouterStackEntry>>()
 
-    override fun push(router: Router): Boolean
+    override fun push(viewKey: String, router: Router): Boolean
     {
-        if (router is RouterTab || router is RouterTabInjector)
+        if (router is RouterTab)
         {
             val index = when (router)
             {
-                is RouterTab -> router.index
+                is RouterTabSimple -> router.index
                 is RouterTabInjector -> router.index
                 else -> 0
             }
@@ -97,7 +120,7 @@ class RouterStackReel(override val viewKey: String): RouterStackEntry
             if (stacks[index] == null)
                 stacks[index] = mutableListOf()
 
-            stacks[index]!!.add(router)
+            stacks[index]!!.add(RouterStackSingle(viewKey, router))
 
             return true
         }
@@ -112,10 +135,27 @@ class RouterStackReel(override val viewKey: String): RouterStackEntry
         if (stacks[currentIndex]!!.size > 1)
         {
             stacks[currentIndex]!!.removeLast()
-            return stacks[currentIndex]!!.last()
+            return stacks[currentIndex]!!.last().top
         }
 
         return null
+    }
+
+    override fun remove(key: String): Boolean
+    {
+        for (k in stacks.keys)
+        {
+            for (i in stacks[k]!!.indices)
+            {
+                if (stacks[k]!![i].viewKey == key)
+                {
+                    stacks[k]!!.removeAt(i)
+                    return true
+                }
+            }
+        }
+
+        return false
     }
 }
 

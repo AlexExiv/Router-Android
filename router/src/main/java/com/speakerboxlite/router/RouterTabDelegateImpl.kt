@@ -31,7 +31,12 @@ class RouterTabDelegateImpl(val index: Int,
 
         routerTab?.closeAllNoStack()
         return if ((routerTabs?.presentInTab == true && stackSize > 0) || route.isTabs || _presentation == Presentation.Modal)
-            parent?.route(null, path, RouteType.Simple, Presentation.Modal, routerTab?.viewsStack?.lastOrNull()?.key, null)
+        {
+            if (parent is RouterTab)
+                parent?.route(path, presentation)
+            else
+                parent?.route(null, path, RouteType.Simple, Presentation.Modal, routerTab?.viewsStack?.lastOrNull()?.key, null)
+        }
         else
             routerTab?.route(routerTab, path, RouteType.Simple, presentation, null, null)
     }
@@ -43,13 +48,18 @@ class RouterTabDelegateImpl(val index: Int,
 
         routerTab?.closeAllNoStack()
         return if ((routerTabs?.presentInTab == true && stackSize > 0) || route.isTabs || _presentation == Presentation.Modal)
-            parent?.route(null, path, RouteType.Simple, Presentation.Modal, routerTab?.viewsStack?.lastOrNull()?.key) { result(it as R) }
+        {
+            if (parent is RouterTab)
+                parent?.routeWithResult(path, presentation, result)
+            else
+                parent?.route(null, path, RouteType.Simple, Presentation.Modal, routerTab?.viewsStack?.lastOrNull()?.key) { result(it as R) }
+        }
         else
             routerTab?.route(routerTab, path, RouteType.Simple, presentation, null) { result(it as  R) }
     }
 
     override fun back(): Router? =
-        if (stackSize > 1)
+        if (stackSize > 1 || parent is RouterTab)
             superRouterTab?.superBack()
         else if (routerTabs?.tabChangeCallback != null && index != 0)
         {
@@ -62,7 +72,7 @@ class RouterTabDelegateImpl(val index: Int,
             routerTab
 
     override fun close(): Router? =
-        if (stackSize > 1)
+        if (stackSize > 1 || parent is RouterTab)
             superRouterTab?.superClose()
         else
             routerTabs?.closeTabs()

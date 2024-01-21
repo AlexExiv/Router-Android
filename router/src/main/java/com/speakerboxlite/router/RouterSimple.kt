@@ -1,13 +1,13 @@
 package com.speakerboxlite.router
 
 import android.util.Log
+import com.speakerboxlite.router.annotations.InternalApi
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.annotations.RouteType
 import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
 import com.speakerboxlite.router.command.CommandBufferImpl
 import com.speakerboxlite.router.command.CommandExecutor
-import com.speakerboxlite.router.controllers.AnimationHostChanged
 import com.speakerboxlite.router.controllers.RouteControllerComposable
 import com.speakerboxlite.router.controllers.RouteControllerInterface
 import com.speakerboxlite.router.controllers.RouteControllerViewModelHolder
@@ -95,81 +95,11 @@ open class RouterSimple(protected val callerKey: String?,
         return this
     }
 
-    override fun routeDialog(path: RoutePath): Router?
-    {
-        val route = findRoute(path)
-        val routeParams = RouteParamsGen(path = path, isDialog = true)
-        if (tryRouteMiddlewares(routeParams, route))
-            return null
-
-        val view = createView(route, RouteType.Dialog, path, null, null)
-        routerManager.push(view.viewKey, this)
-        commandBuffer.apply(Command.Dialog(view))
-
-        return this
-    }
-
-    override fun <R: Any> routeDialogWithResult(path: RoutePathResult<R>, result: Result<R>): Router?
-    {
-        val route = findRoute(path)
-        val routeParams = RouteParamsGen(path = path, isDialog = true) { result(it as R) }
-        if (tryRouteMiddlewares(routeParams, route)  )
-            return null
-
-        val view = createView(route, RouteType.Dialog, path, null) { result(it as  R) }
-        routerManager.push(view.viewKey, this)
-        commandBuffer.apply(Command.Dialog(view))
-
-        return this
-    }
-
-    override fun routeBTS(path: RoutePath): Router?
-    {
-        val route = findRoute(path)
-        val routeParams = RouteParamsGen(path = path, isBts = true)
-        if (tryRouteMiddlewares(routeParams, route))
-            return null
-
-        val view = createView(route, RouteType.BTS, path, null, null)
-        routerManager.push(view.viewKey, this)
-        commandBuffer.apply(Command.BottomSheet(view))
-
-        return this
-    }
-
-    override fun <R : Any> routeBTSWithResult(path: RoutePathResult<R>, result: Result<R>): Router?
-    {
-        val route = findRoute(path)
-        val routeParams = RouteParamsGen(path = path, isBts = true) { result(it as R) }
-        if (tryRouteMiddlewares(routeParams, route))
-            return null
-
-        val view = createView(route, RouteType.BTS, path, null) { result(it as  R) }
-        routerManager.push(view.viewKey, this)
-        commandBuffer.apply(Command.BottomSheet(view))
-
-        return this
-    }
-
     override fun route(path: RouteParamsGen): Router?
     {
         return if (path.execRouter != null && path.execRouter !== this)
         {
             path.execRouter.route(path)
-        }
-        else if (path.isDialog)
-        {
-            if (path.result == null)
-                routeDialog(path.path)
-            else
-                routeDialogWithResult(path.path as RoutePathResult<Any>, path.result)
-        }
-        else if (path.isBts)
-        {
-            if (path.result == null)
-                routeBTS(path.path)
-            else
-                routeBTSWithResult(path.path as RoutePathResult<Any>, path.result)
         }
         else if (path.isReplace)
         {
@@ -235,6 +165,7 @@ open class RouterSimple(protected val callerKey: String?,
         resultManager.unbind(key)
         pathData.remove(key)
         routerTabsByKey.remove(key)
+        routerManager.remove(key)
         unbindRouter(key)
 /*
         if (isClosing)
@@ -304,11 +235,26 @@ open class RouterSimple(protected val callerKey: String?,
     override fun bindExecutor(executor: CommandExecutor)
     {
         commandBuffer.bind(executor)
+        syncExecutor()
     }
 
     override fun unbindExecutor()
     {
         commandBuffer.unbind()
+    }
+
+    override fun syncExecutor()
+    {
+        val isClosed = isClosing
+        val remove = commandBuffer.sync(viewsStack.map { it.key })
+        remove.forEach { removeView(it) }
+
+        if (!isClosed && viewsStack.isEmpty() && rootPath != null)
+        {
+            println("|------RESTART ROUTER------|")
+            isClosing = false
+            route(null, rootPath!!, RouteType.Simple, Presentation.Push, null, null)
+        }
     }
 
     override fun onPrepareView(view: View, viewModel: ViewModel?)
@@ -369,7 +315,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     internal open fun createRouter(callerKey: String): Router = RouterSimple(callerKey, this, routeManager, routerManager, resultManager)
 
-    internal open fun createRouterTab(callerKey: String, index: Int, tabs: RouterTabsImpl): Router = RouterTab(callerKey, this, routeManager, routerManager, resultManager, index, tabs)
+    internal open fun createRouterTab(callerKey: String, index: Int, tabs: RouterTabsImpl): Router = RouterTabSimple(callerKey, this, routeManager, routerManager, resultManager, index, tabs)
 
     internal fun findRoute(path: RoutePath): RouteControllerInterface<RoutePath, *> = routeManager.find(path) ?: throw RouteNotFoundException(path)
 
@@ -391,6 +337,12 @@ open class RouterSimple(protected val callerKey: String?,
     }
 
     override fun createResultProvider(key: String): RouterResultProvider = RouterResultProviderImpl(key, resultManager)
+
+    @InternalApi
+    override fun restart()
+    {
+
+    }
 
     internal fun bindResult(from: String, to: String, result: Result<Any>?)
     {
@@ -545,18 +497,6 @@ open class RouterSimple(protected val callerKey: String?,
         {
             RouteType.Dialog, RouteType.BTS ->
             {
-                /*val view = if (result == null)
-                    createView(route, route.routeType, path, null, null)
-                else
-                    createView(route, route.routeType, path, null) { result(it as  R) }
-
-                val command = if (route.routeType == RouteType.Dialog)
-                    Command.Dialog(view)
-                else
-                    Command.BottomSheet(view)
-
-                routerManager.push(view.viewKey, this)
-                commandBuffer.apply(command)*/
                 return doDialogRoute(route, path, result)
             }
 

@@ -8,7 +8,6 @@ import com.speakerboxlite.router.R
 import com.speakerboxlite.router.RouterManager
 import com.speakerboxlite.router.command.CommandExecutor
 import com.speakerboxlite.router.fragment.ActivityLifeCycle
-import com.speakerboxlite.router.fragment.CommandExecutorAndroid
 import com.speakerboxlite.router.fragment.FragmentLifeCycleFactory
 import com.speakerboxlite.router.fragment.FragmentModelProvider
 
@@ -19,7 +18,7 @@ class ActivityLifeCycleMixed(routerManager: RouterManager,
 {
     override fun onCreateExecutor(activity: Activity): CommandExecutor? =
         if (activity is AppCompatActivity)
-            CommandExecutorAndroidMixed(activity, R.id.root, activity.supportFragmentManager, activity as? HostActivityFactory, activity as? HostCloseable, fragmentFactory)
+            CommandExecutorFragmentMixed(activity, R.id.root, activity.supportFragmentManager, activity as? HostActivityFactory, activity as? HostCloseable, fragmentFactory)
         else
             null
 }

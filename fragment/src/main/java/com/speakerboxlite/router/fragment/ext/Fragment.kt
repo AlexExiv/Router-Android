@@ -15,3 +15,12 @@ var Fragment.isPopped: Boolean
     }
 
 val Fragment.isPoppedRecursive: Boolean get() = isPopped || (parentFragment?.isPoppedRecursive ?: false)
+
+var Fragment._viewKey: String
+    get() = requireArguments().getString("com.speakerboxlite.router.VIEW_KEY")!!
+    set(value)
+    {
+        if (arguments == null)
+            arguments = Bundle()
+        requireArguments().putString("com.speakerboxlite.router.VIEW_KEY", value)
+    }

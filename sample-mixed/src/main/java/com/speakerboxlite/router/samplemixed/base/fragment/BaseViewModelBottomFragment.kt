@@ -11,7 +11,7 @@ import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterLocal
 import com.speakerboxlite.router.ViewBTS
 import com.speakerboxlite.router.fragment.ViewFragmentVM
-import com.speakerboxlite.router.fragment._viewKey
+import com.speakerboxlite.router.fragment.ext._viewKey
 import com.speakerboxlite.router.result.RouterResultProvider
 import com.speakerboxlite.router.samplemixed.base.BaseViewModel
 

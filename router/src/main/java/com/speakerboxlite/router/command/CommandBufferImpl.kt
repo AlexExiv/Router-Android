@@ -30,4 +30,7 @@ internal class CommandBufferImpl : CommandBuffer
         else
             executor!!.execute(command)
     }
+
+    override fun sync(items: List<String>): List<String> =
+        executor?.sync(items) ?: error("Try to sync executor that hasn't been set")
 }

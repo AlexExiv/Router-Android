@@ -19,7 +19,7 @@ class MiddlewareControllerStep: MiddlewareController
 
         if (i % 100 == 0 && next::class != AuthPath::class)
         {
-            router.routeDialog(DialogPath(message = "I'm a step middleware", okBtn = "Close"))
+            router.route(DialogPath(message = "I'm a step middleware", okBtn = "Close"))
             return true
         }
 

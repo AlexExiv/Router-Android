@@ -33,14 +33,6 @@ class RouterZombie : Router, RouterLocal
 
     override fun replace(path: RoutePath): Router? = null
 
-    override fun routeDialog(path: RoutePath): Router? = null
-
-    override fun <R : Any> routeDialogWithResult(path: RoutePathResult<R>, result: Result<R>): Router? = null
-
-    override fun routeBTS(path: RoutePath): Router? = null
-
-    override fun <R : Any> routeBTSWithResult(path: RoutePathResult<R>, result: Result<R>): Router? = null
-
     override fun back(): Router? = null
 
     override fun close(): Router? = null
@@ -57,6 +49,11 @@ class RouterZombie : Router, RouterLocal
     override fun unbindExecutor()
     {
         
+    }
+
+    override fun syncExecutor()
+    {
+
     }
 
     override fun onPrepareView(view: View, viewModel: ViewModel?)
@@ -84,6 +81,12 @@ class RouterZombie : Router, RouterLocal
     }
 
     override fun createResultProvider(key: String): RouterResultProvider = RouterResultProviderZombie()
+
+    @InternalApi
+    override fun restart()
+    {
+
+    }
 
     override fun routeInContainer(containerId: Int, path: RoutePath): String = ""
 

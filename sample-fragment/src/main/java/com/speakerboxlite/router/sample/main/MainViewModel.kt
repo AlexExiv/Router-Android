@@ -48,7 +48,7 @@ class MainViewModel(app: Application): BaseViewModel(app)
 
     fun onShowDialog()
     {
-        router.routeDialogWithResult(DialogPath(title = "Title", message = "Tap Yes or No", okBtn = "Yes", cancelBtn = "No")) {
+        router.routeWithResult(DialogPath(title = "Title", message = "Tap Yes or No", okBtn = "Yes", cancelBtn = "No")) {
             dialogResult.value = "Dialog result: ${if (it) "Yes" else "No"}"
         }
     }

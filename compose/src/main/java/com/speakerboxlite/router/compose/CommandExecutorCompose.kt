@@ -52,6 +52,18 @@ open class CommandExecutorCompose(val navigator: ComposeNavigator,
         }
     }
 
+    override fun sync(items: List<String>): List<String>
+    {
+        val remove = mutableListOf<String>()
+        for (i in items)
+        {
+            if (navigator.items.indexOfFirst { it.id == i } == -1)
+                remove.add(i)
+        }
+
+        return remove
+    }
+
     private fun close()
     {
         if (navigator.size > 1)

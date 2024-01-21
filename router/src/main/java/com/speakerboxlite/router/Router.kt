@@ -1,5 +1,6 @@
 package com.speakerboxlite.router
 
+import com.speakerboxlite.router.annotations.InternalApi
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.command.CommandExecutor
 import com.speakerboxlite.router.controllers.RouteParamsGen
@@ -62,40 +63,6 @@ interface Router
     fun replace(path: RoutePath): Router?
 
     /**
-     * Show a dialog screen
-     *
-     * @param path The path to the dialog connected by the `RouteController`
-     * @return A router that will execute the route; may be null (usually when a middleware interrupts the route).
-     */
-    fun routeDialog(path: RoutePath): Router?
-
-    /**
-     * Show a dialog screen with an expected result.
-     *
-     * @param path The path to the dialog connected by the `RouteController`
-     * @param result The callback for handling the screen result. To send a result, use `ResultProvider::send`.
-     * @return A router that will execute the route; may be null (usually when a middleware interrupts the route).
-     */
-    fun <R: Any> routeDialogWithResult(path: RoutePathResult<R>, result: Result<R>): Router?
-
-    /**
-     * Show a bottom sheet screen
-     *
-     * @param path The path to the dialog connected by the `RouteController`
-     * @return A router that will execute the route; may be null (usually when a middleware interrupts the route).
-     */
-    fun routeBTS(path: RoutePath): Router?
-
-    /**
-     * Show a bottom sheet screen with an expected result.
-     *
-     * @param path The path to the dialog connected by the `RouteController`
-     * @param result The callback for handling the screen result. To send a result, use `ResultProvider::send`.
-     * @return A router that will execute the route; may be null (usually when a middleware interrupts the route).
-     */
-    fun <R: Any> routeBTSWithResult(path: RoutePathResult<R>, result: Result<R>): Router?
-
-    /**
      * Navigate to a screen using the specified path and presentation type.
      *
      * @param path          The path to the screen connected by the RouteController.
@@ -152,6 +119,8 @@ interface Router
      */
     fun unbindExecutor()
 
+    fun syncExecutor()
+
     /**
      * Prepares the view by injecting the ViewModel, Router, and ResultProvider and so on. This method should be called in the `onCreate` method of the fragment.
      */
@@ -192,4 +161,7 @@ interface Router
     fun removeView(key: String)
 
     fun createResultProvider(key: String): RouterResultProvider
+
+    @InternalApi
+    fun restart()
 }

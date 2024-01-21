@@ -29,4 +29,5 @@ interface CommandBuffer
     fun unbind()
 
     fun apply(command: Command)
+    fun sync(items: List<String>): List<String>
 }

@@ -10,7 +10,7 @@ import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.compose.ViewCompose
 import com.speakerboxlite.router.fragment.AnimationControllerFragment
-import com.speakerboxlite.router.fragment.CommandExecutorAndroid
+import com.speakerboxlite.router.fragment.CommandExecutorFragment
 
 interface HostFragmentComposeFactory
 {
@@ -18,12 +18,12 @@ interface HostFragmentComposeFactory
     fun onCreateAnimation(): AnimationControllerFragment<RoutePath, View>?
 }
 
-class CommandExecutorAndroidMixed(activity: FragmentActivity,
-                                  @IdRes containerId: Int,
-                                  fragmentManager: FragmentManager,
-                                  activityFactory: HostActivityFactory? = null,
-                                  hostCloseable: HostCloseable? = null,
-                                  val fragmentFactory: HostFragmentComposeFactory? = null): CommandExecutorAndroid(activity, containerId, fragmentManager, activityFactory, hostCloseable)
+class CommandExecutorFragmentMixed(activity: FragmentActivity,
+                                   @IdRes containerId: Int,
+                                   fragmentManager: FragmentManager,
+                                   activityFactory: HostActivityFactory? = null,
+                                   hostCloseable: HostCloseable? = null,
+                                   val fragmentFactory: HostFragmentComposeFactory? = null): CommandExecutorFragment(activity, containerId, fragmentManager, activityFactory, hostCloseable)
 {
     override fun pushFragment(path: RoutePath?, view: View, animation: AnimationControllerFragment<RoutePath, View>?, replacing: Boolean)
     {

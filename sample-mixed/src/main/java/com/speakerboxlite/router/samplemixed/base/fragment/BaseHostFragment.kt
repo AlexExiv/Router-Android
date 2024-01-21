@@ -1,6 +1,7 @@
 package com.speakerboxlite.router.samplemixed.base.fragment
 
 import android.content.Context
+import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.fragment.app.Fragment
 import com.speakerboxlite.router.HostCloseable
@@ -11,7 +12,7 @@ import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.compose.ComposeNavigator
 import com.speakerboxlite.router.fragment.AnimationControllerFragment
-import com.speakerboxlite.router.fragment._viewKey
+import com.speakerboxlite.router.fragment.ext._viewKey
 import com.speakerboxlite.router.fragmentcompose.CommandExecutorComposeMixed
 import com.speakerboxlite.router.fragmentcompose.ComposeFragmentHostView
 import com.speakerboxlite.router.fragmentcompose.ComposeViewHoster
@@ -71,14 +72,27 @@ class HostComposeFragment: com.speakerboxlite.router.fragmentcompose.HostCompose
     }
 }
 
-class TabHostComposeFragment: com.speakerboxlite.router.fragmentcompose.TabHostComposeFragment()
+class TabHostComposeFragment: Fragment(R.layout.fragment_host)
 {
-    @Composable
-    override fun Navigator()
+    var viewKey: String
+        get() = _viewKey
+        set(value)
+        {
+            _viewKey = value
+        }
+
+    override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?)
     {
-        ComposeNavigator(
-            router = router,
-            hostCloseable = this,
-            executorFactory = { CommandExecutorComposeMixed(it, R.id.root, parentFragmentManager, ComposeViewHosterImpl(requireContext()), this) })
+        super.onViewCreated(view, savedInstanceState)
+
+        if (childFragmentManager.backStackEntryCount == 0)
+        {
+            val host = HostComposeFragment()
+            host.viewKey = viewKey
+            childFragmentManager.beginTransaction()
+                .replace(R.id.root, host, viewKey)
+                .addToBackStack(viewKey)
+                .commit()
+        }
     }
 }

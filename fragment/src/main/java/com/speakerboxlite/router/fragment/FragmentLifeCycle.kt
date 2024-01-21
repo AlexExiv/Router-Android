@@ -9,6 +9,7 @@ import com.speakerboxlite.router.HostActivityFactory
 import com.speakerboxlite.router.HostCloseable
 import com.speakerboxlite.router.HostView
 import com.speakerboxlite.router.R
+import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterManager
 import com.speakerboxlite.router.RouterManagerImpl
 import com.speakerboxlite.router.RouterModelProvider
@@ -75,7 +76,7 @@ open class FragmentLifeCycle(private val routerManager: RouterManager,
 
             f.localRouter = f.router.createRouterLocal(f.viewKey)
 
-            if (f as? ViewVM<ViewModel> != null)
+            if (f as? ViewVM<ViewModel> != null && f.router !is RouterZombie)
             {
                 val mp = modelProvider?.invoke(FragmentModelProviderArgs(f.requireActivity(), f)) ?: error("You use ViewModel without specifying FragmentModelProvider")
                 f.viewModel = f.router.provideViewModel(f, mp)
@@ -119,6 +120,16 @@ open class FragmentLifeCycle(private val routerManager: RouterManager,
         }
     }
 
+    override fun onFragmentResumed(fm: FragmentManager, f: Fragment)
+    {
+        super.onFragmentResumed(fm, f)
+    }
+
+    override fun onFragmentPaused(fm: FragmentManager, f: Fragment)
+    {
+        super.onFragmentPaused(fm, f)
+    }
+
     override fun onFragmentStopped(fm: FragmentManager, f: Fragment)
     {
         super.onFragmentStopped(fm, f)
@@ -158,5 +169,5 @@ open class FragmentLifeCycle(private val routerManager: RouterManager,
     }
 
     protected open fun onCreateExecutor(fragment: Fragment): CommandExecutor? =
-        CommandExecutorAndroid(fragment.requireActivity(), R.id.root, fragment.childFragmentManager, fragment.requireActivity() as? HostActivityFactory, fragment as? HostCloseable)
+        CommandExecutorFragment(fragment.requireActivity(), R.id.root, fragment.childFragmentManager, fragment.requireActivity() as? HostActivityFactory, fragment as? HostCloseable)
 }
