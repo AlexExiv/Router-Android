@@ -5,6 +5,20 @@ navigation between screens. A screen shouldn’t know how it has been opened and
 It should only know that in this case it has to close or navigate to another screen or send some data as 
 the result of its job to the caller of this screen.
 
+```kotlin
+// Define path to the screen
+class ScreenPath: RouterPath
+
+// Connect the path and screen using RouteController
+// ScreenView can be Compose view or Fragment
+@Route
+abstract class ScreenRouteController: RouteController<ScreenPath, ScreenView>()
+
+// Then somewhere in the code (View or ViewModel)
+router.route(ScreenPath())
+
+```
+
 ## Modules
 
 Gradle config for the core modules:
@@ -230,3 +244,83 @@ abstract class StepRouteController: RouteControllerApp<StepPath, StepViewModel, 
 }
 
 ```
+
+## Router
+
+Router is injected to Views and ViewModels by the framework.
+
+```kotlin
+// Call the method to navigate to another screen
+router.route(SreenPath())
+
+// Call the method to navigate to another screen and get result from it
+router.routeWithResult(ScreenPath()) { result -> }
+```
+
+## Chain
+
+A chain is a sequence of screens connected by specific logic. It can represent a wizard with steps like step0, step1, step2, and so on. When the `close` method is invoked by any of the entries, the entire chain closes.
+
+You can define a chain of screens in the RouteController using the `@Chain` annotation. It has one parameter that specifies the paths which close the chain. 
+
+It's important to note that calling the `back` method doesn't close a chain.
+
+```kotlin
+data class ChainPath(val step: Int): RoutePathResult<Int>
+
+@Chain([ChainStepPath::class])
+@Route
+abstract class ChainRouteController: RouteControllerApp<ChainPath, ChainViewModel, ChainFragment>()
+{
+    override fun onCreateViewModel(modelProvider: AndroidViewModelProvider, path: ChainPath): ChainViewModel =
+        modelProvider.getViewModel { ChainViewModel(path.step, it) }
+}
+```
+
+If you want to explore a comprehensive example, you can refer to the `Sample-Fragment` module. It provides a detailed illustration of the concepts discussed, allowing you to see the implementation in action.
+
+## Middleware
+
+Middleware serves as a tool to intercept navigation between screens under specific conditions. 
+For instance, when a user attempts to navigate to a screen that requires authentication, but the user is not signed in, the Middleware intercepts the navigation and redirects the user to the sign-in screen.
+
+Example:
+
+```kotlin
+// Create middleware annotation
+@Middleware
+annotation class MiddlewareAuth
+
+// Mark MiddlewareController as MiddlewareAuth
+@MiddlewareAuth
+class MiddlewareControllerAuth: MiddlewareControllerComponent
+{
+    @Inject
+    lateinit var userData: UserData
+
+    override fun onInject(component: Any)
+    {
+        (component as AppComponent).inject(this)
+    }
+
+    // This method will be called during navigation
+    override fun onRoute(router: Router, prev: RoutePath?, next: RouteParamsGen): Boolean
+    {
+        if (!userData.isLogin.value!!)
+        {
+            router.route(AuthPath(next))
+            return true
+        }
+
+        return false
+    }
+}
+
+// Then mark the RouteController as MiddlewareAuth 
+@Route
+@MiddlewareAuth
+abstract class TabAuthRouteController: RouteControllerApp<TabPath2, TabViewModel, TabFragment>()
+```
+
+If you want to explore a comprehensive example, you can refer to the `Sample-Fragment` module. It provides a detailed illustration of the concepts discussed, allowing you to see the implementation in action.
+
