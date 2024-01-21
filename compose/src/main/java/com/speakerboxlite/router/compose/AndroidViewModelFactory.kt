@@ -18,8 +18,7 @@ class AndroidViewModelFactory<T>(val app: Application,
 }
 
 class AndroidComposeViewModelProvider(val app: Application,
-                                      val viewModelStoreOwner: ViewModelStoreOwner):
-    RouterModelProvider
+                                      val viewModelStoreOwner: ViewModelStoreOwner): RouterModelProvider
 {
     inline fun <reified VM: ViewModel> getViewModel(noinline creator: ((app: Application) -> VM)? = null): VM
     {

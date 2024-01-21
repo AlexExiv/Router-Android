@@ -119,8 +119,6 @@ interface Router
      */
     fun unbindExecutor()
 
-    fun syncExecutor()
-
     /**
      * Prepares the view by injecting the ViewModel, Router, and ResultProvider and so on. This method should be called in the `onCreate` method of the fragment.
      */
@@ -161,7 +159,4 @@ interface Router
     fun removeView(key: String)
 
     fun createResultProvider(key: String): RouterResultProvider
-
-    @InternalApi
-    fun restart()
 }

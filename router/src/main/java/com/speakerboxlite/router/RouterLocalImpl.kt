@@ -55,11 +55,6 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
         commandBuffer.unbind()
     }
 
-    override fun syncExecutor()
-    {
-
-    }
-
     override fun onPrepareView(view: View, viewModel: ViewModel?)
     {
         router?.onPrepareView(view, viewModel)
@@ -86,12 +81,6 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
     }
 
     override fun createResultProvider(key: String): RouterResultProvider = router!!.createResultProvider(key)
-
-    @InternalApi
-    override fun restart()
-    {
-
-    }
 
     override fun routeInContainer(containerId: Int, path: RoutePath): String
     {

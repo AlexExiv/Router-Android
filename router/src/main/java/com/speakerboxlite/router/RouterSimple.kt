@@ -243,7 +243,7 @@ open class RouterSimple(protected val callerKey: String?,
         commandBuffer.unbind()
     }
 
-    override fun syncExecutor()
+    protected fun syncExecutor()
     {
         val isClosed = isClosing
         val remove = commandBuffer.sync(viewsStack.map { it.key })
@@ -337,12 +337,6 @@ open class RouterSimple(protected val callerKey: String?,
     }
 
     override fun createResultProvider(key: String): RouterResultProvider = RouterResultProviderImpl(key, resultManager)
-
-    @InternalApi
-    override fun restart()
-    {
-
-    }
 
     internal fun bindResult(from: String, to: String, result: Result<Any>?)
     {

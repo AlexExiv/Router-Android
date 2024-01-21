@@ -51,11 +51,6 @@ class RouterZombie : Router, RouterLocal
         
     }
 
-    override fun syncExecutor()
-    {
-
-    }
-
     override fun onPrepareView(view: View, viewModel: ViewModel?)
     {
 
@@ -81,12 +76,6 @@ class RouterZombie : Router, RouterLocal
     }
 
     override fun createResultProvider(key: String): RouterResultProvider = RouterResultProviderZombie()
-
-    @InternalApi
-    override fun restart()
-    {
-
-    }
 
     override fun routeInContainer(containerId: Int, path: RoutePath): String = ""
 
