@@ -2,6 +2,7 @@ package com.speakerboxlite.router
 
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.result.ResultManager
+import java.lang.ref.WeakReference
 
 class RouterTabInjector(callerKey: String?,
                         parent: RouterSimple,
@@ -10,8 +11,10 @@ class RouterTabInjector(callerKey: String?,
                         resultManager: ResultManager,
                         componentProvider: ComponentProvider,
                         val index: Int,
-                        routerTabs: RouterTabsImpl): RouterInjector(callerKey, parent, routeManager, routerManager, resultManager, componentProvider), RouterTabSuper
+                        routerTabs: RouterTabsImpl): RouterInjector(callerKey, parent, routeManager, routerManager, resultManager, componentProvider), RouterTabSuper, RouterTab
 {
+    private val weakRouterTabs = WeakReference(routerTabs)
+
     private val delegate: RouterTabDelegate = RouterTabDelegateImpl(index, routerTabs, this, this, parent)
 
     override val hasPreviousScreen: Boolean get() = delegate.hasPreviousScreen
@@ -34,4 +37,6 @@ class RouterTabInjector(callerKey: String?,
     override fun superBack(): Router? = super.back()
 
     override fun superClose(): Router? = super.close()
+
+    override fun createRouter(callerKey: String): Router = RouterTabInjector(callerKey, this, routeManager, routerManager, resultManager, componentProvider, index, weakRouterTabs.get()!!)
 }

@@ -32,7 +32,15 @@ class RouteControllerProcessor(processingEnv: ProcessingEnvironment,
         val elementClassName = ClassName(pack, className)
         val names = element.getExecutables().map { it.simpleName.toString() }
         if (names.containsAll(REQUIRED_METHODS))
-            return RouteClass(elementClassName, pathClass, viewClass, false, null)
+        {
+            return RouteClass(elementClassName,
+                pathClass,
+                viewClass,
+                false,
+                null,
+                isCompose(viewElement),
+                getRouteType(viewElement))
+        }
 
         if (!names.contains(CREATE_VIEW))
         {
@@ -49,7 +57,13 @@ class RouteControllerProcessor(processingEnv: ProcessingEnvironment,
         val file = FileSpec.builder(pack, classNameImpl).addType(classBuilder.build()).build()
         file.writeTo(File(kaptKotlinGeneratedDir))
 
-        return RouteClass(ClassName(pack, classNameImpl), pathClass, viewClass, false, null)
+        return RouteClass(ClassName(pack, classNameImpl),
+            pathClass,
+            viewClass,
+            false,
+            null,
+            isCompose(viewElement),
+            getRouteType(viewElement))
     }
 
     companion object

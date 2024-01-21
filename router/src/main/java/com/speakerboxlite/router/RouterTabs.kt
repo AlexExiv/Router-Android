@@ -44,4 +44,6 @@ interface RouterTabs
      * Any pending operations will be pushed onto the stack before calling `bindExecutor`.
      */
     fun unbindExecutor()
+
+    operator fun get(index: Int): Router
 }

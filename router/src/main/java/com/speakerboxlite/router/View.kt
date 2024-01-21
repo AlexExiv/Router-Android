@@ -5,14 +5,14 @@ import com.speakerboxlite.router.result.RouterResultProvider
 interface View
 {
     var viewKey: String
+}
 
-    var router: Router
-    var localRouter: RouterLocal
-
+interface ViewResult
+{
     var resultProvider: RouterResultProvider
 }
 
-interface ViewVM<VM: ViewModel>: View
+interface ViewVM<VM: ViewModel>
 {
     var viewModel: VM
 }
@@ -20,4 +20,14 @@ interface ViewVM<VM: ViewModel>: View
 interface ViewTabs
 {
     var routerTabs: RouterTabs
+}
+
+interface ViewDialog
+
+interface ViewBTS
+
+interface BaseHostView
+{
+    var routerManager: RouterManager
+    var router: Router
 }

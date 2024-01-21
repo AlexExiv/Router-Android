@@ -12,8 +12,9 @@ sealed class Command
     class CloseTo(val key: String): Command()
     object CloseAll: Command()
     class StartModal(val key: String, val params: Serializable?): Command()
-    class Push(val path: RoutePath, val view: View, val animation: AnimationController<RoutePath, View>?): Command()
-    class Replace(val path: RoutePath, val byView: View, val animation: AnimationController<RoutePath, View>?): Command()
+    class ChangeHost(val key: String, val path: RoutePath, val animation: AnimationController?): Command()
+    class Push(val path: RoutePath, val view: View, val animation: AnimationController?): Command()
+    class Replace(val path: RoutePath, val byView: View, val animation: AnimationController?): Command()
     class BottomSheet(val view: View): Command()
     class CloseBottomSheet(val key: String): Command()
     class Dialog(val view: View): Command()
@@ -28,4 +29,5 @@ interface CommandBuffer
     fun unbind()
 
     fun apply(command: Command)
+    fun sync(items: List<String>): List<String>
 }

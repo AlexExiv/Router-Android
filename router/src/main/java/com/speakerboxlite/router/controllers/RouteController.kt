@@ -1,6 +1,7 @@
 package com.speakerboxlite.router.controllers
 
 import com.speakerboxlite.router.RoutePath
+import com.speakerboxlite.router.annotations.RouteType
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.pattern.UrlMatcher
@@ -13,7 +14,8 @@ abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterfa
 {
     lateinit var pathClass: KClass<Path>
     var pattern: UrlMatcher? = null
-    var preferredAnimationController: AnimationController<RoutePath, View>? = null
+    var preferredAnimationController: AnimationController? = null
+    var animationControllerFactory: AnimationControllerFactory? = null
 
     final override var singleTop: Boolean = false
     final override var creatingInjector: Boolean = false
@@ -22,6 +24,8 @@ abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterfa
     var chainPaths: List<KClass<*>> = listOf()
     final override val isChain: Boolean get() = chainPaths.isNotEmpty()
 
+    final override var isCompose: Boolean = false
+    final override var routeType: RouteType = RouteType.Simple
     final override var isTabs: Boolean = false
 
     final override var middlewares: List<MiddlewareController> = listOf()
@@ -63,7 +67,8 @@ abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterfa
 
     override fun isPartOfChain(clazz: KClass<*>): Boolean = chainPaths.indexOfFirst { it == clazz } != -1
 
-    override fun animationController(): AnimationController<RoutePath, View>? = preferredAnimationController
+    override fun animationController(presentation: Presentation?, view: View?, hostChanged: AnimationHostChanged?): AnimationController? =
+        preferredAnimationController ?: animationControllerFactory?.onCreate(presentation, view, hostChanged)
 
     abstract override fun onCreateView(path: Path): V
 

@@ -2,28 +2,41 @@ package com.speakerboxlite.router.controllers
 
 import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.Router
+import com.speakerboxlite.router.RouterModelProvider
+import com.speakerboxlite.router.View
 import com.speakerboxlite.router.ViewModel
-import com.speakerboxlite.router.ViewVM
 
-abstract class RouteControllerVM<Path: RoutePath, VM: ViewModel, V: ViewVM<VM>>: RouteController<Path, V>(),
-    RouteControllerComposable<Path, V>
+abstract class RouteControllerVM<Path: RoutePath, VM: ViewModel, ModelProvider: RouterModelProvider, V>:
+    RouteController<Path, V>(),
+    RouteControllerComposable<Path, V>,
+    RouteControllerViewModelProvider<Path, VM>,
+    RouteControllerViewModelHolder<VM> where V: View
 {
-    override fun onComposeView(router: Router, view: V, path: Path)
-    {
-        val vm = onCreateViewModel(view, path)
-        view.viewModel = vm
+    val viewModelInit = mutableMapOf<String, Boolean>()
 
-        if (!view.viewModel.isInit)
+    override fun onPrepareView(router: Router, view: V, path: Path)
+    {
+
+    }
+
+    override fun onProvideViewModel(modelProvider: RouterModelProvider, path: Path): VM
+    {
+        return onCreateViewModel(modelProvider as ModelProvider, path)
+    }
+
+    override fun onPrepareViewModel(router: Router, key: String, vm: VM)
+    {
+        if (viewModelInit[key] != true)
         {
-            view.viewModel.router = router
-            view.viewModel.resultProvider = router.createResultProvider(view.viewKey)
+            vm.router = router
+            vm.resultProvider = router.createResultProvider(key)
                 .also { it.start() }
 
-            view.viewModel.onInit()
-            view.viewModel.isInit = true
+            vm.onInit()
+            viewModelInit[key] = true
         }
     }
 
-    abstract protected fun onCreateViewModel(view: V, path: Path): VM
+    abstract protected fun onCreateViewModel(modelProvider: ModelProvider, path: Path): VM
 }
 

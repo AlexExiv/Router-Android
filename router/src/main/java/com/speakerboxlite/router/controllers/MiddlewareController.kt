@@ -8,8 +8,6 @@ import com.speakerboxlite.router.annotations.Presentation
 data class RouteParams<Path: RoutePath>(val execRouter: Router? = null,
                                         val path: Path,
                                         val presentation: Presentation? = null,
-                                        val isBts: Boolean = false,
-                                        val isDialog: Boolean = false,
                                         val isReplace: Boolean = false,
                                         val tabIndex: Int? = null,
                                         val result: Result<Any>? = null)

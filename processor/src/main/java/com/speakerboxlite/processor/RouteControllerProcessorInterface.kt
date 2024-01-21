@@ -1,6 +1,5 @@
 package com.speakerboxlite.processor
 
-import com.squareup.kotlinpoet.ClassName
 import javax.lang.model.element.TypeElement
 
 interface RouteControllerProcessorInterface

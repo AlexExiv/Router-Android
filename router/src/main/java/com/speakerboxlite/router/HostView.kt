@@ -1,7 +1,11 @@
 package com.speakerboxlite.router
 
-interface HostView
+interface HostCloseable
 {
-    var viewKey: String
+    fun onCloseHost()
+}
+
+interface HostView: View
+{
     var router: Router
 }

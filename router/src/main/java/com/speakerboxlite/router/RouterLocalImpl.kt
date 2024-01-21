@@ -1,5 +1,6 @@
 package com.speakerboxlite.router
 
+import com.speakerboxlite.router.annotations.InternalApi
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
@@ -15,9 +16,7 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
     val weakRouter = WeakReference(router)
     val router: RouterSimple? get() = weakRouter.get()
 
-    override var topRouter: Router?
-        get() = router?.topRouter
-        set(value) { router?.topRouter = value }
+    override val topRouter: Router? get() = router?.topRouter
 
     override val hasPreviousScreen: Boolean get() = router!!.hasPreviousScreen
 
@@ -38,17 +37,6 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
 
     override fun replace(path: RoutePath): Router? = router?.replace(path)
 
-    override fun routeDialog(path: RoutePath): Router? = router?.routeDialog(path)
-
-    override fun <R: Any> routeDialogWithResult(path: RoutePathResult<R>, result: Result<R>): Router? =
-        router?.routeDialogWithResult(path, result)
-
-    override fun routeBTS(path: RoutePath): Router? =
-        router?.routeBTS(path)
-
-    override fun <R : Any> routeBTSWithResult(path: RoutePathResult<R>, result: Result<R>): Router? =
-        router?.routeBTSWithResult(path, result)
-
     override fun back(): Router? = router?.back()
 
     override fun close(): Router? = router?.close()
@@ -67,10 +55,13 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
         commandBuffer.unbind()
     }
 
-    override fun onComposeView(view: View)
+    override fun onPrepareView(view: View, viewModel: ViewModel?)
     {
-        router?.onComposeView(view)
+        router?.onPrepareView(view, viewModel)
     }
+
+    override fun <VM : ViewModel> provideViewModel(view: View, modelProvider: RouterModelProvider): VM =
+        router!!.provideViewModel(view, modelProvider)
 
     override fun onComposeAnimation(view: View)
     {

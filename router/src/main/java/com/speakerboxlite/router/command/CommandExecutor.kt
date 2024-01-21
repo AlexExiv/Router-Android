@@ -6,4 +6,5 @@ interface CommandExecutor
     fun onUnbind()
 
     fun execute(command: Command)
+    fun sync(items: List<String>): List<String>
 }

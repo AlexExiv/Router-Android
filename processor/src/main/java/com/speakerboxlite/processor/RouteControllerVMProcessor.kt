@@ -36,7 +36,15 @@ class RouteControllerVMProcessor(processingEnv: ProcessingEnvironment,
         val elementClassName = ClassName(pack, className)
         val names = element.getExecutables().map { it.simpleName.toString() }
         if (names.containsAll(REQUIRED_METHODS))
-            return RouteClass(elementClassName, pathClass, viewClass, false, null)
+        {
+            return RouteClass(elementClassName,
+                pathClass,
+                viewClass,
+                false,
+                null,
+                isCompose(viewElement),
+                getRouteType(viewElement))
+        }
 
         if (!names.contains(CREATE_VIEW))
         {
@@ -50,15 +58,16 @@ class RouteControllerVMProcessor(processingEnv: ProcessingEnvironment,
 
         if (!names.contains(CREATE_VIEWMODEL))
         {
-            val getAndroidViewModel = MemberName(mainRouterPack, "getAndroidViewModel")
+            val mpElement = typeArguments[MP_INDEX].asElement() as TypeElement
+            val mpClass = ClassName(mpElement.getPack(processingEnv), mpElement.simpleName.toString())
 
             val func = FunSpec.builder(CREATE_VIEWMODEL)
             func.addModifiers(KModifier.OVERRIDE)
             func.addModifiers(KModifier.PROTECTED)
-            func.addParameter("view", viewClass)
+            func.addParameter("modelProvider", mpClass)
             func.addParameter("path", pathClass)
             func.returns(vmClass)
-            func.addStatement("return view.%M()", getAndroidViewModel)
+            func.addStatement("return modelProvider.getViewModel()")
             classBuilder.addFunction(func.build())
         }
 
@@ -70,14 +79,21 @@ class RouteControllerVMProcessor(processingEnv: ProcessingEnvironment,
 
         file.writeTo(File(kaptKotlinGeneratedDir))
 
-        return RouteClass(ClassName(pack, classNameImpl), pathClass, viewClass, false, null)
+        return RouteClass(ClassName(pack, classNameImpl),
+            pathClass,
+            viewClass,
+            false,
+            null,
+            isCompose(viewElement),
+            getRouteType(viewElement))
     }
 
     companion object
     {
         val PATH_INDEX = 0
         val VM_INDEX = 1
-        val V_INDEX = 2
+        val MP_INDEX = 2
+        val V_INDEX = 3
 
         const val CREATE_VIEW = "onCreateView"
         const val CREATE_VIEWMODEL = "onCreateViewModel"

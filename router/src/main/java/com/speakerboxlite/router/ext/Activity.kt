@@ -2,8 +2,10 @@ package com.speakerboxlite.router.ext
 
 import android.app.Activity
 import android.content.Intent
+import com.speakerboxlite.router.annotations.InternalApi
 
-internal fun Activity.restartApp()
+@InternalApi
+fun Activity.restartApp()
 {
     finish()
     val intent = baseContext!!.packageManager!!.getLaunchIntentForPackage(baseContext!!.packageName!!)!!
