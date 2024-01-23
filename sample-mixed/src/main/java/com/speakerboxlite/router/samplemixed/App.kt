@@ -6,7 +6,6 @@ import com.speakerboxlite.router.View
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.controllers.AnimationController
 import com.speakerboxlite.router.controllers.AnimationControllerFactory
-import com.speakerboxlite.router.controllers.AnimationHostChanged
 import com.speakerboxlite.router.fragment.ActivityLifeCycle
 import com.speakerboxlite.router.fragment.AndroidViewModelProvider
 import com.speakerboxlite.router.fragment.AnimationControllerFragment
@@ -61,24 +60,11 @@ class HostFragmentComposeFactoryImpl: HostFragmentComposeFactory
 
 class AnimationFactory: AnimationControllerFactory
 {
-    override fun onCreate(presentation: Presentation?, view: View?, hostChanged: AnimationHostChanged?): AnimationController?
+    override fun onCreate(presentation: Presentation?, view: View): AnimationController?
     {
-        return if (hostChanged != null)
-        {
-            when (hostChanged)
-            {
-                AnimationHostChanged.FromFragment -> AnimationControllerFragmentDefault()
-                AnimationHostChanged.FromCompose -> AnimationControllerComposeSlide()
-            }
-        }
-        else if (view != null)
-        {
-            if (view is ViewFragment)
-                AnimationControllerFragmentDefault()
-            else
-                AnimationControllerComposeSlide()
-        }
+        return if (view is ViewFragment)
+            AnimationControllerFragmentDefault()
         else
-            null
+            AnimationControllerComposeSlide()
     }
 }

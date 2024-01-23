@@ -12,8 +12,6 @@ abstract class RouteControllerVM<Path: RoutePath, VM: ViewModel, ModelProvider: 
     RouteControllerViewModelProvider<Path, VM>,
     RouteControllerViewModelHolder<VM> where V: View
 {
-    val viewModelInit = mutableMapOf<String, Boolean>()
-
     override fun onPrepareView(router: Router, view: V, path: Path)
     {
 
@@ -26,14 +24,14 @@ abstract class RouteControllerVM<Path: RoutePath, VM: ViewModel, ModelProvider: 
 
     override fun onPrepareViewModel(router: Router, key: String, vm: VM)
     {
-        if (viewModelInit[key] != true)
+        if (!vm.isInit)
         {
             vm.router = router
             vm.resultProvider = router.createResultProvider(key)
                 .also { it.start() }
 
             vm.onInit()
-            viewModelInit[key] = true
+            vm.isInit = true
         }
     }
 

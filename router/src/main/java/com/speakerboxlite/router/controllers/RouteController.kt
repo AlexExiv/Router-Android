@@ -67,8 +67,8 @@ abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterfa
 
     override fun isPartOfChain(clazz: KClass<*>): Boolean = chainPaths.indexOfFirst { it == clazz } != -1
 
-    override fun animationController(presentation: Presentation?, view: View?, hostChanged: AnimationHostChanged?): AnimationController? =
-        preferredAnimationController ?: animationControllerFactory?.onCreate(presentation, view, hostChanged)
+    override fun animationController(presentation: Presentation?, view: View): AnimationController? =
+        preferredAnimationController ?: animationControllerFactory?.onCreate(presentation, view)
 
     abstract override fun onCreateView(path: Path): V
 

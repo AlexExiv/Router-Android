@@ -30,33 +30,34 @@ interface RouteControllerInterface<Path: RoutePath, V: View>
 
     fun isPartOfChain(clazz: KClass<*>): Boolean
 
-    fun animationController(presentation: Presentation?, view: View?, hostChanged: AnimationHostChanged?): AnimationController?
+    fun animationController(presentation: Presentation?, view: View): AnimationController?
     fun onCreateView(path: Path): V
 
     /**
      * Called when the router attempts to leave this route and navigate to another path (`next`).
+     * This method is called before the `onBeforeRoute` method of middlewares.
      *
      * @param router   The current active router.
      * @param current  The path of this route.
-     * @param next     The path to which the router is attempting to navigate.
-     * @param result   The callback through which this route expects to receive a result.
+     * @param next     RouteParams that contains the path to which the router is attempting to navigate.
      * @return `true` to prevent navigation to the `next` path (use this value if you are routing to another path); `false` otherwise.
      */
     fun onBeforeRoute(router: Router, current: Path, next: RouteParamsGen): Boolean
 
     /**
      * Called when the router attempts to navigate to this route (`current`).
+     * This method is called before the `onRoute` method of middlewares.
      *
      * @param router   The current active router. You can use it to navigate to another route, but don't forget to return `true`.
      * @param prev     The path of the previous route.
-     * @param current  The path to which the router is attempting to navigate.
-     * @param result   The callback through which the previous route expects to receive a result.
+     * @param current  RouteParams that contains the path to which the router is attempting to navigate.
      * @return `true` to prevent navigation to the `current` path (use this value if you are routing to another path); `false` otherwise.
      */
     fun onRoute(router: Router, prev: RoutePath?, current: RouteParams<Path>): Boolean
 
     /**
      * Called when the router is about to close this route.
+     * This method is called before the `onClose` method of middlewares.
      *
      * @param router   The current active router. You can use it to navigate to another route, but don't forget to return `true`.
      * @param current  The path of the current route.

@@ -37,7 +37,7 @@ open class FragmentLifeCycle(private val routerManager: RouterManager,
     {
         if (f is HostView)
         {
-            val router = routerManager.getForView(f.viewKey) ?: routerManager[f.viewKey]
+            val router = routerManager[f.viewKey]
 
             //In case of we couldn't find the router start the restarting process. It may occur after the app restores the state after the reboot maybe a better
             //solution is to serialize routers.
@@ -57,7 +57,7 @@ open class FragmentLifeCycle(private val routerManager: RouterManager,
 
         if (f is ViewFragment)
         {
-            val router = routerManager.getForView(f.viewKey) ?: routerManager[f.viewKey]
+            val router = routerManager[f.viewKey]
 
             //In case of we couldn't find the router start the restarting process. It may occur after the app restores the state after the reboot maybe better
             //solution is to serialize routers.
@@ -76,13 +76,16 @@ open class FragmentLifeCycle(private val routerManager: RouterManager,
 
             f.localRouter = f.router.createRouterLocal(f.viewKey)
 
-            if (f as? ViewVM<ViewModel> != null && f.router !is RouterZombie)
+            if (f.router !is RouterZombie)
             {
-                val mp = modelProvider?.invoke(FragmentModelProviderArgs(f.requireActivity(), f)) ?: error("You use ViewModel without specifying FragmentModelProvider")
-                f.viewModel = f.router.provideViewModel(f, mp)
-            }
+                if (f as? ViewVM<ViewModel> != null)
+                {
+                    val mp = modelProvider?.invoke(FragmentModelProviderArgs(f.requireActivity(), f)) ?: error("You use ViewModel without specifying FragmentModelProvider")
+                    f.viewModel = f.router.provideViewModel(f, mp)
+                }
 
-            f.router.onPrepareView(f, (f as? ViewVM<ViewModel>)?.viewModel)
+                f.router.onPrepareView(f, (f as? ViewVM<ViewModel>)?.viewModel)
+            }
 
             if (f is ViewTabs)
                 f.routerTabs = f.router.createRouterTabs(f.viewKey)

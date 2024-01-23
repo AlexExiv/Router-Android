@@ -27,7 +27,7 @@ class TabViewModel(val index: Int, app: Application): BaseViewModel(app)
 
     fun onNext()
     {
-        router.route(StepPath(0))
+        router.route(StepPath(0), Presentation.ModalNewTask)
     }
 
     fun onSingleton()

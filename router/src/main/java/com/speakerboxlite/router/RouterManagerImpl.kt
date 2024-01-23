@@ -23,24 +23,16 @@ class RouterManagerImpl: RouterManager, RouterStack by RouterStackImpl()
             routers[key] = value
             if ((value is RouterSimple) && (value.parent == null))
                 rootRouter = value
+
+            Log.d("RouterManager", "Bound routers: ${routerByView.size}")
+        }
+        else
+        {
+            Log.d("RouterManager", "Bound routers after unbind: ${routerByView.size}")
         }
     }
 
     override fun get(key: String): Router? = routers[key]
-
-    override fun bindView(router: Router, viewKey: String)
-    {
-        routerByView[viewKey] = router
-        Log.d("RouterManager", "Bound routers: ${routerByView.size}")
-    }
-
-    override fun unbindView(viewKey: String)
-    {
-        //routerByView.remove(viewKey)
-        Log.d("RouterManager", "Bound routers after unbind: ${routerByView.size}")
-    }
-
-    override fun getForView(viewKey: String): Router? = routerByView[viewKey]
 
     @InternalApi
     fun resetToTop()

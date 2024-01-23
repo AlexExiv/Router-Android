@@ -90,7 +90,7 @@ open class RouterSimple(protected val callerKey: String?,
 
         val view = createView(route, RouteType.Simple, path, null, null)
         routerManager.push(view.viewKey, this)
-        commandBuffer.apply(Command.Replace(path, view, route.animationController(null, view, null)))
+        commandBuffer.apply(Command.Replace(path, view, route.animationController(null, view)))
 
         return this
     }
@@ -328,12 +328,12 @@ open class RouterSimple(protected val callerKey: String?,
 
     internal fun bindRouter(viewKey: String)
     {
-        routerManager.bindView(this, viewKey)
+        routerManager[viewKey] = this
     }
 
     internal fun unbindRouter(viewKey: String)
     {
-        routerManager.unbindView(viewKey)
+        routerManager[viewKey] = null
     }
 
     override fun createResultProvider(key: String): RouterResultProvider = RouterResultProviderImpl(key, resultManager)
@@ -619,7 +619,7 @@ open class RouterSimple(protected val callerKey: String?,
         {
             val view = createView(route, routeType, path, resultKey, result)
             routerManager.push(view.viewKey, this)
-            commandBuffer.apply(Command.Push(path, view, route.animationController(presentation, view, null)))
+            commandBuffer.apply(Command.Push(path, view, route.animationController(presentation, view)))
             this
         }
     }

@@ -14,7 +14,6 @@ abstract class RouteControllerVMC<Path: RoutePath, VM: ViewModel, ModelProvider:
     RouteControllerViewModelHolderComponent<VM> where V: View
 {
     final override lateinit var componentClass: KClass<C>
-    val viewModelInit = mutableMapOf<String, Boolean>()
 
     override fun onPrepareView(router: Router, view: V, path: Path, component: Any)
     {
@@ -28,7 +27,7 @@ abstract class RouteControllerVMC<Path: RoutePath, VM: ViewModel, ModelProvider:
 
     override fun onPrepareViewModel(router: Router, key: String, vm: VM, component: Any)
     {
-        if (viewModelInit[key] != true)
+        if (!vm.isInit)
         {
             vm.router = router
             vm.resultProvider = router.createResultProvider(key)
@@ -37,10 +36,10 @@ abstract class RouteControllerVMC<Path: RoutePath, VM: ViewModel, ModelProvider:
 
         onInject(vm, component as C)
 
-        if (viewModelInit[key] != true)
+        if (!vm.isInit)
         {
             vm.onInit()
-            viewModelInit[key] = true
+            vm.isInit = true
         }
     }
 
