@@ -1,5 +1,7 @@
 # Router-Android
 
+[![](https://jitpack.io/v/AlexExiv/Router-Android.svg)](https://jitpack.io/#AlexExiv/Router-Android)
+
 Simple but powerful router for Android. The main goal of the Router is to separate business logic from 
 navigation between screens. A screen shouldn’t know how it has been opened and how it should be closed.
 It should only know that in this case it has to close or navigate to another screen or send some data as 
