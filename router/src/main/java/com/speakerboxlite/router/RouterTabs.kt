@@ -20,8 +20,19 @@ interface RouterTabs
      */
     var tabChangeCallback: OnTabChangeCallback?
 
+    /**
+     *  Current selected tab's index
+     */
     val tabIndex: Int
 
+    /**
+     * Navigate to the tab with the specified `index`. Use this method to change a tab and make it possible to intercept routing by middlewares.
+     * Avoid changing tabs by other means.
+     *
+     * @param index The index of the tab to which you want to switch.
+     *
+     * @return `true` if the tab has been changed; `false` otherwise.
+     */
     fun route(index: Int): Boolean
 
     /**
@@ -47,5 +58,8 @@ interface RouterTabs
      */
     fun unbindExecutor()
 
+    /**
+     *  Get router with index
+     */
     operator fun get(index: Int): Router
 }

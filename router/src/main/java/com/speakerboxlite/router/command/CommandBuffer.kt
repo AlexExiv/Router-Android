@@ -12,7 +12,6 @@ sealed class Command
     class CloseTo(val key: String): Command()
     object CloseAll: Command()
     class StartModal(val key: String, val params: Serializable?): Command()
-    class ChangeHost(val key: String, val path: RoutePath, val animation: AnimationController?): Command()
     class Push(val path: RoutePath, val view: View, val animation: AnimationController?): Command()
     class Replace(val path: RoutePath, val byView: View, val animation: AnimationController?): Command()
     class BottomSheet(val view: View): Command()

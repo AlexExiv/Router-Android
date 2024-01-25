@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.samplemixed.base.BaseViewModel
+import com.speakerboxlite.router.samplemixed.dialog.DialogPath
+import com.speakerboxlite.router.samplemixed.dialog.fragment.DialogFragmentPath
 import com.speakerboxlite.router.samplemixed.step.compose.StepComposePath
 import com.speakerboxlite.router.samplemixed.step.fragment.StepFragmentPath
 import com.speakerboxlite.router.samplemixed.tabs.TabsPath
@@ -13,6 +15,7 @@ class StepViewModel(val step: Int, app: Application): BaseViewModel(app)
 {
     val stepStr = MutableLiveData(step.toString())
     val counter = MutableLiveData(0)
+    val dialogResult = MutableLiveData("")
 
     var lockBack = false
         set(value)
@@ -69,6 +72,13 @@ class StepViewModel(val step: Int, app: Application): BaseViewModel(app)
     fun onLockBack()
     {
         lockBack = !lockBack
+    }
+
+    fun onShowDialogFragment()
+    {
+        router.routeWithResult(this, DialogFragmentPath(message = "Click Yes to get result", okBtn = "Yes", cancelBtn = "No")) {
+            it.vr.dialogResult.value = "Result is ${if (it.result) "YES" else "NO"}"
+        }
     }
 
     fun onShowTabs()

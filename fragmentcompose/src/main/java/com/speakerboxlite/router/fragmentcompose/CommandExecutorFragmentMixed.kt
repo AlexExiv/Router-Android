@@ -72,8 +72,8 @@ class CommandExecutorFragmentMixed(activity: FragmentActivity,
         host as Fragment
         fragmentManager
             .beginTransaction()
-            .add(containerId, host, "${host.viewKey}.HOST")
-            .addToBackStack("${host.viewKey}.HOST")
+            .add(containerId, host, host.viewKey)
+            .addToBackStack(host.viewKey)
             .commit()
 
         fragmentManager.executePendingTransactions()

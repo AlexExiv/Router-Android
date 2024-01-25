@@ -35,6 +35,7 @@ fun Step(viewModel: StepViewModel)
         val step = viewModel.stepStr.observeAsState()
         val counter = viewModel.counter.observeAsState()
         val lockBack = viewModel.lockBackTitle.observeAsState()
+        val dialogResult = viewModel.dialogResult.observeAsState()
 
         Row(modifier = Modifier.fillMaxSize()) {
             Column {
@@ -58,8 +59,8 @@ fun Step(viewModel: StepViewModel)
                     Text(text = "Show dialog")
                 }
 
-                Button(onClick = { router.route(DialogFragmentPath(message = "Im fragment", okBtn = "Close")) }) {
-                    Text(text = "Show dialog fragment")
+                Button(onClick = {viewModel.onShowDialogFragment() }) {
+                    Text(text = if (dialogResult.value!!.isEmpty()) "Show dialog fragment" else dialogResult.value!!)
                 }
 
                 Button(onClick = { router.route(BottomSheetPath()) }) {

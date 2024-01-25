@@ -63,17 +63,10 @@ open class CommandExecutorFragment(val activity: FragmentActivity,
 
     override fun sync(items: List<String>): List<String>
     {
-        val backstack = mutableListOf<String>()
-        for (i in 0 until fragmentManager.backStackEntryCount)
-        {
-            val en = fragmentManager.getBackStackEntryAt(i).name ?: continue
-            backstack.add(en)
-        }
-
         val remove = mutableListOf<String>()
         for (i in items)
         {
-            if (!backstack.contains(i))
+            if (fragmentManager.findFragmentByTag(i) == null)
                 remove.add(i)
         }
 
@@ -90,7 +83,6 @@ open class CommandExecutorFragment(val activity: FragmentActivity,
             is Command.CloseTo -> closeTo(command.key)
             is Command.CloseAll -> closeAll()
             is Command.StartModal -> startActivity(command.key, command.params)
-            is Command.ChangeHost -> changeHost(command.key, command.path, command.animation as? AnimationControllerFragment<RoutePath, View>)
             is Command.Dialog -> showDialog(command.view)
             is Command.CloseDialog -> closeDialog(command.key)
             is Command.Push -> pushFragment(command.path, command.view, command.animation as? AnimationControllerFragment<RoutePath, View>, false)
@@ -140,11 +132,6 @@ open class CommandExecutorFragment(val activity: FragmentActivity,
         }
     }
 
-    protected open fun changeHost(key: String, path: RoutePath?, animation: AnimationControllerFragment<RoutePath, View>?)
-    {
-        error("You try to change a host but don't use appropriate Navigator")
-    }
-
     protected open fun pushFragment(path: RoutePath?, view: View, animation: AnimationControllerFragment<RoutePath, View>?, replacing: Boolean)
     {
         if (view is Fragment)
@@ -182,6 +169,7 @@ open class CommandExecutorFragment(val activity: FragmentActivity,
         if (view is BottomSheetDialogFragment)
         {
             view.show(fragmentManager, view.viewKey)
+            fragmentManager.executePendingTransactions()
         }
     }
 
@@ -191,6 +179,7 @@ open class CommandExecutorFragment(val activity: FragmentActivity,
         if (f is BottomSheetDialogFragment)
         {
             f.dismiss()
+            fragmentManager.executePendingTransactions()
 
             if (fragmentManager.backStackEntryCount == 0)
                 closeAll()
@@ -202,6 +191,7 @@ open class CommandExecutorFragment(val activity: FragmentActivity,
         if (view is DialogFragment)
         {
             view.show(fragmentManager, view.viewKey)
+            fragmentManager.executePendingTransactions()
         }
     }
 
@@ -211,6 +201,7 @@ open class CommandExecutorFragment(val activity: FragmentActivity,
         if (f is DialogFragment)
         {
             f.dismiss()
+            fragmentManager.executePendingTransactions()
 
             if (fragmentManager.backStackEntryCount == 0)
                 closeAll()

@@ -40,7 +40,6 @@ open class CommandExecutorCompose(val navigator: ComposeNavigator,
             is Command.CloseTo -> closeTo(command.key)
             is Command.CloseAll -> closeAll()
             is Command.StartModal -> startActivity(command.key, command.params)
-            is Command.ChangeHost -> changeHost(command.key, command.animation as? AnimationControllerCompose)
             is Command.Dialog -> showDialog(command.view)
             is Command.CloseDialog -> closeDialog(command.key)
             is Command.Push -> push(command.path, command.view, command.animation as? AnimationControllerCompose)
@@ -92,11 +91,6 @@ open class CommandExecutorCompose(val navigator: ComposeNavigator,
             intent.putExtra(HOST_ACTIVITY_KEY, key)
             params?.also { intent.putExtra(HOST_ACTIVITY_INTENT_DATA_KEY, it) }
         }
-    }
-
-    protected open fun changeHost(key: String, animationController: AnimationControllerCompose?)
-    {
-        error("You try to change a host but don't use appropriate Navigator")
     }
 
     protected open fun push(path: RoutePath?, view: View, animationController: AnimationControllerCompose?)

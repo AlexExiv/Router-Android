@@ -9,7 +9,7 @@ class RouterTabSimple(callerKey: String?,
                       routeManager: RouteManager,
                       routerManager: RouterManager,
                       resultManager: ResultManager,
-                      val index: Int,
+                      override val index: Int,
                       routerTabs: RouterTabsImpl): RouterSimple(callerKey, parent, routeManager, routerManager, resultManager), RouterTabSuper, RouterTab
 {
     private val weakRouterTabs = WeakReference(routerTabs)
