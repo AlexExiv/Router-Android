@@ -37,6 +37,7 @@ open class FragmentLifeCycle(private val routerManager: RouterManager,
     {
         if (f is HostView)
         {
+            f.routerManager = routerManager
             val router = routerManager[f.viewKey]
 
             //In case of we couldn't find the router start the restarting process. It may occur after the app restores the state after the reboot maybe a better
@@ -112,7 +113,6 @@ open class FragmentLifeCycle(private val routerManager: RouterManager,
         if (f is ViewFragment)
         {
             onCreateExecutor(f)?.let { f.localRouter.bindExecutor(it) }
-            f.resultProvider.start()
 
             if (f is ViewTabs)
             {
@@ -126,11 +126,27 @@ open class FragmentLifeCycle(private val routerManager: RouterManager,
     override fun onFragmentResumed(fm: FragmentManager, f: Fragment)
     {
         super.onFragmentResumed(fm, f)
+
+        if (f is ViewFragment)
+        {
+            f.resultProvider.start(f)
+
+            if (f is ViewVM<*>)
+                f.viewModel.resultProvider.start(f.viewModel)
+        }
     }
 
     override fun onFragmentPaused(fm: FragmentManager, f: Fragment)
     {
         super.onFragmentPaused(fm, f)
+
+        if (f is ViewFragment)
+        {
+            f.resultProvider.pause()
+
+            if (f is ViewVM<*>)
+                f.viewModel.resultProvider.pause()
+        }
     }
 
     override fun onFragmentStopped(fm: FragmentManager, f: Fragment)
@@ -145,7 +161,6 @@ open class FragmentLifeCycle(private val routerManager: RouterManager,
         if (f is ViewFragment)
         {
             f.localRouter.unbindExecutor()
-            f.resultProvider.pause()
 
             if (f is ViewTabs)
                 f.routerTabs.unbindExecutor()

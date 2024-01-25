@@ -1,12 +1,9 @@
 package com.speakerboxlite.router
 
-import com.speakerboxlite.router.result.RouterResultProvider
-
-interface ViewModel
+interface ViewModel: ViewResult
 {
     var isInit: Boolean
     var router: Router
-    var resultProvider: RouterResultProvider
 
     fun onInit()
 }

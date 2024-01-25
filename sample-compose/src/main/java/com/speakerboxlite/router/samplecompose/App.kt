@@ -26,7 +26,7 @@ class App: Application()
             .userModule(UserModule(UserData()))
             .build()
 
-        routerComponent.initialize(MainPath(), { _, _, _ -> AnimationControllerComposeSlide() }, component)
+        routerComponent.initialize(MainPath(), { _, _ -> AnimationControllerComposeSlide() }, component)
 
         lifeCycle = ActivityLifeCycle(routerComponent.routerManager)
         registerActivityLifecycleCallbacks(lifeCycle)

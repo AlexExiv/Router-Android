@@ -35,27 +35,28 @@ class RouterTabDelegateImpl(val index: Int,
             if (parent is RouterTab)
                 parent?.route(path, presentation)
             else
-                parent?.route(null, path, RouteType.Simple, if (_presentation == Presentation.ModalNewTask) Presentation.ModalNewTask else Presentation.Modal, routerTab?.viewsStack?.lastOrNull()?.key, null)
+                parent?.routeInternal(null, path, RouteType.Simple, if (_presentation == Presentation.ModalNewTask) Presentation.ModalNewTask else Presentation.Modal, null)
         }
         else
-            routerTab?.route(routerTab, path, RouteType.Simple, presentation, null, null)
+            routerTab?.routeInternal(routerTab, path, RouteType.Simple, presentation, null)
     }
 
-    override fun <R : Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation?, result: Result<R>): Router?
+    override fun <VR: ViewResult, R: Any> routeWithResult(viewResult: VR, path: RoutePathResult<R>, presentation: Presentation?, result: RouterResultDispatcher<VR, R>): Router?
     {
         val route = routerTab?.findRoute(path) ?: return null
         val _presentation = if (route.routeType.isNoStackStructure) Presentation.Modal else (presentation ?: route.preferredPresentation)
 
         routerTab?.closeAllNoStack()
+        val _result = ViewResultData.create(viewResult, result)
         return if ((routerTabs?.presentInTab == true && stackSize > 0) || route.isTabs || _presentation == Presentation.Modal || _presentation == Presentation.ModalNewTask)
         {
             if (parent is RouterTab)
-                parent?.routeWithResult(path, presentation, result)
+                parent?.routeWithResult(viewResult, path, presentation, result)
             else
-                parent?.route(null, path, RouteType.Simple, if (_presentation == Presentation.ModalNewTask) Presentation.ModalNewTask else Presentation.Modal, routerTab?.viewsStack?.lastOrNull()?.key) { result(it as R) }
+                parent?.routeInternal(null, path, RouteType.Simple, if (_presentation == Presentation.ModalNewTask) Presentation.ModalNewTask else Presentation.Modal, _result)
         }
         else
-            routerTab?.route(routerTab, path, RouteType.Simple, presentation, null) { result(it as  R) }
+            routerTab?.routeInternal(routerTab, path, RouteType.Simple, presentation, _result)
     }
 
     override fun back(): Router? =

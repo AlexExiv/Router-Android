@@ -18,15 +18,15 @@ class ChainViewModel(val step: Int, app: Application): BaseViewModel(app)
 
     fun onSubChain()
     {
-        router.routeWithResult(ChainPath(100*step + 1)) {
-            chainResult.value = "Chain has been finished at step $it"
+        router.routeWithResult(this, ChainPath(100*step + 1)) {
+            it.vr.chainResult.value = "Chain has been finished at step ${it.result}"
         }
     }
 
     fun onSubRoute()
     {
-        router.routeWithResult(SubChainPath(step)) {
-            subResult.value = "Sub route result is $it"
+        router.routeWithResult(this, SubChainPath(step)) {
+            it.vr.subResult.value = "Sub route result is ${it.result}"
         }
     }
 

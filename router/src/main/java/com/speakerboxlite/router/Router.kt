@@ -1,12 +1,21 @@
 package com.speakerboxlite.router
 
-import com.speakerboxlite.router.annotations.InternalApi
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.command.CommandExecutor
 import com.speakerboxlite.router.controllers.RouteParamsGen
 import com.speakerboxlite.router.result.RouterResultProvider
+import java.io.Serializable
 
-typealias Result<R> = (R) -> Unit
+data class Result<VR: ViewResult, R>(val vr: VR, val result: R)
+
+fun interface RouterResultDispatcher<VR: ViewResult, R>: Serializable
+{
+    /**
+     * This handler will be called to dispatch the result. It's important not to use `this` context of the caller in the dispatcher
+     * because the caller could be recreated by this time. In the `vr` parameter, you will get the current instance of the caller.
+     */
+    fun onDispatch(result: Result<VR, R>)
+}
 
 interface Router
 {
@@ -45,13 +54,14 @@ interface Router
     /**
      * Navigate to a screen with an expected result.
      *
+     * @param viewResult   ViewResult's subclass it will be passed to the result dispatcher.
      * @param path         The path to the screen connected by the `RouteController`.
      * @param presentation The type of presentation (e.g., modal, full-screen).
      * @param result       The callback for handling the screen result. To send a result, use `ResultProvider::send`.
      * @return             A router that will execute the route; may be null (usually when a middleware interrupts the route).
      * @throws RouteNotFoundException If the provided path is not found in the routes manager.
      */
-    fun <R: Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation? = null, result: Result<R>): Router?
+    fun <VR: ViewResult, R: Any> routeWithResult(viewResult: VR, path: RoutePathResult<R>, presentation: Presentation? = null, result: RouterResultDispatcher<VR, R>): Router?
 
     /**
      * Replaces the top screen on the stack with a new one specified by the given `path`.

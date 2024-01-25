@@ -7,7 +7,7 @@ interface RouterTabDelegate
     val hasPreviousScreen: Boolean
 
     fun route(path: RoutePath, presentation: Presentation?): Router?
-    fun <R : Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation?, result: Result<R>): Router?
+    fun <VR: ViewResult, R: Any> routeWithResult(viewResult: VR, path: RoutePathResult<R>, presentation: Presentation?, result: RouterResultDispatcher<VR, R>): Router?
 
     fun back(): Router?
 

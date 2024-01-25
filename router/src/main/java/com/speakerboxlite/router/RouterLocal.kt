@@ -20,5 +20,5 @@ interface RouterLocal: Router
      * @param path        The path to the sub view that should be shown.
      * @param result      The callback for handling the screen result. To send a result, use `ResultProvider::send`.
      */
-    fun <R: Any> routeInContainerWithResult(containerId: Int, path: RoutePath, result: Result<R>): String
+    fun <VR: ViewResult, R: Any> routeInContainerWithResult(viewResult: VR, containerId: Int, path: RoutePath, result: RouterResultDispatcher<VR, R>): String
 }

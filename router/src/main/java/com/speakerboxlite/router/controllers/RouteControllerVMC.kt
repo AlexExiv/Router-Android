@@ -31,7 +31,6 @@ abstract class RouteControllerVMC<Path: RoutePath, VM: ViewModel, ModelProvider:
         {
             vm.router = router
             vm.resultProvider = router.createResultProvider(key)
-                .also { it.start() }
         }
 
         onInject(vm, component as C)

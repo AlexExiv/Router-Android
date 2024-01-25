@@ -2,6 +2,7 @@ package com.speakerboxlite.router.compose
 
 import android.app.Application
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -32,11 +33,29 @@ class AndroidComposeViewModelProvider(val app: Application,
 @Composable
 inline fun <reified VM: com.speakerboxlite.router.ViewModel> routerViewModel(
     view: ViewCompose,
-    router: Router = checkNotNull(LocalRouter.current) { "No Router was provided via LocalRouter" },
+    router: Router? = null,
     viewModelStoreOwner: ViewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) { "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner" }): VM
 {
+    val _router = if (router == null)
+    {
+        val manager = LocalRouterManager.current ?: error("You haven't provided RouterManager")
+        manager[view.viewKey] ?: error("Router for key ${view.viewKey} wasn't found")
+    }
+    else
+        router
+
     val app = LocalContext.current.applicationContext as Application
-    val vm: VM = router.provideViewModel(view, AndroidComposeViewModelProvider(app, viewModelStoreOwner))
-    router.onPrepareView(view, vm)
+    val vm: VM = _router.provideViewModel(view, AndroidComposeViewModelProvider(app, viewModelStoreOwner))
+    _router.onPrepareView(view, vm)
+
+    DisposableEffect(view.viewKey)
+    {
+        vm.resultProvider.start(vm)
+
+        onDispose {
+            vm.resultProvider.pause()
+        }
+    }
+
     return vm
 }

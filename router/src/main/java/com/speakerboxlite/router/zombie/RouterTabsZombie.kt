@@ -11,6 +11,8 @@ internal class RouterTabsZombie : RouterTabs
 {
     override var tabChangeCallback: OnTabChangeCallback? = null
 
+    override val tabIndex: Int = 0
+
     override fun route(index: Int): Boolean = false
 
     override fun route(index: Int, path: RoutePath, recreate: Boolean): String = UUID.randomUUID().toString()

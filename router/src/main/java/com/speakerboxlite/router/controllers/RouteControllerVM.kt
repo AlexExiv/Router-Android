@@ -28,7 +28,6 @@ abstract class RouteControllerVM<Path: RoutePath, VM: ViewModel, ModelProvider: 
         {
             vm.router = router
             vm.resultProvider = router.createResultProvider(key)
-                .also { it.start() }
 
             vm.onInit()
             vm.isInit = true

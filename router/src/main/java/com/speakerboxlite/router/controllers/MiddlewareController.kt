@@ -1,8 +1,8 @@
 package com.speakerboxlite.router.controllers
 
-import com.speakerboxlite.router.Result
 import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.Router
+import com.speakerboxlite.router.ViewResultData
 import com.speakerboxlite.router.annotations.Presentation
 
 data class RouteParams<Path: RoutePath>(val execRouter: Router? = null,
@@ -10,7 +10,7 @@ data class RouteParams<Path: RoutePath>(val execRouter: Router? = null,
                                         val presentation: Presentation? = null,
                                         val isReplace: Boolean = false,
                                         val tabIndex: Int? = null,
-                                        val result: Result<Any>? = null)
+                                        val result: ViewResultData? = null)
 
 typealias RouteParamsGen = RouteParams<RoutePath>
 

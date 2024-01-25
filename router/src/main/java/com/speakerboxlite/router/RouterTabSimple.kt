@@ -20,8 +20,8 @@ class RouterTabSimple(callerKey: String?,
 
     override fun route(path: RoutePath, presentation: Presentation?): Router? = delegate.route(path, presentation)
 
-    override fun <R : Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation?, result: Result<R>): Router? =
-        delegate.routeWithResult(path, presentation, result)
+    override fun <VR: ViewResult, R: Any> routeWithResult(viewResult: VR, path: RoutePathResult<R>, presentation: Presentation?, result: RouterResultDispatcher<VR, R>): Router? =
+        delegate.routeWithResult(viewResult, path, presentation, result)
 
     override fun back() = delegate.back()
 

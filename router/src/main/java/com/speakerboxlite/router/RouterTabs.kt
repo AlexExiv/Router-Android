@@ -20,6 +20,8 @@ interface RouterTabs
      */
     var tabChangeCallback: OnTabChangeCallback?
 
+    val tabIndex: Int
+
     fun route(index: Int): Boolean
 
     /**

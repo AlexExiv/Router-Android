@@ -1,28 +1,34 @@
 package com.speakerboxlite.router.result
 
+import com.speakerboxlite.router.ViewResult
+import java.lang.ref.WeakReference
+
 class RouterResultProviderImpl(private val from: String,
                                private val resultManager: ResultManager): RouterResultProvider
 {
-    private val results = mutableListOf<Any>()
-    private var started: Boolean = false
+    override val key: String get() = from
+    override val viewResult: ViewResult? get() = weakVR.get()
+    override var resultType: ViewResultType? = null
+
+    private var weakVR = WeakReference<ViewResult>(null)
 
     override fun <R : Any> send(result: R)
     {
-        if (started)
-            resultManager.send(from, result)
-        else
-            results.add(result)
+        resultManager.send(from, result)
     }
 
-    override fun start()
+    override fun start(vke: ViewResult)
     {
-        started = true
-        results.forEach { resultManager.send(from, it) }
-        results.clear()
+        val rt = ViewResultType.fromViewResult(vke)
+        check(resultType == null || (resultType != null && resultType == rt)) { "" }
+        resultType = rt
+
+        weakVR = WeakReference(vke)
+        resultManager.register(from, this)
     }
 
     override fun pause()
     {
-        started = false
+        resultManager.unregister(from, resultType!!)
     }
 }

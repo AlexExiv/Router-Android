@@ -11,7 +11,9 @@ import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
 import androidx.compose.runtime.saveable.SaveableStateRegistry
 import androidx.fragment.app.Fragment
 import com.speakerboxlite.router.Router
+import com.speakerboxlite.router.RouterManager
 import com.speakerboxlite.router.compose.ComposeHostViewRoot
+import com.speakerboxlite.router.compose.LocalRouterManager
 import com.speakerboxlite.router.fragment.HostClosableFragment
 import com.speakerboxlite.router.fragment.IHostClosableFragment
 import com.speakerboxlite.router.fragment.ext._viewKey
@@ -27,6 +29,7 @@ abstract class BaseHostComposeFragment: Fragment(),
             _viewKey = value
         }
 
+    override lateinit var routerManager: RouterManager
     override lateinit var router: Router
 
     override var root: ComposeHostViewRoot = mutableStateOf(null)
@@ -52,7 +55,9 @@ abstract class BaseHostComposeFragment: Fragment(),
         val parentRegistry = LocalSaveableStateRegistry.current
         val registry = remember { SaveableStateRegistry(savedState) { parentRegistry?.canBeSaved(it) ?: true } }
 
-        CompositionLocalProvider(LocalSaveableStateRegistry provides registry)
+        CompositionLocalProvider(
+            LocalSaveableStateRegistry provides registry,
+            LocalRouterManager provides routerManager)
         {
             root.value?.invoke()
 

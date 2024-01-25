@@ -28,7 +28,7 @@ class App: Application()
             .userModule(UserModule(UserData()))
             .build()
 
-        routerComponent.initialize(MainPath(), { _, _, _ -> AnimationControllerDefault() }, component)
+        routerComponent.initialize(MainPath(), { _, _ -> AnimationControllerDefault() }, component)
 
         lifeCycle = ActivityLifeCycle(routerComponent.routerManager, { AndroidViewModelProvider(it.fragment) })
         registerActivityLifecycleCallbacks(lifeCycle)

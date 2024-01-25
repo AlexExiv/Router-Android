@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import com.speakerboxlite.router.HostView
 import com.speakerboxlite.router.Router
+import com.speakerboxlite.router.RouterManager
 import com.speakerboxlite.router.samplefragment.R
 
 open class HostFragment: Fragment(R.layout.fragment_host), HostView
@@ -17,5 +18,6 @@ open class HostFragment: Fragment(R.layout.fragment_host), HostView
             requireArguments().putString("VIEW_KEY", value)
         }
 
+    override lateinit var routerManager: RouterManager
     override lateinit var router: Router
 }

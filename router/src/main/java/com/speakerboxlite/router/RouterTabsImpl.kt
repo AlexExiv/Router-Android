@@ -24,7 +24,7 @@ class RouterTabsImpl(val viewKey: String,
     protected val tabRouters = mutableMapOf<Int, RouterSimple>()
     protected val tabRoutersKeys = mutableMapOf<Int, String>()
 
-    protected var tabIndex = 0
+    override var tabIndex = 0
 
     override fun route(index: Int): Boolean
     {

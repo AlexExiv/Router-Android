@@ -30,15 +30,16 @@ class TabsView: BaseViewCompose()
 @Composable
 fun Tabs(key: String)
 {
-
     Surface {
 
         val routerTabs = LocalRouter.currentOrThrow.createRouterTabs(key)
 
         Column(modifier = Modifier.fillMaxSize()) {
 
-            val page = remember { mutableIntStateOf(0) }
+            // current page use routerTabs.tabIndex as the start value
+            val page = remember { mutableIntStateOf(routerTabs.tabIndex) }
 
+            // change pages only via routerTabs.route(0) don't change pages directly
             TabRow(selectedTabIndex = page.intValue) {
                 Tab(selected = page.intValue == 0, onClick = { routerTabs.route(0) }) {
                     Text(text = "Tab 0")

@@ -9,6 +9,7 @@ import com.speakerboxlite.router.HostView
 import com.speakerboxlite.router.IntentBuilder
 import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.Router
+import com.speakerboxlite.router.RouterManager
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.compose.ComposeNavigator
 import com.speakerboxlite.router.fragment.AnimationControllerFragment
@@ -30,6 +31,7 @@ open class BaseHostFragment: Fragment(R.layout.fragment_host),
             _viewKey = value
         }
 
+    override lateinit var routerManager: RouterManager
     override lateinit var router: Router
 }
 

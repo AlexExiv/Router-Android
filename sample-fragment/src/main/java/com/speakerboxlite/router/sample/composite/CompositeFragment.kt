@@ -13,7 +13,7 @@ class CompositeFragment: BaseViewModelFragment<CompositeViewModel, FragmentCompo
     {
         super.onViewCreated(view, savedInstanceState)
 
-        localRouter.routeInContainerWithResult<String>(R.id.sub, DetailsPath()) { viewModel.onChangeValue(it) }
+        localRouter.routeInContainerWithResult(viewModel, R.id.sub, DetailsPath()) { it.vr.onChangeValue(it.result) }
     }
 
     override fun onBindData()

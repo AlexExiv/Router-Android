@@ -1,6 +1,5 @@
 package com.speakerboxlite.router
 
-import com.speakerboxlite.router.annotations.InternalApi
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
@@ -32,8 +31,8 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
 
     override fun route(path: RouteParamsGen): Router? = router?.route(path)
 
-    override fun <R: Any> routeWithResult(path: RoutePathResult<R>, presentation: Presentation?, result: Result<R>): Router? =
-        router!!.routeWithResult(path, presentation, result)
+    override fun <VR: ViewResult, R: Any> routeWithResult(viewResult: VR, path: RoutePathResult<R>, presentation: Presentation?, result: RouterResultDispatcher<VR, R>): Router? =
+        router!!.routeWithResult(viewResult, path, presentation, result)
 
     override fun replace(path: RoutePath): Router? = router?.replace(path)
 
@@ -99,10 +98,10 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
         return view.viewKey
     }
 
-    override fun <R: Any> routeInContainerWithResult(containerId: Int, path: RoutePath, result: Result<R>): String
+    override fun <VR: ViewResult, R: Any> routeInContainerWithResult(viewResult: VR, containerId: Int, path: RoutePath, result: RouterResultDispatcher<VR, R>): String
     {
         val key = routeInContainer(containerId, path)
-        router?.bindResult(key, viewKey) { result(it as R) }
+        router?.bindResult(key, ViewResultData.create(viewResult, result))
         return key
     }
 }

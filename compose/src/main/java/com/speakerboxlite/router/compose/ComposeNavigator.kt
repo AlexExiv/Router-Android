@@ -22,6 +22,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.speakerboxlite.router.HostCloseable
 import com.speakerboxlite.router.Router
+import com.speakerboxlite.router.RouterManager
 import com.speakerboxlite.router.RouterTabs
 import com.speakerboxlite.router.ViewBTS
 import com.speakerboxlite.router.ViewDialog
@@ -35,6 +36,8 @@ val LocalComposeNavigator: ProvidableCompositionLocal<ComposeNavigator?> =
 
 val <T> ProvidableCompositionLocal<T?>.currentOrThrow: T @Composable
     get() = current ?: error("CompositionLocal is null")
+
+val LocalRouterManager: ProvidableCompositionLocal<RouterManager?> = staticCompositionLocalOf { null }
 
 val LocalRouter: ProvidableCompositionLocal<Router?> = staticCompositionLocalOf { null }
 

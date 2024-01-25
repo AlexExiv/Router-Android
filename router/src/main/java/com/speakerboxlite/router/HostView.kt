@@ -7,5 +7,6 @@ interface HostCloseable
 
 interface HostView: View
 {
+    var routerManager: RouterManager
     var router: Router
 }

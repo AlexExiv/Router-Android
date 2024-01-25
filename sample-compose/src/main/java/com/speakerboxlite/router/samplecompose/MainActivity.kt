@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import com.speakerboxlite.router.compose.ComposeNavigator
@@ -15,6 +16,7 @@ import com.speakerboxlite.router.RouterManager
 import com.speakerboxlite.router.samplecompose.ui.theme.RouterTheme
 import com.speakerboxlite.router.BaseHostView
 import com.speakerboxlite.router.compose.ComposeHostViewRoot
+import com.speakerboxlite.router.compose.LocalRouterManager
 
 class MainActivity : ComponentActivity(), BaseHostView
 {
@@ -27,9 +29,11 @@ class MainActivity : ComponentActivity(), BaseHostView
     {
         super.onCreate(savedInstanceState)
         setContent {
-            RouterTheme {
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    root.value?.invoke()
+            CompositionLocalProvider(LocalRouterManager provides routerManager) {
+                RouterTheme {
+                    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                        root.value?.invoke()
+                    }
                 }
             }
         }
