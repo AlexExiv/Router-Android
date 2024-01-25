@@ -52,7 +52,8 @@ Please, look at samples for each module to understand how to use the router in v
 2. RouteController - a controller that connects a path with a screen and implements routing logic. It creates a View, ViewModel, connects them, creates components for injections, and injects dependencies.
 3. Router - conducts routing between screens
 4. Chain - sequence of screens
-5. Middleware - interceptor of navigations; it can prevent navigation, or replace it with another route, or perform some operations.
+5. Result Api - convenient API to get result from called screen
+6. Middleware - interceptor of navigations; it can prevent navigation, or replace it with another route, or perform some operations.
 
 ## RoutePath
 
@@ -254,7 +255,7 @@ Router is injected to Views and ViewModels by the framework.
 router.route(SreenPath())
 
 // Call the method to navigate to another screen and get result from it
-router.routeWithResult(ScreenPath()) { result -> }
+router.routeWithResult(this, ScreenPath()) { result -> }
 ```
 
 ## Chain
@@ -278,6 +279,27 @@ abstract class ChainRouteController: RouteControllerApp<ChainPath, ChainViewMode
 ```
 
 If you want to explore a comprehensive example, you can refer to the `Sample-Fragment` module. It provides a detailed illustration of the concepts discussed, allowing you to see the implementation in action.
+
+## Result Api
+
+An easy and convenient way to obtain results from the called screen. To use it, the called path should implement the
+`RoutePathResult<Result>` interface, where `Result` is the type of the returning value. Then, in code, simply call the
+`routeWithResult` method. The first parameter is a reference to the ViewResult subclass, and the second is the path to which
+you want to navigate. ViewResult subclasses are Fragments and ViewModels that implement the ViewResult interface.
+
+```kotlin
+router.routeWithResult(this, ScreenPath()) { /* handle result here */ }
+```
+
+In the result closure, you receive a data structure that has a reference to the ViewResult subclass passed to the method
+and the result of the called screen's job.
+
+**Important:** why do we pass the ViewResult to the `routeWithResult` method? Why don't we use `this` context of
+the ViewModel in the closure? It's because the Fragment or ViewModel could be recreated by the system
+by the time you get the result in the closure. Therefore, the Result API returns to you a fresh reference to the Fragment
+or ViewModel.
+
+**Chains case:** Result from a screen that is part of a chain is delivered to the caller of the chain.
 
 ## Middleware
 
