@@ -38,4 +38,6 @@ class RouterTabSimple(callerKey: String?,
     override fun superClose() = super.close()
 
     override fun createRouter(callerKey: String): Router = RouterTabSimple(callerKey, this, routeManager, routerManager, resultManager, index, weakRouterTabs.get()!!)
+
+    override fun closeTabToTop(): RouterTab? = delegate.closeTabToTop()
 }

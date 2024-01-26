@@ -3,6 +3,7 @@ package com.speakerboxlite.router.zombie
 import com.speakerboxlite.router.OnTabChangeCallback
 import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.Router
+import com.speakerboxlite.router.RouterTab
 import com.speakerboxlite.router.RouterTabs
 import com.speakerboxlite.router.command.CommandExecutor
 import java.util.UUID
@@ -27,7 +28,7 @@ internal class RouterTabsZombie : RouterTabs
 
     }
 
-    override fun get(index: Int): Router
+    override fun get(index: Int): RouterTab
     {
         TODO("Not yet implemented")
     }

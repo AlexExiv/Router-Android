@@ -18,6 +18,7 @@ import com.speakerboxlite.router.result.ResultManager
 import com.speakerboxlite.router.result.RouterResultProvider
 import com.speakerboxlite.router.result.RouterResultProviderImpl
 import com.speakerboxlite.router.result.ViewResultType
+import java.lang.ref.WeakReference
 import java.util.UUID
 import kotlin.reflect.KClass
 
@@ -51,7 +52,7 @@ internal interface RouterInternal
 }
 
 open class RouterSimple(protected val callerKey: String?,
-                        val parent: RouterSimple?,
+                        parent: RouterSimple?,
                         protected val routeManager: RouteManager,
                         internal val routerManager: RouterManager,
                         protected val resultManager: ResultManager): Router, RouterInternal
@@ -59,6 +60,12 @@ open class RouterSimple(protected val callerKey: String?,
     protected val pathData = mutableMapOf<String, RoutePath>()
 
     protected val commandBuffer: CommandBuffer = CommandBufferImpl()
+
+    private var weakParent = WeakReference(parent)
+    val parent: RouterSimple? get() = weakParent.get()
+
+    private var weakChild = WeakReference<RouterSimple>(null)
+    val child: RouterSimple? get() = weakChild.get()
 
     override val topRouter: Router? get() = routerManager.top
 
@@ -78,6 +85,11 @@ open class RouterSimple(protected val callerKey: String?,
     protected val routerTabsByKey = mutableMapOf<String, RouterTabsImpl>()
     internal var rootPath: RoutePath? = null
         private set
+
+    init
+    {
+        parent?.weakChild = WeakReference(this)
+    }
 
     override fun route(url: String): Router?
     {
@@ -224,7 +236,7 @@ open class RouterSimple(protected val callerKey: String?,
         else
         {
             _closeAll()
-            returnRouter = parent.closeTo(key)
+            returnRouter = parent?.closeTo(key)
         }
 
         tryRepeatTopIfEmpty()
@@ -240,7 +252,7 @@ open class RouterSimple(protected val callerKey: String?,
         else
         {
             _closeAll()
-            parent.closeToTop()
+            parent?.closeToTop()
         }
 
         tryRepeatTopIfEmpty()
@@ -365,7 +377,7 @@ open class RouterSimple(protected val callerKey: String?,
             return chain
 
         if (parent != null)
-            return parent.scanForChain()
+            return parent?.scanForChain()
 
         return null
     }
@@ -383,7 +395,7 @@ open class RouterSimple(protected val callerKey: String?,
         }
 
         if (parent != null && recursive)
-            return parent.scanForPath(clazz)
+            return parent?.scanForPath(clazz)
 
         return null
     }
@@ -426,9 +438,10 @@ open class RouterSimple(protected val callerKey: String?,
 
     internal fun tryCloseMiddlewares(path: RoutePath)
     {
-        val router = if (viewsStack.isEmpty() && parent != null) parent else this
-        val prev = if (viewsStack.isEmpty() && parent != null)
-            parent.viewsStack.lastOrNull()?.let { parent.pathData[it.key] }
+        val _parent = parent
+        val router = if (viewsStack.isEmpty() && _parent != null) _parent else this
+        val prev = if (viewsStack.isEmpty() && _parent != null)
+            _parent.viewsStack.lastOrNull()?.let { _parent.pathData[it.key] }
         else
             viewsStack.lastOrNull()?.let { pathData[it.key] }
 
@@ -456,6 +469,9 @@ open class RouterSimple(protected val callerKey: String?,
     internal fun _closeTo(i: Int): Router?
     {
         closeAllNoStack()
+
+        if (i == (viewsStack.size - 1))
+            return this
 
         val deleteCount = viewsStack.size - i - 1
         for (j in 0 until deleteCount)
@@ -524,9 +540,9 @@ open class RouterSimple(protected val callerKey: String?,
                 if (isClosing)
                 {
                     return if (viewResult == null)
-                        parent!!.route(path, presentation)
+                        parent?.route(path, presentation)
                     else
-                        parent!!.routeInternal(null, path as RoutePathResult<Any>, RouteType.Simple, presentation, viewResult)
+                        parent?.routeInternal(null, path as RoutePathResult<Any>, RouteType.Simple, presentation, viewResult)
                 }
 
                 //if this route has singleTop flag try to find it in the hierarchy and route to the instance
@@ -680,7 +696,7 @@ open class RouterSimple(protected val callerKey: String?,
             return null
 
         val v = viewsStack.removeLast()
-        routerManager.pop()
+        routerManager.remove(v.key)
 
         if (viewsStack.isEmpty() && parent != null)
             isClosing = true

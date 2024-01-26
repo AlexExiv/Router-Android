@@ -95,5 +95,17 @@ class RouterTabDelegateImpl(val index: Int,
         else
             routerTabs?.closeTabsToTop()
 
+    override fun closeTabToTop(): RouterTab?
+    {
+        (routerTab?.child as? RouterTab)?.closeTabToTop()
+
+        if (routerTab?.parent is RouterTab)
+            routerTab?._closeAll()
+        else
+            routerTab?._closeTo(0)
+
+        return routerTab as RouterTab
+    }
+
     override fun tryRouteToTab(path: RoutePath): Router? = parent?.tryRouteToTab(path)
 }

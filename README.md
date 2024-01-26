@@ -290,7 +290,13 @@ An easy and convenient way to obtain results from the called screen. To use it, 
 you want to navigate. ViewResult subclasses are Fragments and ViewModels that implement the ViewResult interface.
 
 ```kotlin
-router.routeWithResult(this, ScreenPath()) { /* handle result here */ }
+router.routeWithResult(this, ScreenPath()) { 
+    /* handle result here */
+    
+    it.vr // reference to the object passed to the method
+    it.result // result
+    it.vr.onHandleResult(it.result)
+}
 ```
 
 In the result closure, you receive a data structure that has a reference to the ViewResult subclass passed to the method

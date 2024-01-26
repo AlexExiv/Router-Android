@@ -103,7 +103,7 @@ class RouterTabsImpl(val viewKey: String,
         return router.closeToTop()
     }
 
-    override operator fun get(index: Int): Router = tabRouters[index]!!
+    override operator fun get(index: Int): RouterTab = tabRouters[index]!! as RouterTab
 
     internal fun scanForPath(clazz: KClass<*>): ViewMeta?
     {

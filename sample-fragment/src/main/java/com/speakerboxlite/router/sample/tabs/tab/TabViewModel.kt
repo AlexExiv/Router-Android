@@ -27,7 +27,7 @@ class TabViewModel(val index: Int, app: Application): BaseViewModel(app)
 
     fun onNext()
     {
-        router.route(StepPath(0), Presentation.ModalNewTask)
+        router.route(StepPath(0))
     }
 
     fun onSingleton()
@@ -42,7 +42,7 @@ class TabViewModel(val index: Int, app: Application): BaseViewModel(app)
 
     fun onShowStepPresent()
     {
-        router.route(StepPath(0), Presentation.Modal)
+        router.route(StepPath(0), Presentation.ModalNewTask)
     }
 
     fun onResetAuth()

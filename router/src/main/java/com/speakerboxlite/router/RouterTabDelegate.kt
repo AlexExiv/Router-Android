@@ -14,6 +14,7 @@ interface RouterTabDelegate
     fun close(): Router?
     fun closeTo(key: String): Router?
     fun closeToTop(): Router?
+    fun closeTabToTop(): RouterTab?
 
     fun tryRouteToTab(path: RoutePath): Router?
 }

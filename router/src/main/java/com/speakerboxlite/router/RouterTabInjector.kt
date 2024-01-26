@@ -40,4 +40,6 @@ class RouterTabInjector(callerKey: String?,
     override fun superClose(): Router? = super.close()
 
     override fun createRouter(callerKey: String): Router = RouterTabInjector(callerKey, this, routeManager, routerManager, resultManager, componentProvider, index, weakRouterTabs.get()!!)
+
+    override fun closeTabToTop(): RouterTab? = delegate.closeTabToTop()
 }

@@ -61,5 +61,5 @@ interface RouterTabs
     /**
      *  Get router with index
      */
-    operator fun get(index: Int): Router
+    operator fun get(index: Int): RouterTab
 }

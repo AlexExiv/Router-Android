@@ -1,5 +1,6 @@
 package com.speakerboxlite.router.samplemixed.tabs
 
+import com.speakerboxlite.router.RouterTab
 import com.speakerboxlite.router.samplemixed.R
 import com.speakerboxlite.router.samplemixed.base.fragment.BaseViewModelTabFragment
 import com.speakerboxlite.router.samplemixed.databinding.FragmentTabsBinding
@@ -18,7 +19,9 @@ class TabsFragment: BaseViewModelTabFragment<TabsViewModel, FragmentTabsBinding>
             routerTabs.route(TABS_MAP[it.itemId]!!)
         }
 
-        dataBinding.bottomNavigationView.setOnItemReselectedListener {  }
+        dataBinding.bottomNavigationView.setOnItemReselectedListener {
+            routerTabs[TABS_MAP[it.itemId]!!].closeTabToTop()
+        }
 
         routerTabs.tabChangeCallback = {
             dataBinding.bottomNavigationView.selectedItemId = TABS_BACK_MAP[it]!!
