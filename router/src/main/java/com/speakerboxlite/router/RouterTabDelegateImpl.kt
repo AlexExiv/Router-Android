@@ -60,18 +60,24 @@ class RouterTabDelegateImpl(val index: Int,
             routerTab?.routeInternal(routerTab, path, RouteType.Simple, presentation, _result)
     }
 
-    override fun back(): Router? =
-        if (stackSize > 1 || parent is RouterTab)
+    override fun back(): Router?
+    {
+        val _routerTabs = routerTabs ?: return null
+
+        return if (stackSize > 1 || parent is RouterTab)
             superRouterTab?.superBack()
-        else if (routerTabs?.tabChangeCallback != null && index != 0)
+        else if (_routerTabs.backToFirst && index != 0)
         {
-            routerTabs?.showFirstTab()
-            routerTabs?.get(0)
+            check(_routerTabs.tabChangeCallback != null) { "You want to get back to the first tab but haven't specified tabChangeCallback" }
+            _routerTabs.showFirstTab()
+            _routerTabs.get(0)
         }
         else if (hasPreviousScreen)
-            routerTabs?.closeTabs()
+            _routerTabs.closeTabs()
         else
             routerTab
+    }
+
 
     override fun close(): Router? =
         if (stackSize > 1 || parent is RouterTab)

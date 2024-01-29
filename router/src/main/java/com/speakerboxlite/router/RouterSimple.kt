@@ -328,7 +328,7 @@ open class RouterSimple(protected val callerKey: String?,
             val tabProps = viewsStackById[key]!!.route.tabProps ?: error("Tab props has not been specified. Use Tab annotation to specify props")
             val _tabRouteInParent = tabRouteInParent ?: tabProps.tabRouteInParent
 
-            routerTabsByKey[key] = RouterTabsImpl(key, viewsStack.lastOrNull()?.key ?: "", this, _tabRouteInParent || !createReel, tabProps.tabUnique)
+            routerTabsByKey[key] = RouterTabsImpl(key, viewsStack.lastOrNull()?.key ?: "", this, tabProps.copy(tabRouteInParent = _tabRouteInParent || !createReel))
             if (createReel)
                 routerManager.pushReel(key, routerTabsByKey[key]!!)
         }

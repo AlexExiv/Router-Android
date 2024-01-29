@@ -13,6 +13,7 @@ enum class TabUnique
 @Retention(AnnotationRetention.SOURCE)
 annotation class Tabs(
     val tabRouteInParent: Boolean = false,
+    val backToFirst: Boolean = true,
     val tabUnique: TabUnique = TabUnique.Class)
 
 /*

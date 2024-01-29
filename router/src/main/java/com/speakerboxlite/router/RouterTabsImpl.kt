@@ -7,6 +7,7 @@ import com.speakerboxlite.router.command.CommandBuffer
 import com.speakerboxlite.router.command.CommandBufferImpl
 import com.speakerboxlite.router.command.CommandExecutor
 import com.speakerboxlite.router.controllers.RouteParamsGen
+import com.speakerboxlite.router.controllers.TabsProperties
 import java.lang.ref.WeakReference
 import java.util.UUID
 import kotlin.reflect.KClass
@@ -15,8 +16,12 @@ class RouterTabsImpl(val viewKey: String,
                      val callerKey: String,
                      router: RouterSimple,
                      val tabRouteInParent: Boolean,
+                     val backToFirst: Boolean,
                      val tabUnique: TabUnique): RouterTabs
 {
+    constructor(viewKey: String, callerKey: String, router: RouterSimple, tabsProperties: TabsProperties):
+            this(viewKey, callerKey, router, tabsProperties.tabRouteInParent, tabsProperties.backToFirst, tabsProperties.tabUnique)
+
     protected val weakRouter = WeakReference(router)
     protected val router: RouterSimple get() = weakRouter.get()!!
 
