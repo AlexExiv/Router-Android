@@ -2,6 +2,7 @@ package com.speakerboxlite.router
 
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.annotations.RouteType
+import com.speakerboxlite.router.annotations.TabUnique
 import java.lang.ref.WeakReference
 
 class RouterTabDelegateImpl(val index: Int,
@@ -30,7 +31,7 @@ class RouterTabDelegateImpl(val index: Int,
         val _presentation = if (route.routeType.isNoStackStructure) Presentation.Modal else (presentation ?: route.preferredPresentation)
 
         routerTab?.closeAllNoStack()
-        return if ((routerTabs?.presentInTab == true && stackSize > 0) || route.isTabs || _presentation == Presentation.Modal || _presentation == Presentation.ModalNewTask)
+        return if ((routerTabs?.tabRouteInParent == true && stackSize > 0) || _presentation == Presentation.Modal || _presentation == Presentation.ModalNewTask)
         {
             if (parent is RouterTab)
                 parent?.route(path, presentation)
@@ -48,7 +49,7 @@ class RouterTabDelegateImpl(val index: Int,
 
         routerTab?.closeAllNoStack()
         val _result = ViewResultData.create(viewResult, result)
-        return if ((routerTabs?.presentInTab == true && stackSize > 0) || route.isTabs || _presentation == Presentation.Modal || _presentation == Presentation.ModalNewTask)
+        return if ((routerTabs?.tabRouteInParent == true && stackSize > 0) || _presentation == Presentation.Modal || _presentation == Presentation.ModalNewTask)
         {
             if (parent is RouterTab)
                 parent?.routeWithResult(viewResult, path, presentation, result)
@@ -108,4 +109,6 @@ class RouterTabDelegateImpl(val index: Int,
     }
 
     override fun tryRouteToTab(path: RoutePath): Router? = parent?.tryRouteToTab(path)
+
+    override fun createRouterTabs(key: String): RouterTabs = routerTab!!.createRouterTabs(key, true, false)
 }

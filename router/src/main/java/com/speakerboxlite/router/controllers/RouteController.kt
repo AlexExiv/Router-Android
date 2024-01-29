@@ -26,7 +26,7 @@ abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterfa
 
     final override var isCompose: Boolean = false
     final override var routeType: RouteType = RouteType.Simple
-    final override var isTabs: Boolean = false
+    final override var tabProps: TabsProperties? = null
 
     final override var middlewares: List<MiddlewareController> = listOf()
 

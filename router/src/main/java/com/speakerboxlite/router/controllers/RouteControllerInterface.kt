@@ -18,7 +18,7 @@ interface RouteControllerInterface<Path: RoutePath, V: View>
     val isChain: Boolean
     val isCompose: Boolean
     val routeType: RouteType
-    val isTabs: Boolean
+    val tabProps: TabsProperties?
 
     val middlewares: List<MiddlewareController>
 

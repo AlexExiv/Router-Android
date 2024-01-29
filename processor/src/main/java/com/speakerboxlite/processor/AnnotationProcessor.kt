@@ -238,7 +238,11 @@ class AnnotationProcessor : AbstractProcessor()
             initBuilder.addStatement("${valName}.singleTop = true")
 
         if (tabsAnnotation != null)
-            initBuilder.addStatement("${valName}.isTabs = true")
+        {
+            val tabPropsClass = ClassName(CONTROLLERS_PACK, "TabsProperties")
+            val tabUniqueEnum = ClassName("$MAIN_ROUTER_PACK.annotations", "TabUnique")
+            initBuilder.addStatement("${valName}.tabProps = %T(${tabsAnnotation.tabRouteInParent}, %T.%L)", tabPropsClass, tabUniqueEnum, tabsAnnotation.tabUnique.toString())
+        }
 
         val animationMirror = try
             {

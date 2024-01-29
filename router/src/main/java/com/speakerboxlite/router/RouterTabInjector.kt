@@ -1,7 +1,6 @@
 package com.speakerboxlite.router
 
 import com.speakerboxlite.router.annotations.Presentation
-import com.speakerboxlite.router.annotations.RouteType
 import com.speakerboxlite.router.result.ResultManager
 import java.lang.ref.WeakReference
 
@@ -38,6 +37,8 @@ class RouterTabInjector(callerKey: String?,
     override fun superBack(): Router? = super.back()
 
     override fun superClose(): Router? = super.close()
+
+    override fun createRouterTabs(key: String): RouterTabs = delegate.createRouterTabs(key)
 
     override fun createRouter(callerKey: String): Router = RouterTabInjector(callerKey, this, routeManager, routerManager, resultManager, componentProvider, index, weakRouterTabs.get()!!)
 

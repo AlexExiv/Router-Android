@@ -69,7 +69,7 @@ class RouterZombie : Router, RouterLocal
 
     override fun createRouterLocal(key: String): RouterLocal = RouterZombie()
 
-    override fun createRouterTabs(key: String, presentInTab: Boolean): RouterTabs = RouterTabsZombie()
+    override fun createRouterTabs(key: String): RouterTabs = RouterTabsZombie()
 
     override fun removeView(key: String)
     {

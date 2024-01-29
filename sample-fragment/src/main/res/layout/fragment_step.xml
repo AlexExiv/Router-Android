@@ -65,6 +65,12 @@
                 <Button
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:text="Show Tab"
+                    android:onClick="@{() -> viewmodel.onShowTab()}"/>
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:text="Replace"
                     android:onClick="@{() -> viewmodel.onReplace()}"/>
 

@@ -156,7 +156,7 @@ interface Router
      * @param presentInTab
      * @return A new tabs router instance.
      */
-    fun createRouterTabs(key: String, presentInTab: Boolean = false): RouterTabs
+    fun createRouterTabs(key: String): RouterTabs
 
     /**
      * Removes a view from the views stack and resets all connections.

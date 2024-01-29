@@ -69,7 +69,7 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
 
     override fun createRouterLocal(key: String): RouterLocal = router!!.createRouterLocal(key)
 
-    override fun createRouterTabs(key: String, presentInTab: Boolean): RouterTabs
+    override fun createRouterTabs(key: String): RouterTabs
     {
         TODO("Local routers can't have tabs router")
     }

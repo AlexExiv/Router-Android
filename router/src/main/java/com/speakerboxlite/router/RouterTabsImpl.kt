@@ -1,6 +1,7 @@
 package com.speakerboxlite.router
 
 import com.speakerboxlite.router.annotations.Presentation
+import com.speakerboxlite.router.annotations.TabUnique
 import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
 import com.speakerboxlite.router.command.CommandBufferImpl
@@ -13,7 +14,8 @@ import kotlin.reflect.KClass
 class RouterTabsImpl(val viewKey: String,
                      val callerKey: String,
                      router: RouterSimple,
-                     val presentInTab: Boolean): RouterTabs
+                     val tabRouteInParent: Boolean,
+                     val tabUnique: TabUnique): RouterTabs
 {
     protected val weakRouter = WeakReference(router)
     protected val router: RouterSimple get() = weakRouter.get()!!
@@ -50,7 +52,7 @@ class RouterTabsImpl(val viewKey: String,
             routerTab.route(path, Presentation.Push)
 
             tabRouters[index] = routerTab as RouterSimple
-            tabRouters[index]!!.bindRouter(viewKey)
+            router.routerManager[viewKey] = tabRouters[index]!!
             tabRoutersKeys[index] = viewKey
 
             viewKey
@@ -122,9 +124,9 @@ class RouterTabsImpl(val viewKey: String,
         //tabRoutes.values.forEach { it.release() }
     }
 
-    internal fun containsPath(clazz: KClass<*>): Int?
+    internal fun containsPath(path: RoutePath): Int?
     {
-        val i = tabRouters.values.indexOfFirst { it.viewsStack.isNotEmpty() && it.viewsStack.first()::class == clazz }
+        val i = tabRouters.values.indexOfFirst { it.testPathUnique(0, path, tabUnique) }
         return if (i == -1) null else i
     }
 

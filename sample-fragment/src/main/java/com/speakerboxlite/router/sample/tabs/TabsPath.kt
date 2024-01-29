@@ -5,13 +5,9 @@ import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.annotations.Route
 import com.speakerboxlite.router.annotations.Tabs
 import com.speakerboxlite.router.sample.base.RouteControllerApp
-import com.speakerboxlite.router.sample.base.middlewares.MiddlewareAuth
-import com.speakerboxlite.router.sample.base.middlewares.MiddlewarePro
 
 class TabsPath: RoutePath
 
 @Tabs
-@Route(presentation = Presentation.ModalNewTask)
-//@MiddlewareAuth
-//@MiddlewarePro
+@Route(presentation = Presentation.Modal)
 abstract class TabsRouteController: RouteControllerApp<TabsPath, TabsViewModel, TabsFragment>()

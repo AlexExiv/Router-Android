@@ -45,6 +45,11 @@ class StepViewModel(val step: Int, app: Application): BaseViewModel(app)
         router.route(TabPath1())
     }
 
+    fun onShowTab()
+    {
+        router.route(TabPath1())
+    }
+
     fun onReplace()
     {
         router.replace(ReplacePath(step))

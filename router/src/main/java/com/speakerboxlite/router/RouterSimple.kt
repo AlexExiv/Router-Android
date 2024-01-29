@@ -3,6 +3,7 @@ package com.speakerboxlite.router
 import android.util.Log
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.annotations.RouteType
+import com.speakerboxlite.router.annotations.TabUnique
 import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
 import com.speakerboxlite.router.command.CommandBufferImpl
@@ -318,12 +319,18 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun createRouterLocal(key: String): RouterLocal = RouterLocalImpl(key, this)
 
-    override fun createRouterTabs(key: String, presentInTab: Boolean): RouterTabs
+    override fun createRouterTabs(key: String): RouterTabs = createRouterTabs(key, null, true)
+
+    internal fun createRouterTabs(key: String, tabRouteInParent: Boolean? = null, createReel: Boolean): RouterTabs
     {
         if (routerTabsByKey[key] == null)
         {
-            routerTabsByKey[key] = RouterTabsImpl(key, viewsStack.lastOrNull()?.key ?: "", this, presentInTab)
-            routerManager.pushReel(key, routerTabsByKey[key]!!)
+            val tabProps = viewsStackById[key]!!.route.tabProps ?: error("Tab props has not been specified. Use Tab annotation to specify props")
+            val _tabRouteInParent = tabRouteInParent ?: tabProps.tabRouteInParent
+
+            routerTabsByKey[key] = RouterTabsImpl(key, viewsStack.lastOrNull()?.key ?: "", this, _tabRouteInParent || !createReel, tabProps.tabUnique)
+            if (createReel)
+                routerManager.pushReel(key, routerTabsByKey[key]!!)
         }
 
         return routerTabsByKey[key]!!
@@ -564,7 +571,7 @@ open class RouterSimple(protected val callerKey: String?,
         val tabRouter = routerTabsByKey[viewsStack.lastOrNull()?.key]
         if (tabRouter != null)
         {
-            val i = tabRouter.containsPath(path::class)
+            val i = tabRouter.containsPath(path)
             if (i != null)
             {
                 tabRouter.route(i)
@@ -573,6 +580,19 @@ open class RouterSimple(protected val callerKey: String?,
         }
 
         return null
+    }
+
+    internal fun testPathUnique(i: Int, path: RoutePath, tabUnique: TabUnique): Boolean
+    {
+        val first = if (i < viewsStack.size) viewsStack[i] else return false
+        val tabPath = pathData[first.key] ?: return false
+
+        return when (tabUnique)
+        {
+            TabUnique.None -> false
+            TabUnique.Class -> tabPath::class == path::class
+            TabUnique.Equal -> tabPath == path
+        }
     }
 
     internal fun doDialogRoute(route: RouteControllerInterface<RoutePath, *>, path: RoutePath, viewResult: ViewResultData?): Router?
@@ -644,7 +664,7 @@ open class RouterSimple(protected val callerKey: String?,
                 commandBuffer.apply(Command.Push(path, view, null))
             }
 
-            returnRouter//?.also { routerManager.push(key, it) }
+            returnRouter
         }
         else
         {
