@@ -23,7 +23,7 @@ class RouterStackImpl: RouterStack
     {
         if (router is RouterTab)
         {
-            val reel = stack.last() as? RouterStackReel ?: error("The last item is not a Reel")
+            val reel = stack.firstOrNull { it is RouterStackReel && it.routerTabs == router.routerTabs } ?: error("Try to add RouterTab before its RouterTabs has pushed the Reel")
             reel.push(viewKey, router)
         }
         else
@@ -35,8 +35,9 @@ class RouterStackImpl: RouterStack
         if (stack.count { it.viewKey == viewKey } == 2)
             return
 
-        check(stack.last().viewKey == viewKey) { "Try to add Reel before the Root view" }
-        stack.add(RouterStackReel(viewKey))
+        val index = stack.indexOfLast { it.viewKey == viewKey }
+        check(index != -1) { "Try to add Reel before the Root view" }
+        stack.add(index + 1, RouterStackReel(viewKey, routerTabs))
     }
 
     override fun switchReel(viewKey: String, index: Int)
@@ -99,7 +100,8 @@ class RouterStackSingle(override val viewKey: String,
     override fun remove(key: String): Boolean = false
 }
 
-class RouterStackReel(override val viewKey: String): RouterStackEntry
+class RouterStackReel(override val viewKey: String,
+                      val routerTabs: RouterTabs): RouterStackEntry
 {
     override val top: Router? get() = if (currentIndex == -1) null else stacks[currentIndex]?.lastOrNull()?.top
 
@@ -110,17 +112,10 @@ class RouterStackReel(override val viewKey: String): RouterStackEntry
     {
         if (router is RouterTab)
         {
-            val index = when (router)
-            {
-                is RouterTabSimple -> router.index
-                is RouterTabInjector -> router.index
-                else -> 0
-            }
+            if (stacks[router.index] == null)
+                stacks[router.index] = mutableListOf()
 
-            if (stacks[index] == null)
-                stacks[index] = mutableListOf()
-
-            stacks[index]!!.add(RouterStackSingle(viewKey, router))
+            stacks[router.index]!!.add(RouterStackSingle(viewKey, router))
 
             return true
         }

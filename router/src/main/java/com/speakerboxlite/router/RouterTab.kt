@@ -8,6 +8,11 @@ interface RouterTab: Router
     val index: Int
 
     /**
+     *
+     */
+    val routerTabs: RouterTabs
+
+    /**
      * Closes all screens inside this tab up to the top screen.
      */
     fun closeTabToTop(): RouterTab?

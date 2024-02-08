@@ -17,6 +17,8 @@ class RouterTabInjector(callerKey: String?,
 
     private val delegate: RouterTabDelegate = RouterTabDelegateImpl(index, routerTabs, this, this, parent)
 
+    override val routerTabs: RouterTabs get() = weakRouterTabs.get()!!
+
     override val hasPreviousScreen: Boolean get() = delegate.hasPreviousScreen
 
     override fun route(path: RoutePath, presentation: Presentation?): Router? = delegate.route(path, presentation)
