@@ -192,12 +192,18 @@ open class RouterSimple(protected val callerKey: String?,
     {
         resultManager.unbind(key)
         pathData.remove(key)
+        routerTabsByKey[key]?.releaseRouters()
         routerTabsByKey.remove(key)
         routerManager.remove(key)
         unbindRouter(key)
 /*
         if (isClosing)
             releaseRouter()*/
+    }
+
+    internal fun releaseRouter()
+    {
+        viewsStack.forEach { unbind(it.key) }
     }
 
     override fun closeTo(key: String): Router?

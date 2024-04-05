@@ -13,6 +13,7 @@ import com.speakerboxlite.router.sample.pro.ProViewModel
 import com.speakerboxlite.router.sample.simple.component.SimpleComponentFragment
 import com.speakerboxlite.router.sample.step.StepViewModel
 import com.speakerboxlite.router.sample.step.replace.ReplaceViewModel
+import com.speakerboxlite.router.sample.subtabs.SubTabsViewModel
 import com.speakerboxlite.router.sample.tabs.TabsViewModel
 import com.speakerboxlite.router.sample.tabs.tab.TabViewModel
 import com.speakerboxlite.router.sample.theme.ThemeViewModel
@@ -36,6 +37,7 @@ interface AppComponent: com.speakerboxlite.router.controllers.Component
 
     fun inject(vm: TabsViewModel)
     fun inject(vm: TabViewModel)
+    fun inject(vm: SubTabsViewModel)
 
     fun inject(vm: DialogViewModel)
 

@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.sample.base.BaseViewModel
 import com.speakerboxlite.router.sample.step.replace.ReplacePath
+import com.speakerboxlite.router.sample.subtabs.SubTabsPath
 import com.speakerboxlite.router.sample.tabs.TabsPath
 import com.speakerboxlite.router.sample.tabs.tab.TabPath1
 
@@ -63,6 +64,11 @@ class StepViewModel(val step: Int, app: Application): BaseViewModel(app)
     fun onShowTabs()
     {
         router.route(TabsPath())
+    }
+
+    fun onShowLocalTabs()
+    {
+        router.route(SubTabsPath())
     }
 
     fun onCloseAndShow()

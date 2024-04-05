@@ -14,21 +14,18 @@ class RouterManagerImpl: RouterManager, RouterStack by RouterStackImpl()
 
     override fun set(key: String, value: Router?)
     {
-        //if (value == null)
-            //routers.remove(key)
-        //else
-
         if (value != null)
         {
             routers[key] = value
             if ((value is RouterSimple) && (value.parent == null))
                 rootRouter = value
 
-            Log.d("RouterManager", "Bound routers: ${routerByView.size}")
+            Log.d("RouterManager", "Bound routers: ${routers.size}")
         }
         else
         {
-            Log.d("RouterManager", "Bound routers after unbind: ${routerByView.size}")
+            routers.remove(key)
+            Log.d("RouterManager", "Bound routers after unbind: ${routers.size}")
         }
     }
 

@@ -12,6 +12,9 @@ enum class TabUnique
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.SOURCE)
 annotation class Tabs(
+    /**
+     * If true then any route operation will be executed in the parent router
+     * */
     val tabRouteInParent: Boolean = false,
     val backToFirst: Boolean = true,
     val tabUnique: TabUnique = TabUnique.Class)

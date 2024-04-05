@@ -10,11 +10,8 @@ import com.speakerboxlite.router.result.RouterResultProvider
 import java.lang.ref.WeakReference
 import java.util.UUID
 
-class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
+open class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
 {
-    val weakRouter = WeakReference(router)
-    val router: RouterSimple? get() = weakRouter.get()
-
     override val topRouter: Router? get() = router?.topRouter
 
     override val hasPreviousScreen: Boolean get() = router!!.hasPreviousScreen
@@ -24,6 +21,10 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
         set(value) { router?.lockBack = value }
 
     protected val commandBuffer: CommandBuffer = CommandBufferImpl()
+    protected val routerTabsList = mutableListOf<RouterTabsLocal>()
+
+    val weakRouter = WeakReference(router)
+    val router: RouterSimple? get() = weakRouter.get()
 
     override fun route(url: String): Router? = router?.route(url)
 
@@ -69,13 +70,15 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
 
     override fun createRouterLocal(key: String): RouterLocal = router!!.createRouterLocal(key)
 
-    override fun createRouterTabs(key: String): RouterTabs
-    {
-        TODO("Local routers can't have tabs router")
-    }
+    override fun createRouterTabs(key: String): RouterTabs =
+        RouterTabsLocal(key, router!!)
+            .also { routerTabsList.add(it) }
 
     override fun removeView(key: String)
     {
+        if (viewKey == key)
+            routerTabsList.forEach { it.releaseRouters() }
+
         router?.removeView(key)
     }
 
@@ -103,5 +106,16 @@ class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
         val key = routeInContainer(containerId, path)
         router?.bindResult(key, ViewResultData.create(viewResult, result))
         return key
+    }
+
+    internal fun routeInternal(path: RoutePath)
+    {
+        val router = router ?: return
+        val route = router.findRoute(path)
+        val view = route.onCreateView(path)
+        view.viewKey = UUID.randomUUID().toString()
+        router.setPath(view.viewKey, path)
+        router.routerManager[view.viewKey] = this
+        commandBuffer.apply(Command.Push(path, view, null))
     }
 }

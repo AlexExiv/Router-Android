@@ -141,6 +141,7 @@ fun ComposeNavigator(
 
         DisposableEffect(navigator) 
         {
+            navigator.onDisposeCallback = OnDisposeCallback { key -> router.removeView(key) }
             router.bindExecutor(executorFactory.onCreate(navigator))
             
             onDispose {
@@ -156,6 +157,11 @@ fun ComposeNavigator(
     }
 }
 
+fun interface OnDisposeCallback
+{
+    fun onDispose(key: String)
+}
+
 class ComposeNavigator(val key: String,
                        val stateHolder: SaveableStateHolder,
                        val viewModelProvider: RouterViewModelStoreProvider?,
@@ -169,6 +175,8 @@ class ComposeNavigator(val key: String,
 
     var isAnimating: Boolean = false
         private set
+
+    var onDisposeCallback: OnDisposeCallback? = null
 
     init
     {
@@ -260,7 +268,10 @@ class ComposeNavigator(val key: String,
 
     protected fun onDisposePopping()
     {
-        poppingEntries?.forEach { it.onDispose() }
+        poppingEntries?.forEach {
+            it.onDispose()
+            onDisposeCallback?.onDispose(it.id)
+        }
         poppingEntries = null
     }
 

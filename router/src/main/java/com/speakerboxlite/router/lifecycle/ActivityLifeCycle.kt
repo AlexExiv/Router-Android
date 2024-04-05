@@ -28,7 +28,7 @@ open class ActivityLifeCycle(val routerManager: RouterManager): Application.Acti
             {
                 p0.router = RouterZombie()
 
-                if (!routerManager.isAppRestarting)
+                if (!routerManager.isAppRestarting && !p0.isFinishing)
                 {
                     (routerManager as? RouterManagerImpl)?.resetToTop()
                     p0.restartApp()

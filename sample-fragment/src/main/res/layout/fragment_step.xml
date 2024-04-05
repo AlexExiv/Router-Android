@@ -77,8 +77,14 @@
                 <Button
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="hsow Tabs"
+                    android:text="Show Tabs"
                     android:onClick="@{() -> viewmodel.onShowTabs()}"/>
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Show Sub Tabs"
+                    android:onClick="@{() -> viewmodel.onShowLocalTabs()}"/>
 
                 <Button
                     android:layout_width="match_parent"

@@ -85,7 +85,7 @@ class RouterTabsImpl(val viewKey: String,
 
     fun closeTabs(): Router?
     {
-        releaseRouters()
+        //releaseRouters()
         return router.close()
     }
 
@@ -106,7 +106,7 @@ class RouterTabsImpl(val viewKey: String,
 
     internal fun closeTabsToTop(): Router?
     {
-        releaseRouters()
+        //releaseRouters()
         return router.closeToTop()
     }
 
@@ -126,7 +126,10 @@ class RouterTabsImpl(val viewKey: String,
 
     internal fun releaseRouters()
     {
-        //tabRoutes.values.forEach { it.release() }
+        tabRoutersKeys.forEach {
+            tabRouters[it.key]!!.releaseRouter()
+            router.routerManager[it.value] = null
+        }
     }
 
     internal fun containsPath(path: RoutePath): Int?

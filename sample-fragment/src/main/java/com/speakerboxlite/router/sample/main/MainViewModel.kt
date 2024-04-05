@@ -11,6 +11,7 @@ import com.speakerboxlite.router.sample.shared.SharedPath
 import com.speakerboxlite.router.sample.simple.SimplePath
 import com.speakerboxlite.router.sample.simple.component.SimpleComponentPath
 import com.speakerboxlite.router.sample.step.StepPath
+import com.speakerboxlite.router.sample.subtabs.SubTabsPath
 import com.speakerboxlite.router.sample.tabs.TabsPath
 import com.speakerboxlite.router.sample.theme.ThemePath
 
@@ -71,5 +72,10 @@ class MainViewModel(app: Application): BaseViewModel(app)
     fun onShowTheme()
     {
         router.route(ThemePath(), Presentation.ModalNewTask)
+    }
+
+    fun onShowLocalTabs()
+    {
+        router.route(SubTabsPath())
     }
 }

@@ -46,7 +46,7 @@ open class FragmentLifeCycle(private val routerManager: RouterManager,
             {
                 f.router = RouterZombie()
 
-                if (!routerManager.isAppRestarting)
+                if (!routerManager.isAppRestarting && f.activity?.isFinishing != true)
                 {
                     (routerManager as? RouterManagerImpl)?.resetToTop()
                     f.requireActivity().restartApp()
@@ -66,7 +66,7 @@ open class FragmentLifeCycle(private val routerManager: RouterManager,
             {
                 f.router = RouterZombie()
 
-                if (!routerManager.isAppRestarting)
+                if (!routerManager.isAppRestarting && f.activity?.isFinishing != true)
                 {
                     (routerManager as? RouterManagerImpl)?.resetToTop()
                     f.requireActivity().restartApp()
@@ -169,7 +169,8 @@ open class FragmentLifeCycle(private val routerManager: RouterManager,
 
     override fun onFragmentDestroyed(fm: FragmentManager, f: Fragment)
     {
-
+        if (f is ViewFragment)
+            f.localRouter
     }
 
     override fun onFragmentDetached(fm: FragmentManager, f: Fragment)
