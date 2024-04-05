@@ -116,6 +116,10 @@ open class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLoc
         view.viewKey = UUID.randomUUID().toString()
         router.setPath(view.viewKey, path)
         router.routerManager[view.viewKey] = this
+
+        if (router is RouterInjector)
+            router.connectComponent(viewKey, view.viewKey)
+
         commandBuffer.apply(Command.Push(path, view, null))
     }
 }
