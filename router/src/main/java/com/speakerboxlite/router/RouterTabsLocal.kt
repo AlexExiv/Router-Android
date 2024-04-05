@@ -41,7 +41,7 @@ class RouterTabsLocal(val viewKey: String, router: RouterSimple): RouterTabs
         val viewKey = if (tabRoutersKeys[index] == null || recreate)
         {
             val viewKey = UUID.randomUUID().toString()
-            val routerTab = RouterTabLocal(viewKey, router, index, this, path)
+            val routerTab = RouterTabLocal(this.viewKey, router, index, this, path)
 
             tabRouters[index] = routerTab
             router.routerManager[viewKey] = tabRouters[index]!!
