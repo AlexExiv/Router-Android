@@ -51,14 +51,7 @@ open class CommandExecutorFragment(val activity: FragmentActivity,
 
     override fun execute(command: Command)
     {
-        try
-        {
-            activity.runOnUiThread { _execute(command) }
-        }
-        catch (e: IllegalStateException)
-        {
-            activity.window.decorView.post { _execute(command) }
-        }
+        _execute(command)
     }
 
     override fun sync(items: List<String>): List<String>

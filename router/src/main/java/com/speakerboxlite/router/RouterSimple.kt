@@ -15,6 +15,7 @@ import com.speakerboxlite.router.controllers.RouteControllerViewModelProvider
 import com.speakerboxlite.router.controllers.RouteParamsGen
 import com.speakerboxlite.router.exceptions.ImpossibleRouteException
 import com.speakerboxlite.router.exceptions.RouteNotFoundException
+import com.speakerboxlite.router.ext.checkMainThread
 import com.speakerboxlite.router.result.ResultManager
 import com.speakerboxlite.router.result.RouterResultProvider
 import com.speakerboxlite.router.result.RouterResultProviderImpl
@@ -524,6 +525,7 @@ open class RouterSimple(protected val callerKey: String?,
     {
         Log.i("Router", "Start route with path: ${path::class}")
 
+        checkMainThread("Navigation between screen only possible on the main thread")
         val route = findRoute(path)
 
         //try to check all middlewares
