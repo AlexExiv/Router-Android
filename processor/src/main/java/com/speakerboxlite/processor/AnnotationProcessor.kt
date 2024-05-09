@@ -148,12 +148,14 @@ class AnnotationProcessor : AbstractProcessor()
                 processAnnotation(it, initBuilder, processorManager, processorMiddleware)
             }
 
-            val routerClass = if (processorManager.hadComponent)
+            if (processorManager.hadComponent || processorMiddleware.hadComponent)
             {
                 initBuilder.addParameter("component", ANY)
                 initBuilder.addStatement("this.component = component")
-                ClassName(MAIN_ROUTER_PACK, "RouterInjector")
             }
+
+            val routerClass = if (processorManager.hadComponent)
+                ClassName(MAIN_ROUTER_PACK, "RouterInjector")
             else
                 ClassName(MAIN_ROUTER_PACK, "RouterSimple")
 
@@ -305,8 +307,6 @@ class AnnotationProcessor : AbstractProcessor()
     {
         val MAIN_ROUTER_PACK = "com.speakerboxlite.router"
         val CONTROLLERS_PACK = "com.speakerboxlite.router.controllers"
-
-        val MIDDLEWARE_CLASSES = listOf("MiddlewareController", "MiddlewareControllerComponent")
 
         const val CREATE_INJECTOR = "onCreateInjector"
 

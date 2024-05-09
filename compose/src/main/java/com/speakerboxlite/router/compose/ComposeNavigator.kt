@@ -275,7 +275,7 @@ class ComposeNavigator(val key: String,
         poppingEntries = null
     }
 
-    fun getStackEntriesSaveable() = items.map { StackEntrySaveable(it.view, it.animationController, it.isRemoving) }
+    fun getStackEntriesSaveable() = items.map { StackEntrySaveable(it) }
 }
 
 @Composable

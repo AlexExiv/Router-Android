@@ -12,7 +12,7 @@ class ResultViewModel(app: Application): BaseViewModel(app)
 
     fun onSend()
     {
-        resultProvider.send(text)
         router.close()
+        resultProvider.send(text)
     }
 }

@@ -34,7 +34,8 @@ class AndroidComposeViewModelProvider(val app: Application,
 inline fun <reified VM: com.speakerboxlite.router.ViewModel> routerViewModel(
     view: ViewCompose,
     router: Router? = null,
-    viewModelStoreOwner: ViewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) { "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner" }): VM
+    viewModelStoreOwner: ViewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) { "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner" },
+    modelProvider: RouterModelProvider = AndroidComposeViewModelProvider(LocalContext.current.applicationContext as Application, viewModelStoreOwner)): VM
 {
     val _router = if (router == null)
     {
@@ -44,8 +45,7 @@ inline fun <reified VM: com.speakerboxlite.router.ViewModel> routerViewModel(
     else
         router
 
-    val app = LocalContext.current.applicationContext as Application
-    val vm: VM = _router.provideViewModel(view, AndroidComposeViewModelProvider(app, viewModelStoreOwner))
+    val vm: VM = _router.provideViewModel(view, modelProvider)
     _router.onPrepareView(view, vm)
 
     DisposableEffect(view.viewKey)
