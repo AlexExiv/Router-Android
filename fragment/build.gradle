@@ -34,10 +34,10 @@ dependencies {
     implementation project(':router')
     implementation project(':annotations')
 
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation "androidx.fragment:fragment-ktx:1.6.1"
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.11.0'
+    implementation "androidx.core:core-ktx:$kotlin_core"
+    implementation "androidx.fragment:fragment-ktx:$fragment_ktx"
+    implementation "androidx.appcompat:appcompat:$appcompat"
+    implementation "com.google.android.material:material:$android_material"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

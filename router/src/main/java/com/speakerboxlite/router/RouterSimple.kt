@@ -576,14 +576,15 @@ open class RouterSimple(protected val callerKey: String?,
 
     internal open fun tryRouteToTab(path: RoutePath): Router?
     {
-        val tabRouter = routerTabsByKey[viewsStack.lastOrNull()?.key]
-        if (tabRouter != null)
+        val tabsRouter = routerTabsByKey[viewsStack.lastOrNull()?.key]
+        if (tabsRouter != null)
         {
-            val i = tabRouter.containsPath(path)
+            val i = tabsRouter.containsPath(path)
             if (i != null)
             {
-                tabRouter.route(i)
-                return tabRouter[i]
+                tabsRouter.route(i)
+                tabsRouter[i].closeTabToTop()
+                return tabsRouter[i]
             }
         }
 

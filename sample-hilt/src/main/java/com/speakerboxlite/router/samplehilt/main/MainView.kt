@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import com.speakerboxlite.router.compose.LocalRouter
 import com.speakerboxlite.router.compose.currentOrThrow
 import com.speakerboxlite.router.samplehilt.base.BaseViewCompose
-import com.speakerboxlite.router.samplehilt.base.routerHiltViewModel
+import com.speakerboxlite.router.composehilt.routerHiltViewModel
 import com.speakerboxlite.router.samplehilt.nohilt.NoHiltPath
 import com.speakerboxlite.router.samplehilt.step.StepAuthPath
 import com.speakerboxlite.router.samplehilt.step.StepPath

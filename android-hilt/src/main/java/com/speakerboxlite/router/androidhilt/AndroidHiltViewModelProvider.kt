@@ -1,27 +1,25 @@
-package com.speakerboxlite.router.samplehilt.base
+package com.speakerboxlite.router.androidhilt
 
 import android.app.Application
 import android.content.Context
 import android.content.ContextWrapper
 import androidx.activity.ComponentActivity
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.HasDefaultViewModelProviderFactory
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.CreationExtras
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterModelProvider
-import com.speakerboxlite.router.compose.AndroidViewModelFactory
-import com.speakerboxlite.router.compose.ViewCompose
-import com.speakerboxlite.router.compose.routerViewModel
 import dagger.hilt.android.internal.lifecycle.HiltViewModelFactory
 import dagger.hilt.android.lifecycle.withCreationCallback
 
+class AndroidViewModelFactory<T>(val app: Application,
+                                 val creator: (app: Application) -> T) : ViewModelProvider.Factory
+{
+    override fun <T: ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T = creator(app) as T
+}
+
 class AndroidHiltViewModelProvider(val context: Context,
-                                   val app: Application,
                                    val viewModelStoreOwner: ViewModelStoreOwner): RouterModelProvider
 {
     inline fun <reified VM: ViewModel> getViewModel(): VM
@@ -47,7 +45,7 @@ class AndroidHiltViewModelProvider(val context: Context,
     }
 
     inline fun <reified VM: ViewModel> getViewModelApp(noinline creator: ((app: Application) -> VM)): VM =
-        ViewModelProvider(viewModelStoreOwner, AndroidViewModelFactory(app, creator))[VM::class.java]
+        ViewModelProvider(viewModelStoreOwner, AndroidViewModelFactory(context.applicationContext as Application, creator))[VM::class.java]
 
     fun getActivity(): ComponentActivity
     {
@@ -68,23 +66,5 @@ class AndroidHiltViewModelProvider(val context: Context,
         if (viewModelStoreOwner is HasDefaultViewModelProviderFactory)
             viewModelStoreOwner.defaultViewModelProviderFactory
         else
-            ViewModelProvider.AndroidViewModelFactory(app)
-}
-
-@Composable
-inline fun <reified VM: com.speakerboxlite.router.ViewModel> routerHiltViewModel(
-    view: ViewCompose,
-    router: Router? = null,
-    viewModelStoreOwner: ViewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) { "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner" }): VM
-{
-    val modelProvider = AndroidHiltViewModelProvider(
-        LocalContext.current,
-        LocalContext.current.applicationContext as Application,
-        viewModelStoreOwner)
-
-    return routerViewModel(
-        view = view,
-        router = router,
-        viewModelStoreOwner = viewModelStoreOwner,
-        modelProvider = modelProvider)
+            ViewModelProvider.AndroidViewModelFactory(context.applicationContext as Application)
 }

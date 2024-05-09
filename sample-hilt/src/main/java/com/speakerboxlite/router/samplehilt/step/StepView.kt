@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import com.speakerboxlite.router.samplehilt.base.BaseViewCompose
-import com.speakerboxlite.router.samplehilt.base.routerHiltViewModel
+import com.speakerboxlite.router.composehilt.routerHiltViewModel
 
 class StepView: BaseViewCompose()
 {

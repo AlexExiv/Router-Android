@@ -41,21 +41,20 @@ dependencies {
     implementation project(':fragment')
     implementation project(':compose')
 
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation "androidx.activity:activity-ktx:1.8.2"
-    implementation "androidx.fragment:fragment-ktx:1.6.2"
-    implementation 'com.google.android.material:material:1.11.0'
+    implementation "androidx.core:core-ktx:$kotlin_core"
+    implementation "androidx.appcompat:appcompat:$appcompat"
+    implementation "androidx.activity:activity-ktx:$activity_ktx"
+    implementation "androidx.fragment:fragment-ktx:$fragment_ktx"
 
     implementation "androidx.compose.runtime:runtime:$compose_version"
     implementation "androidx.compose.material:material:$compose_version"
     implementation "androidx.compose.runtime:runtime-saveable-android:$compose_version"
 
-    implementation platform('androidx.compose:compose-bom:2023.03.00')
+    implementation platform("androidx.compose:compose-bom:$compose_bom")
     implementation "androidx.compose.ui:ui:$compose_version"
     implementation "androidx.compose.foundation:foundation:$compose_version"
     implementation "androidx.compose.ui:ui-viewbinding:$compose_version"
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2'
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$compose_lifecycle"
 
     testImplementation 'junit:junit:4.13.2'
 
