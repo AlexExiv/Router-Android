@@ -18,44 +18,49 @@ class MiddlewareProcessor(val roundEnv: RoundEnvironment)
     private var middlewares = listOf<MiddlewareController>()
     private var middlewaresGlobal = listOf<MiddlewareController>()
 
+    var hadComponent: Boolean = false
+        private set
+
     fun prepareMiddlewares(): List<MiddlewareController>
     {
-        val middlewares = roundEnv.getElementsAnnotatedWith(Middleware::class.java)
+        val middlewareAnnots = roundEnv.getElementsAnnotatedWith(Middleware::class.java)
         val middlewaresCntrls = mutableListOf<MiddlewareController>()//implementations of middleware controllers
 
-        for (m in middlewares)
+        for (m in middlewareAnnots)
         {
-            val at = m as TypeElement
-            val mcs = roundEnv.getElementsAnnotatedWith(at)
+            val annotation = m as TypeElement
+            val mcs = roundEnv.getElementsAnnotatedWith(annotation)
                 .mapNotNull { it as? TypeElement }
-                .filter { it.hasAnyParent(AnnotationProcessor.MIDDLEWARE_CLASSES, true) }
+                .filter { it.hasAnyParent(MIDDLEWARE_CLASSES, true) }
 
             when (mcs.size)
             {
                 0 -> {}
-                1 -> middlewaresCntrls.add(MiddlewareController(at, mcs[0], mcs[0].asClassName(), "mid_${mcs[0].simpleName.toString().lowercase()}", middlewaresCntrls.size))
+                1 -> middlewaresCntrls.add(MiddlewareController(annotation, mcs[0], mcs[0].asClassName(), "mid_${mcs[0].simpleName.toString().lowercase()}", middlewaresCntrls.size))
                 else -> {}
             }
         }
 
         this.middlewares = middlewaresCntrls.toList()
 
-        val globalMiddlewares = roundEnv.getElementsAnnotatedWith(GlobalMiddleware::class.java)
+        val globalMiddlewaresCntrls = roundEnv.getElementsAnnotatedWith(GlobalMiddleware::class.java)
         middlewaresCntrls.clear()
 
-        for (m in globalMiddlewares)
+        for (m in globalMiddlewaresCntrls)
         {
-            val at = m as TypeElement
-            if (!at.hasAnyParent(AnnotationProcessor.MIDDLEWARE_CLASSES, true))
+            val cntrl = m as TypeElement
+            if (!cntrl.hasAnyParent(MIDDLEWARE_CLASSES, true))
                 continue
 
-            val a = m.getAnnotation(GlobalMiddleware::class.java)
-            middlewaresCntrls.add(MiddlewareController(at, at, at.asClassName(), "mid_${at.simpleName.toString().lowercase()}", a.order))
+            val annot = m.getAnnotation(GlobalMiddleware::class.java)
+            middlewaresCntrls.add(MiddlewareController(cntrl, cntrl, cntrl.asClassName(), "mid_${cntrl.simpleName.toString().lowercase()}", annot.order))
         }
 
         this.middlewaresGlobal = middlewaresCntrls.sortedBy { it.order }.toList()
+        val total = this.middlewares + this.middlewaresGlobal
+        hadComponent = total.firstOrNull { it.typeElement.hasParent(MIDDLEWARE_COMPONENT_CLASS, true) } != null
 
-        return this.middlewares + this.middlewaresGlobal
+        return total
     }
 
     fun buildMiddlewares(typeElement: TypeElement): List<MiddlewareController>
@@ -64,5 +69,11 @@ class MiddlewareProcessor(val roundEnv: RoundEnvironment)
             .mapNotNull { a -> middlewares.firstOrNull { it.annotation == a } }
 
         return middlewares.reversed() + middlewaresGlobal
+    }
+
+    companion object
+    {
+        val MIDDLEWARE_COMPONENT_CLASS = "MiddlewareControllerComponent"
+        val MIDDLEWARE_CLASSES = listOf("MiddlewareController", MIDDLEWARE_COMPONENT_CLASS)
     }
 }

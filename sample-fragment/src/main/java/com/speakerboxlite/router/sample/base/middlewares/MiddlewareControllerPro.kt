@@ -13,6 +13,10 @@ import javax.inject.Inject
 @Middleware
 annotation class MiddlewarePro
 
+/**
+ * Connects the `MiddlewareControllerPro` controller to the `@MiddlewarePro` annotation.
+ * All calls of a route annotated with `@MiddlewarePro` will trigger this middleware before navigation.
+ */
 @MiddlewarePro
 class MiddlewareControllerPro: MiddlewareControllerComponent
 {
