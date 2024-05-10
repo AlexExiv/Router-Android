@@ -12,6 +12,10 @@ import com.speakerboxlite.router.samplehilt.di.modules.UserData
 @Middleware
 annotation class MiddlewareAuth
 
+/**
+ * Connects the `MiddlewareControllerAuth` controller to the `@MiddlewareAuth` annotation.
+ * All calls of a route annotated with `@MiddlewareAuth` will trigger this middleware before navigation.
+ */
 @MiddlewareAuth
 class MiddlewareControllerAuth: MiddlewareControllerComponent
 {

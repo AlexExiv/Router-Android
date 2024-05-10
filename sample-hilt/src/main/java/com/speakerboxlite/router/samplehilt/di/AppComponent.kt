@@ -6,6 +6,10 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 
+/**
+ * You need to have this component to provide your dependencies to the Middleware controllers.
+ * This is necessary because these controllers are not created by the Hilt components.
+ */
 @EntryPoint
 @InstallIn(SingletonComponent::class)
 interface AppComponent: com.speakerboxlite.router.controllers.Component
