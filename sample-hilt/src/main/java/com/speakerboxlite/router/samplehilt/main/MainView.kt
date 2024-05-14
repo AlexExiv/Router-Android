@@ -21,7 +21,7 @@ class MainView: BaseViewCompose()
     @Composable
     override fun Root()
     {
-        Main(viewModel = routerHiltViewModel(view = this))
+        Main(viewModel = routerHiltViewModel())
     }
 }
 

@@ -21,7 +21,7 @@ class StepView: BaseViewCompose()
     @Composable
     override fun Root()
     {
-        Step(viewModel = routerViewModel(view = this))
+        Step(viewModel = routerViewModel())
     }
 }
 
