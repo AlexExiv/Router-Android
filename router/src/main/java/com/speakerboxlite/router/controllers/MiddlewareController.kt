@@ -14,6 +14,9 @@ data class RouteParams<Path: RoutePath>(val execRouter: Router? = null,
 
 typealias RouteParamsGen = RouteParams<RoutePath>
 
+/**
+ *
+ */
 interface MiddlewareController
 {
     /**
@@ -50,6 +53,9 @@ interface MiddlewareController
     fun onClose(router: Router, current: RoutePath, prev: RoutePath?): Boolean = false
 }
 
+/**
+ * Implement this Middleware Controller if you need to inject dependencies into the controller
+ */
 interface MiddlewareControllerComponent: MiddlewareController
 {
     /**
