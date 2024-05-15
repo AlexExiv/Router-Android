@@ -2,7 +2,7 @@
 
 ## Getting started
 
-### Setting up the dependency
+### Setting up the dependencies
 
 Gradle config for the core modules:
 
@@ -12,9 +12,9 @@ To project module add support of JitPack
 
 allprojects {
     repositories {
-        ....
+        ...
         maven { url 'https://jitpack.io' }
-        ....
+        ...
     }
 }
 ```
@@ -33,12 +33,89 @@ kapt "com.github.AlexExiv.Router-Android:processor:$version"
 
 You can find an example project at [sample-fragment](../sample-fragment)
 
-#### RouteController
-In the case of Fragment we have the same way of implementing of RouteControllers and Paths. Look at simple example bellow
+#### Application
+
+In the first step, we need to configure our `Application` class.
+Your `Application` class should be inherited from the `FragmentApplication` class and create and initialize the `RouterComponentImpl` in the `onCreateRouter` method.
+
+If you're not using Component injection, the App class should look like this:
+
+```kotlin
+class App: FragmentApplication<RouterComponentImpl>()
+{
+    override fun onCreateRouter()
+    {
+        routerComponent = RouterComponentImpl()
+        routerComponent.initialize(MainPath(), { _, _ -> AnimationControllerDefault() })
+    }
+}
+```
+
+Otherwise:
+
+```kotlin
+class App: FragmentApplication<RouterComponentImpl>()
+{
+    lateinit var component: AppComponent
+
+    override fun onCreateComponent()
+    {
+        super.onCreateComponent()
+
+        component = DaggerAppComponent.builder()
+            .appModule(AppModule(AppData("App String")))
+            .userModule(UserModule(UserData()))
+            .build()
+    }
+
+    override fun onCreateRouter()
+    {
+        routerComponent = RouterComponentImpl()
+        routerComponent.initialize(MainPath(), { _, _ -> AnimationControllerDefault() }, component)
+    }
+}
+```
+
+#### MainActivity
+
+The second step involves implementing a simple `MainActivity` class. This class should inherit from the `FragmentActivity` class.
+Simple `MainActivity` class:
+
+```kotlin
+class MainActivity: FragmentActivity(R.layout.activity_main)
+```
+
+It's enough if you're using single activity way. Now let's create our first `Fragment`
+
+#### SimpleFragment
+
+Your Fragment should be inherited from the Fragment from the [bootstrap](src/main/java/com/speakerboxlite/router/fragment/bootstrap/Fragment.kt) package
+
+```kotlin
+class SimpleFragment: Fragment(R.layout.fragment_simple)
+{
+    override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?)
+    {
+        super.onViewCreated(view, savedInstanceState)
+        arguments // access data
+    }
+}
+```
+
+#### SimplePath
+
+Using with class we will navigate to the `SimpleFragment` screen
 
 ```kotlin
 class SimplePath: RoutePath
+```
 
+#### RouteController
+
+Now we have to connect `SimplePath` with `SimpleFragment`.
+In the case of Fragment we have the same way of implementing of RouteControllers and Paths. Look at simple example bellow
+
+```kotlin
 @Route
 abstract class SimpleRouteController: RouteController<SimplePath, SimpleFragment>()
 ```
@@ -65,83 +142,24 @@ class SimpleRouteController: RouteController<SimplePath, SimpleFragment>()
 }
 ```
 
-#### SimpleFragment
-
-```kotlin
-class SimpleFragment: Fragment(R.layout.fragment_simple), ViewFragment
-{
-    override var viewKey: String
-        get() = _viewKey
-        set(value)
-        {
-            _viewKey = value
-        }
-
-    override lateinit var router: Router // will be injected by framework
-    override lateinit var localRouter: RouterLocal // will be injected by framework
-    override lateinit var resultProvider: RouterResultProvider // will be injected by framework
-    
-    override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?)
-    {
-        super.onViewCreated(view, savedInstanceState)
-        arguments // access data
-    }
-}
-```
-
-To avoid boilerplate code, we can define a base class for all Fragment view classes.
-
-```kotlin
-
-abstract class BaseFragment(@LayoutRes val layoutId: Int): Fragment(layoutId), ViewFragment
-{
-    override var viewKey: String
-        get() = _viewKey
-        set(value)
-        {
-            _viewKey = value
-        }
-
-    override lateinit var router: Router
-    override lateinit var localRouter: RouterLocal
-    override lateinit var resultProvider: RouterResultProvider
-}
-
-```
-
-then our SimpleFragment becomes
-
-```kotlin
-class SimpleFragment: BaseFragment(R.layout.fragment_simple)
-{
-    override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?)
-    {
-        super.onViewCreated(view, savedInstanceState)
-        arguments // access data
-    }
-}
-```
-
-See examples here
-[BaseFragment](../sample-fragment/src/main/java/com/speakerboxlite/router/sample/base/BaseFragment.kt)
-[SimplePath](../sample-fragment/src/main/java/com/speakerboxlite/router/sample/simple/SimplePath.kt)
-[SimpleFragment](../sample-fragment/src/main/java/com/speakerboxlite/router/sample/simple/SimpleFragment.kt)
-
 ### Code example with ViewModel
+
+Now let's take a look at how `RouteController` looks like when our `Fragment` has a `ViewModel`
 
 #### RouteController
 
-When working with ViewModels, it's beneficial to create a typealias of RouteController
+When working with ViewModels, it's beneficial to create a `typealias` of `RouteController`
 
 ```kotlin
 typealias RouteControllerApp<Path, VM, V> = RouteControllerVM<Path, VM, AndroidViewModelProvider, V> // if you don't use Component fo injection
 typealias RouteControllerApp<Path, VM, V> = RouteControllerVMC<Path, VM, AndroidViewModelProvider, V, AppComponent> // otherwise
 ```
 
-If you're not passing arguments to your screen, the definition of RouteController remains the same.
+If you're not passing arguments to your screen, the definition of `RouteController` remains almost 
+the same, except for adding `SimpleViewModel` to the RouteController.
 
 ```kotlin
-class SimplePath: RoutePath
+class SimplePath: RoutePath // The same
 
 // Simple case
 @Route
@@ -151,7 +169,7 @@ abstract class SimpleRouteController: RouteControllerApp<SimplePath, SimpleViewM
 If you wish to pass arguments, you must override the `onCreateViewModel` method and create the ViewModel as shown in the code below:
 
 ```kotlin
-class SimplePath(val step: Int): RoutePath
+class SimplePath(val step: Int): RoutePath // The same
 
 // When you need to pass data to the ViewModel you have to override the onCreateViewModel method
 @Route
@@ -164,6 +182,8 @@ abstract class SimpleRouteController: RouteControllerApp<SimplePath, SimpleViewM
 
 #### SimpleFragment
 
+But also we have to add ViewModel to the `SimpleFragment`. 
+
 Define a base fragment class with ViewModel from the `BaseFragment` class
 
 ```kotlin
@@ -173,7 +193,7 @@ abstract class BaseViewModelFragment<VM: BaseViewModel>(@LayoutRes layoutId: Int
 }
 ```
 
-SimpleFragment class
+**SimpleFragment** class
 
 ```kotlin
 class SimpleFragment: BaseViewModelFragment<SimpleViewModel>(R.layout.fragment_simple)
@@ -186,7 +206,7 @@ class SimpleFragment: BaseViewModelFragment<SimpleViewModel>(R.layout.fragment_s
 }
 ```
 
-ViewModel class
+**SimpleViewModel** class
 
 ```kotlin
 class SimpleViewModel(val step: Int, app: Application): AndroidViewModel(app), ViewModel
@@ -204,3 +224,8 @@ class SimpleViewModel(val step: Int, app: Application): AndroidViewModel(app), V
 ```
 
 See example of [BaseViewModel](../sample-fragment/src/main/java/com/speakerboxlite/router/sample/base/BaseViewModel.kt)
+
+See examples here
+* [BaseFragment](../sample-fragment/src/main/java/com/speakerboxlite/router/sample/base/BaseFragment.kt)
+* [SimplePath](../sample-fragment/src/main/java/com/speakerboxlite/router/sample/simple/SimplePath.kt)
+* [SimpleFragment](../sample-fragment/src/main/java/com/speakerboxlite/router/sample/simple/SimpleFragment.kt)

@@ -9,28 +9,13 @@ import androidx.annotation.MenuRes
 import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
-import androidx.fragment.app.Fragment
-import com.speakerboxlite.router.Router
-import com.speakerboxlite.router.RouterLocal
 import com.speakerboxlite.router.fragment.ViewFragment
-import com.speakerboxlite.router.fragment.ext._viewKey
-import com.speakerboxlite.router.result.RouterResultProvider
+import com.speakerboxlite.router.fragment.bootstrap.Fragment
 import com.speakerboxlite.router.samplemixed.R
 
 abstract class BaseFragment<VDB: ViewDataBinding>(@LayoutRes val layoutId: Int,
                                                   @MenuRes val menuId: Int = 0): Fragment(), ViewFragment
 {
-    override var viewKey: String
-        get() = _viewKey
-        set(value)
-        {
-            _viewKey = value
-        }
-
-    override lateinit var router: Router
-    override lateinit var localRouter: RouterLocal
-    override lateinit var resultProvider: RouterResultProvider
-
     lateinit var dataBinding: VDB
 
     protected val isShowBackBtn get() = router.hasPreviousScreen

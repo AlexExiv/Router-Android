@@ -5,9 +5,9 @@
 Provides an easy solution for screen navigation, eliminating the need to understand the Fragment lifecycle or implement transitions in Compose. Supports mixed transitions between Fragments and Compose screens.
 
 The simple example of creating a Route for navigation. Here, ScreenView is a pseudo abstract class. For actual implementations, please refer to:
-[sample-fragment](sample-fragment) : Example project with fragments
-[sample-compose](sample-compose) : Example project with Compose
-[sample-mixed](sample-mixed) : Example mixed project containing fragments and Compose
+* [sample-fragment](sample-fragment) : Example project with fragments
+* [sample-compose](sample-compose) : Example project with Compose
+* [sample-mixed](sample-mixed) : Example mixed project containing fragments and Compose
 
 ```kotlin
 // Pseudo view

@@ -15,6 +15,13 @@ import com.speakerboxlite.router.hostActivityKey
 @OptIn(InternalApi::class)
 open class ActivityLifeCycle(val routerManager: RouterManager): Application.ActivityLifecycleCallbacks
 {
+    override fun onActivityPreCreated(activity: Activity, savedInstanceState: Bundle?)
+    {
+        super.onActivityPreCreated(activity, savedInstanceState)
+
+
+    }
+
     override fun onActivityCreated(p0: Activity, p1: Bundle?)
     {
         if (p0 is BaseHostView)

@@ -2,7 +2,7 @@
 
 ## Getting started
 
-### Setting up the dependency
+### Setting up the dependencies
 
 Gradle config for the core modules:
 
@@ -97,7 +97,7 @@ abstract class BaseViewCompose: ViewCompose
 }
 ```
 
-then our SimpleView becomes
+then our **SimpleView** becomes
 
 ```kotlin
 
@@ -177,7 +177,7 @@ fun Simple(
 }
 ```
 
-ViewModel class
+**SimpleViewModel** class
 
 ```kotlin
 class SimpleViewModel(val step: Int, app: Application): AndroidViewModel(app), ViewModel
@@ -193,3 +193,5 @@ class SimpleViewModel(val step: Int, app: Application): AndroidViewModel(app), V
     }
 }
 ```
+
+See example of [BaseViewModel](../sample-compose/src/main/java/com/speakerboxlite/router/samplecompose/base/BaseViewModel.kt)
