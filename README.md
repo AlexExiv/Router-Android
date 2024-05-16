@@ -6,10 +6,10 @@ Provides an easy solution for screen navigation, eliminating the need to underst
 
 ## Features
 
-1. Navigation between screens
-2. Transfer result between screens
-3. Middleware intercepts navigation between screens, blocking it or replacing it with another navigation
-4. Chain - united sequence of screens
+1. [Navigation](#router) between screens
+2. Transfer [result](#result-api) between screens
+3. [Middleware](#middleware) intercepts navigation between screens, blocking it or replacing it with another navigation
+4. [Chain](#chain) - united sequence of screens
 
 The simple example of creating a Route for navigation. Here, ScreenView is a pseudo abstract class. For actual implementations, please refer to:
 * [sample-fragment](sample-fragment) : Example project with fragments
@@ -58,14 +58,14 @@ Please, look at samples for each module to understand how to use the router in v
 
 ## Key parts of the framework:
 
-1. [RoutePath](#route-path) - path to a screen (one screen can have several paths)
-2. [RouteController](#route-controller) - a controller that connects a path with a screen and implements routing logic. It creates a View, ViewModel, connects them, creates components for injections, and injects dependencies.
+1. [RoutePath](#routepath) - path to a screen (one screen can have several paths)
+2. [RouteController](#routecontroller) - a controller that connects a path with a screen and implements routing logic. It creates a View, ViewModel, connects them, creates components for injections, and injects dependencies.
 3. [Router](#router) - conducts routing between screens
 4. [Chain](#chain) - sequence of screens
 5. [Result Api](#result-api) - convenient API to get result from called screen
 6. [Middleware](#middleware) - interceptor of navigations; it can prevent navigation, or replace it with another route, or perform some operations.
 
-## RoutePath {#route-path}
+## RoutePath
 
 A class that defines a path to the screen. The properties of this class are parameters that you want 
 to send to the screen. Use a simple class when the path doesn't provide any parameters to the screen. 
@@ -84,7 +84,7 @@ data class DialogPath(val title: String = "",
                       val cancelBtn: String = ""): RoutePathResult<Boolean>  //Path with parameters that returns Boolean value
 ```
 
-## RouteController {#route-controller}
+## RouteController
 
 A class marked by the annotation @Route and implementing one of the children of the RouteControllerInterface.
 It connects a path with a screen and assembles the screen. Currently supports 4 types of routes:
@@ -214,7 +214,7 @@ abstract class StepRouteController: RouteControllerApp<StepPath, StepViewModel, 
 }
 ```
 
-## Router {#router}
+## Router
 
 Router is injected to Views and ViewModels by the framework.
 
@@ -226,7 +226,7 @@ router.route(SreenPath())
 router.routeWithResult(this, ScreenPath()) { result -> }
 ```
 
-## Chain {#chain}
+## Chain
 
 A chain is a sequence of screens connected by specific logic. It can represent a wizard with steps like step0, step1, step2, and so on. When the `close` method is invoked by any of the entries, the entire chain closes.
 
@@ -248,7 +248,7 @@ abstract class ChainRouteController: RouteControllerApp<ChainPath, ChainViewMode
 
 If you want to explore a comprehensive example, you can refer to the `Sample-Fragment` module. It provides a detailed illustration of the concepts discussed, allowing you to see the implementation in action.
 
-## Result Api {#result-api}
+## Result Api
 
 An easy and convenient way to obtain results from the called screen. To use it, the called path should implement the
 `RoutePathResult<Result>` interface, where `Result` is the type of the returning value. Then, in code, simply call the
@@ -275,7 +275,7 @@ or ViewModel.
 
 **Chains case:** Result from a screen that is part of a chain is delivered to the caller of the chain.
 
-## Middleware {#middleware}
+## Middleware
 
 Middleware serves as a tool to intercept navigation between screens under specific conditions. 
 For instance, when a user attempts to navigate to a screen that requires authentication, but the user is not signed in, the Middleware intercepts the navigation and redirects the user to the sign-in screen.
