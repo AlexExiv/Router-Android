@@ -11,6 +11,9 @@ import com.speakerboxlite.router.compose.bootstrap.ComposeActivity
 
 class MainActivity: ComposeActivity()
 {
+    /**
+     * Root content. It's entry point for your compose view
+     */
     @Composable
     override fun Content()
     {

@@ -2,7 +2,7 @@ package com.speakerboxlite.router.sample.step
 
 import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.annotations.Route
-import com.speakerboxlite.router.fragment.AndroidViewModelProvider
+import com.speakerboxlite.router.fragment.FragmentViewModelProvider
 import com.speakerboxlite.router.sample.base.RouteControllerApp
 import com.speakerboxlite.router.sample.base.middlewares.MiddlewarePro
 
@@ -15,6 +15,6 @@ abstract class RouteControllerStep: RouteControllerApp<StepPath, StepViewModel, 
     override fun convert(path: Map<String, String>, query: Map<String, String>): StepPath =
         StepPath(path["id"]!!.toInt())
 
-    override fun onCreateViewModel(modelProvider: AndroidViewModelProvider, path: StepPath): StepViewModel =
+    override fun onCreateViewModel(modelProvider: FragmentViewModelProvider, path: StepPath): StepViewModel =
         modelProvider.getViewModel { StepViewModel(path.step, it) }
 }

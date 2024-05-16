@@ -3,7 +3,7 @@ package com.speakerboxlite.router.fragmentcompose.bootstrap
 import android.app.Application
 import com.speakerboxlite.router.RouterComponent
 import com.speakerboxlite.router.fragment.ActivityLifeCycle
-import com.speakerboxlite.router.fragment.AndroidViewModelProvider
+import com.speakerboxlite.router.fragment.FragmentViewModelProvider
 import com.speakerboxlite.router.fragmentcompose.ActivityLifeCycleMixed
 import com.speakerboxlite.router.fragmentcompose.HostFragmentComposeFactory
 
@@ -23,7 +23,7 @@ abstract class MixedApplication<RC: RouterComponent>: Application()
 
         lifeCycle = ActivityLifeCycleMixed(
             routerComponent.routerManager,
-            { AndroidViewModelProvider(it.fragment) },
+            { FragmentViewModelProvider(it.fragment) },
             provideHostFragmentComposeFactory())
 
         registerActivityLifecycleCallbacks(lifeCycle)

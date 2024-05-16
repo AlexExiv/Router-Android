@@ -2,7 +2,7 @@ package com.speakerboxlite.router.fragment.bootstrap
 
 import android.app.Application
 import com.speakerboxlite.router.RouterComponent
-import com.speakerboxlite.router.fragment.AndroidViewModelProvider
+import com.speakerboxlite.router.fragment.FragmentViewModelProvider
 import com.speakerboxlite.router.lifecycle.ActivityLifeCycle
 
 abstract class FragmentApplication<RC: RouterComponent>: Application()
@@ -19,7 +19,7 @@ abstract class FragmentApplication<RC: RouterComponent>: Application()
         if (!::routerComponent.isInitialized)
             error("You didn't call routerComponent = RouterComponentImpl() in the onInitRouter method")
 
-        lifeCycle = com.speakerboxlite.router.fragment.ActivityLifeCycle(routerComponent.routerManager, { AndroidViewModelProvider(it.fragment) })
+        lifeCycle = com.speakerboxlite.router.fragment.ActivityLifeCycle(routerComponent.routerManager, { FragmentViewModelProvider(it.fragment) })
         registerActivityLifecycleCallbacks(lifeCycle)
     }
 

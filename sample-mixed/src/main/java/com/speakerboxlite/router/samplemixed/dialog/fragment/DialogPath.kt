@@ -2,7 +2,7 @@ package com.speakerboxlite.router.samplemixed.dialog.fragment
 
 import com.speakerboxlite.router.RoutePathResult
 import com.speakerboxlite.router.annotations.Route
-import com.speakerboxlite.router.fragment.AndroidViewModelProvider
+import com.speakerboxlite.router.fragment.FragmentViewModelProvider
 import com.speakerboxlite.router.samplemixed.base.RouteControllerFragmentApp
 
 data class DialogFragmentPath(val title: String = "",
@@ -13,6 +13,6 @@ data class DialogFragmentPath(val title: String = "",
 @Route
 abstract class DialogFragmentRouteController: RouteControllerFragmentApp<DialogFragmentPath, DialogViewModel, DialogFragment>()
 {
-    override fun onCreateViewModel(modelProvider: AndroidViewModelProvider, path: DialogFragmentPath): DialogViewModel =
+    override fun onCreateViewModel(modelProvider: FragmentViewModelProvider, path: DialogFragmentPath): DialogViewModel =
         modelProvider.getViewModel { DialogViewModel(path.title, path.message, path.okBtn, path.cancelBtn, it) }
 }

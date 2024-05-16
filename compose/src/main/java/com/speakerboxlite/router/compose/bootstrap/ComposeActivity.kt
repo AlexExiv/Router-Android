@@ -33,6 +33,9 @@ abstract class ComposeActivity(@LayoutRes layoutId: Int): ComponentActivity(layo
         }
     }
 
+    /**
+     * Root content. It's entry point for your compose view
+     */
     @Composable
     abstract fun Content()
 }
