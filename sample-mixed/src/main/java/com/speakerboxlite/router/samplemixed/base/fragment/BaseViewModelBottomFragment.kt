@@ -2,33 +2,17 @@ package com.speakerboxlite.router.samplemixed.base.fragment
 
 import android.annotation.SuppressLint
 import android.app.Dialog
-import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.speakerboxlite.router.Router
-import com.speakerboxlite.router.RouterLocal
-import com.speakerboxlite.router.ViewBTS
 import com.speakerboxlite.router.fragment.ViewFragmentVM
-import com.speakerboxlite.router.fragment.ext._viewKey
-import com.speakerboxlite.router.result.RouterResultProvider
+import com.speakerboxlite.router.fragment.bootstrap.BottomSheetDialogFragment
 import com.speakerboxlite.router.samplemixed.base.BaseViewModel
 
-abstract class BaseViewModelBottomFragment<VM: BaseViewModel, VDB: ViewDataBinding>(open val layoutId: Int): BottomSheetDialogFragment(),
-    ViewFragmentVM<VM>, ViewBTS
+abstract class BaseViewModelBottomFragment<VM: BaseViewModel, VDB: ViewDataBinding>(open val layoutId: Int):
+    BottomSheetDialogFragment(), ViewFragmentVM<VM>
 {
-    override var viewKey: String
-        get() = _viewKey
-        set(value)
-        {
-            _viewKey = value
-        }
-
-    override lateinit var router: Router
-    override lateinit var localRouter: RouterLocal
     override lateinit var viewModel: VM
-    override lateinit var resultProvider: RouterResultProvider
 
     lateinit var dataBinding: VDB
 

@@ -41,6 +41,7 @@ dependencies {
     implementation project(':router')
 
     implementation "androidx.core:core-ktx:$kotlin_core"
+    implementation "androidx.activity:activity-compose:$compose_activity"
 
     implementation "androidx.compose.runtime:runtime:$compose_version"
     implementation "androidx.compose.material:material:$compose_version"

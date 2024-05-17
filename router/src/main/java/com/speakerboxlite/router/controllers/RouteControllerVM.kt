@@ -6,6 +6,9 @@ import com.speakerboxlite.router.RouterModelProvider
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.ViewModel
 
+/**
+ * Implement this controller if you are using a simple view with a ViewModel but without a Component for injection
+ */
 abstract class RouteControllerVM<Path: RoutePath, VM: ViewModel, ModelProvider: RouterModelProvider, V>:
     RouteController<Path, V>(),
     RouteControllerComposable<Path, V>,

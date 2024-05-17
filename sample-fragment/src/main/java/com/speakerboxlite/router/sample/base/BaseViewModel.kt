@@ -1,20 +1,15 @@
 package com.speakerboxlite.router.sample.base
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import com.speakerboxlite.router.Router
-import com.speakerboxlite.router.ViewModel
-import com.speakerboxlite.router.result.RouterResultProvider
+import com.speakerboxlite.router.fragment.bootstrap.AndroidViewModel
 
-open class BaseViewModel(app: Application): AndroidViewModel(app), ViewModel
+open class BaseViewModel(app: Application): AndroidViewModel(app)
 {
-    override lateinit var router: Router
-    override lateinit var resultProvider: RouterResultProvider
-
-    override var isInit: Boolean = false
-
+    /**
+     * This method will be called after dependency injection
+     */
     override fun onInit()
     {
-
+        super.onInit()
     }
 }

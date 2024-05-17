@@ -20,7 +20,7 @@ class NoHiltView: BaseViewCompose()
     @Composable
     override fun Root()
     {
-        NoHilt(viewModel = routerHiltViewModel(view = this))
+        NoHilt(viewModel = routerHiltViewModel())
     }
 }
 

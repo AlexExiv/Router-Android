@@ -16,7 +16,7 @@ class AuthView: BaseViewCompose()
     @Composable
     override fun Root()
     {
-        Auth(viewModel = routerHiltViewModel(view = this))
+        Auth(viewModel = routerHiltViewModel())
     }
 }
 

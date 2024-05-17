@@ -3,7 +3,7 @@ package com.speakerboxlite.router.samplemixed.tabs.tab
 import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.annotations.Route
 import com.speakerboxlite.router.controllers.RouteController
-import com.speakerboxlite.router.fragment.AndroidViewModelProvider
+import com.speakerboxlite.router.fragment.FragmentViewModelProvider
 import com.speakerboxlite.router.samplemixed.base.RouteControllerFragmentApp
 import com.speakerboxlite.router.samplemixed.tabs.tab.compose.TabView
 import com.speakerboxlite.router.samplemixed.tabs.tab.fragment.TabFragment
@@ -13,7 +13,7 @@ class TabPath0: RoutePath
 @Route
 abstract class Tab0RouteController: RouteControllerFragmentApp<TabPath0, TabViewModel, TabFragment>()
 {
-    override fun onCreateViewModel(modelProvider: AndroidViewModelProvider, path: TabPath0): TabViewModel =
+    override fun onCreateViewModel(modelProvider: FragmentViewModelProvider, path: TabPath0): TabViewModel =
         modelProvider.getViewModel { TabViewModel(0, it) }
 }
 

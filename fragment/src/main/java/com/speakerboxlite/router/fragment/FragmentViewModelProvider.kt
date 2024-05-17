@@ -12,7 +12,7 @@ class AndroidViewModelFactory<T>(val creator: (app: Application) -> T) : ViewMod
     override fun <T: ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T = creator(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]!!) as T
 }
 
-class AndroidViewModelProvider(val fragment: Fragment): RouterModelProvider
+class FragmentViewModelProvider(val fragment: Fragment): RouterModelProvider
 {
     inline fun <reified VM: ViewModel> getViewModel(noinline creator: ((app: Application) -> VM)? = null): VM
     {

@@ -64,21 +64,23 @@ class AnnotationProcessor : AbstractProcessor()
             val fileBuilder = FileSpec.builder(pack, fileName)
             val classBuilder = TypeSpec.classBuilder(fileName)
 
+            classBuilder.addSuperinterface(ClassName(MAIN_ROUTER_PACK, "RouterComponent"))
+
             val routeManager = PropertySpec
                 .builder("routeManager", ClassName(MAIN_ROUTER_PACK, "RouteManager"))
-                .addModifiers(listOf(KModifier.PUBLIC))
+                .addModifiers(listOf(KModifier.PUBLIC, KModifier.OVERRIDE))
                 .initializer("%T()", ClassName(MAIN_ROUTER_PACK, "RouteManagerImpl"))
                 .build()
 
             val resultManager = PropertySpec
                 .builder("resultManager", ClassName("${MAIN_ROUTER_PACK}.result", "ResultManager"))
-                .addModifiers(listOf(KModifier.PUBLIC))
+                .addModifiers(listOf(KModifier.PUBLIC, KModifier.OVERRIDE))
                 .initializer("%T()", ClassName("${MAIN_ROUTER_PACK}.result", "ResultManagerImpl"))
                 .build()
 
             val routerManager = PropertySpec
                 .builder("routerManager", ClassName(MAIN_ROUTER_PACK, "RouterManager"))
-                .addModifiers(listOf(KModifier.PUBLIC))
+                .addModifiers(listOf(KModifier.PUBLIC, KModifier.OVERRIDE))
                 .initializer("%T()", ClassName(MAIN_ROUTER_PACK, "RouterManagerImpl"))
                 .build()
 

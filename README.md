@@ -2,12 +2,28 @@
 
 [![](https://jitpack.io/v/AlexExiv/Router-Android.svg)](https://jitpack.io/#AlexExiv/Router-Android)
 
-Simple but powerful router for Android. The main goal of the Router is to separate business logic from 
-navigation between screens. A screen shouldn’t know how it has been opened and how it should be closed.
-It should only know that in this case it has to close or navigate to another screen or send some data as 
-the result of its job to the caller of this screen.
+Provides an easy solution for screen navigation, eliminating the need to understand the Fragment lifecycle or implement transitions in Compose. Supports mixed transitions between Fragments and Compose screens.
+
+## Features
+
+1. [Navigation](#router) between screens
+2. Transfer [result](#result-api) between screens
+3. [Middleware](#middleware) intercepts navigation between screens, blocking it or replacing it with another navigation
+4. [Chain](#chain) - united sequence of screens
+
+The simple example of creating a Route for navigation. Here, ScreenView is a pseudo abstract class. For actual implementations, please refer to:
+* [sample-fragment](sample-fragment) : Example project with fragments
+* [sample-compose](sample-compose) : Example project with Compose
+* [sample-mixed](sample-mixed) : Example mixed project containing fragments and Compose
+* [sample-hilt](sample-hilt) : Example project with Compose and Hilt injection
 
 ```kotlin
+// Pseudo view
+class ScreenView: View
+{
+    override var viewKey: String = UUID.randomUUID().toString() // unique id for this view
+}
+
 // Define path to the screen
 class ScreenPath: RouterPath
 
@@ -21,46 +37,38 @@ router.route(ScreenPath())
 
 ```
 
-## Modules
+## Core Modules
 
 Gradle config for the core modules:
+
 ```gradle
 implementation "com.github.AlexExiv.Router-Android:router:$version"
 implementation "com.github.AlexExiv.Router-Android:annotations:$version"
 kapt "com.github.AlexExiv.Router-Android:processor:$version"
 ```
 
-The framework has additional modules:
-1. **fragment** - module for android projects which use only fragment and activities. Additional modules to the config:
-```gradle
-implementation "com.github.AlexExiv.Router-Android:fragment:$version"
-```
-2. **compose** - module for projects which use only compose for UI. Additional modules to the config:
-```gradle
-implementation "com.github.AlexExiv.Router-Android:compose:$version"
-```
-3. **fragmentcompose** - module for projects which use both fragment and compose for UI. Additional modules to the config:
-```gradle
-implementation "com.github.AlexExiv.Router-Android:fragment:$version"
-implementation "com.github.AlexExiv.Router-Android:compose:$version"
-implementation "com.github.AlexExiv.Router-Android:fragmentcompose:$version"
-```
+### Platform Modules
+
+1. Fragment [fragment/README.md](fragment/README.md) \ Information about additional modules and using fragments with the Router.
+2. Compose [compose/README.md](compose/README.md) \ Information about additional modules and using compose with the Router.
+3. Mixed [fragment-compose/README.md](fragmentcompose/README.md) \ If you have mixed project with Fragment and Compose.
+4. Compose with Hilt injection [compose-hilt/README.md](compose-hilt/README.md) \ If you use Compose with Hilt injection.
 
 Please, look at samples for each module to understand how to use the router in various scenarios.
 
 ## Key parts of the framework:
 
-1. RoutePath - path to a screen (one screen can have several paths)
-2. RouteController - a controller that connects a path with a screen and implements routing logic. It creates a View, ViewModel, connects them, creates components for injections, and injects dependencies.
-3. Router - conducts routing between screens
-4. Chain - sequence of screens
-5. Result Api - convenient API to get result from called screen
-6. Middleware - interceptor of navigations; it can prevent navigation, or replace it with another route, or perform some operations.
+1. [RoutePath](#routepath) - path to a screen (one screen can have several paths)
+2. [RouteController](#routecontroller) - a controller that connects a path with a screen and implements routing logic. It creates a View, ViewModel, connects them, creates components for injections, and injects dependencies.
+3. [Router](#router) - conducts routing between screens
+4. [Chain](#chain) - sequence of screens
+5. [Result Api](#result-api) - convenient API to get result from called screen
+6. [Middleware](#middleware) - interceptor of navigations; it can prevent navigation, or replace it with another route, or perform some operations.
 
 ## RoutePath
 
 A class that defines a path to the screen. The properties of this class are parameters that you want 
-to send to the screen. Use a simple class when the path doesn’t provide any parameters to the screen. 
+to send to the screen. Use a simple class when the path doesn't provide any parameters to the screen. 
 Use a data class when you want to pass one or more parameters. Avoid passing heavy data like images or 
 long arrays through it. It is usually used to pass small portions of data such as IDs or filter parameters.
 
@@ -88,19 +96,7 @@ It connects a path with a screen and assembles the screen. Currently supports 4 
 By default this class should be abstract because all its method generated by the framework. You can
 override its if you need to do some extra action, for example add something to the Bundle of the Fragment.
 
-### View is fragment
-
-Here is an example of a simple `RouteController`. The `onCreateView` method is generated by the framework.
-
-```kotlin
-class SimplePath: RoutePath
-
-@Route
-abstract class SimpleRouteController: RouteController<SimplePath, SimpleFragment>()
-```
-
-Here is another example of a simple `RouteController`. In this case, we implement the `onCreateView` method to pass the `title` parameter to the Fragment.
-When you need to pass data to your fragment, you have to implement `onCreateView` yourself and place data in the arguments bundle.
+### Example for Fragment
 
 ```kotlin
 data class SimplePath(val title: String): RoutePath
@@ -117,20 +113,9 @@ class SimpleRouteController: RouteController<SimplePath, SimpleFragment>()
 }
 ```
 
-### View is compose compose
+Full explanation and examples you can find [here](fragment/README.md)
 
-For compose case you have the same code and the `onCreateView` method is generated by the framework.
-
-``` kotlin
-class SimplePath: RoutePath
-
-@Route
-abstract class SimpleRouteController: RouteController<SimplePath, SimpleView>()
-```
-
-Here is another example of a simple `RouteController`. In this case, similar to the fragment scenario, we implement the `onCreateView` method to pass the `title` parameter to the Compose view.
-When you need to pass data to your Compose view, you have to implement `onCreateView` yourself and pass the data to the view, for example, in the constructor. 
-**Important:** The data has to be serializable to be saved in the state.
+### Example for Compose
 
 ```kotlin
 data class SimplePath(val title: String): RoutePath
@@ -142,7 +127,11 @@ class SimpleRouteController: RouteController<SimplePath, SimpleView>()
 }
 ```
 
-### Dagger injection
+Full explanation and examples you can find [here](compose/README.md)
+
+## Injection
+
+**Important** Here I use Dagger but this way of injection from Component may be used for other libraries. 
 
 In case you use dagger injection you have to replace `RouteController` by `RouteControllerC`
 Example of RouteControllerC with dependency injection where AppComponent is a Component interface
@@ -167,7 +156,7 @@ and then use it in your code:
 abstract class SimpleComponentRouteController: RouteControllerApp<SimpleComponentPath, SimpleComponentFragment>()
 ```
 
-#### Inject to RouteController
+### Inject to RouteController
 
 If you need to inject dependencies from your AppComponent, you can override the `fun onInject(component: Any)` method.
 
@@ -225,29 +214,6 @@ abstract class StepRouteController: RouteControllerApp<StepPath, StepViewModel, 
 }
 ```
 
-Example of using for the Compose:
-
-```kotlin
-typealias RouteControllerApp<Path, VM, V> = RouteControllerVMC<Path, VM, AndroidComposeViewModelProvider, V, AppComponent>
-
-class TabsPath: RoutePath
-
-// Simple case
-@Route
-abstract class TabsRouteController: RouteControllerApp<TabsPath, TabsViewModel, TabsView>()
-
-class StepPath(val step: Int): RoutePath
-
-// When you need to pass data to the ViewModel you have to override the onCreateViewModel method
-@Route
-abstract class StepRouteController: RouteControllerApp<StepPath, StepViewModel, StepView>()
-{
-    override fun onCreateViewModel(modelProvider: AndroidComposeViewModelProvider, path: StepPath): StepViewModel =
-        modelProvider.getViewModel { StepViewModel(path.step, it) }
-}
-
-```
-
 ## Router
 
 Router is injected to Views and ViewModels by the framework.
@@ -280,7 +246,8 @@ abstract class ChainRouteController: RouteControllerApp<ChainPath, ChainViewMode
 }
 ```
 
-If you want to explore a comprehensive example, you can refer to the `Sample-Fragment` module. It provides a detailed illustration of the concepts discussed, allowing you to see the implementation in action.
+If you want to explore a comprehensive example, you can refer to the [sample-fragment](sample-fragment/src/main/java/com/speakerboxlite/router/sample/chain)
+package. It provides a detailed illustration of the concepts discussed, allowing you to see the implementation in action.
 
 ## Result Api
 
@@ -339,7 +306,7 @@ class MiddlewareControllerAuth: MiddlewareControllerComponent
         if (!userData.isLogin.value!!)
         {
             router.route(AuthPath(next))
-            return true
+            return true // return true to block the current navigation 
         }
 
         return false
@@ -351,6 +318,4 @@ class MiddlewareControllerAuth: MiddlewareControllerComponent
 @MiddlewareAuth
 abstract class TabAuthRouteController: RouteControllerApp<TabPath2, TabViewModel, TabFragment>()
 ```
-
-If you want to explore a comprehensive example, you can refer to the `Sample-Fragment` module. It provides a detailed illustration of the concepts discussed, allowing you to see the implementation in action.
 

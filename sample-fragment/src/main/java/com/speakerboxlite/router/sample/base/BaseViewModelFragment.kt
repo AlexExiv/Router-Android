@@ -9,32 +9,16 @@ import androidx.annotation.MenuRes
 import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
-import androidx.fragment.app.Fragment
-import com.speakerboxlite.router.Router
-import com.speakerboxlite.router.RouterLocal
 import com.speakerboxlite.router.RouterTabs
 import com.speakerboxlite.router.ViewTabs
 import com.speakerboxlite.router.fragment.ViewFragmentVM
-import com.speakerboxlite.router.result.RouterResultProvider
+import com.speakerboxlite.router.fragment.bootstrap.Fragment
 import com.speakerboxlite.router.samplefragment.R
 
 abstract class BaseViewModelFragment<VM: BaseViewModel, VDB: ViewDataBinding>(@LayoutRes val layoutId: Int,
-                                                                              @MenuRes val menuId: Int = 0): Fragment(),
-    ViewFragmentVM<VM>
+                                                                              @MenuRes val menuId: Int = 0): Fragment(layoutId), ViewFragmentVM<VM>
 {
-    override var viewKey: String
-        get() = requireArguments().getString("VIEW_KEY")!!
-        set(value)
-        {
-            if (arguments == null)
-                arguments = Bundle()
-            requireArguments().putString("VIEW_KEY", value)
-        }
-
-    override lateinit var router: Router
-    override lateinit var localRouter: RouterLocal
     override lateinit var viewModel: VM
-    override lateinit var resultProvider: RouterResultProvider
 
     lateinit var dataBinding: VDB
 

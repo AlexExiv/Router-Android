@@ -10,6 +10,9 @@ import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
+/**
+ * Implement this controller if you are using a simple view without a ViewModel and Component for injection
+ */
 abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterface<Path, V>
 {
     lateinit var pathClass: KClass<Path>

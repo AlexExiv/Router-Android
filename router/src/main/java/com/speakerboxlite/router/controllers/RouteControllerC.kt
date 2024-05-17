@@ -5,6 +5,9 @@ import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.View
 import kotlin.reflect.KClass
 
+/**
+ * Implement this controller if you are using a simple view without a ViewModel but with a Component for injection
+ */
 abstract class RouteControllerC<Path: RoutePath, V: View, C: Component>: RouteController<Path, V>(), RouteControllerComponent<Path, V, C>
 {
     final override lateinit var componentClass: KClass<C>
