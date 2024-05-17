@@ -246,7 +246,8 @@ abstract class ChainRouteController: RouteControllerApp<ChainPath, ChainViewMode
 }
 ```
 
-If you want to explore a comprehensive example, you can refer to the `Sample-Fragment` module. It provides a detailed illustration of the concepts discussed, allowing you to see the implementation in action.
+If you want to explore a comprehensive example, you can refer to the [sample-fragment](sample-fragment/src/main/java/com/speakerboxlite/router/sample/chain)
+package. It provides a detailed illustration of the concepts discussed, allowing you to see the implementation in action.
 
 ## Result Api
 
@@ -305,7 +306,7 @@ class MiddlewareControllerAuth: MiddlewareControllerComponent
         if (!userData.isLogin.value!!)
         {
             router.route(AuthPath(next))
-            return true
+            return true // return true to block the current navigation 
         }
 
         return false
