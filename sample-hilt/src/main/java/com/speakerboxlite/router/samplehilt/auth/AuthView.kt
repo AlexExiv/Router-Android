@@ -8,7 +8,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.speakerboxlite.router.samplehilt.base.BaseViewCompose
+import com.speakerboxlite.router.compose.bootstrap.BaseViewCompose
 import com.speakerboxlite.router.composehilt.routerHiltViewModel
 
 class AuthView: BaseViewCompose()

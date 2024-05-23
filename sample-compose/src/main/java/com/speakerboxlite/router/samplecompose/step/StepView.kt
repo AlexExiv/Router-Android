@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import com.speakerboxlite.router.compose.LocalRouter
-import com.speakerboxlite.router.samplecompose.base.BaseViewCompose
+import com.speakerboxlite.router.compose.bootstrap.BaseViewCompose
 import com.speakerboxlite.router.samplecompose.bts.BottomSheetPath
 import com.speakerboxlite.router.compose.currentOrThrow
 import com.speakerboxlite.router.compose.routerViewModel

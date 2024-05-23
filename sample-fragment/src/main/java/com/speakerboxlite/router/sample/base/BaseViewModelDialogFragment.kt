@@ -6,14 +6,11 @@ import android.view.LayoutInflater
 import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
-import com.speakerboxlite.router.fragment.ViewFragmentVM
-import com.speakerboxlite.router.fragment.bootstrap.DialogFragment
+import com.speakerboxlite.router.fragment.bootstrap.DialogFragmentViewModel
 
 abstract class BaseViewModelDialogFragment<VM: BaseViewModel, VDB: ViewDataBinding>(open val layoutId: Int):
-    DialogFragment(), ViewFragmentVM<VM>
+    DialogFragmentViewModel<VM>()
 {
-    override lateinit var viewModel: VM
-
     lateinit var dataBinding: VDB
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog
