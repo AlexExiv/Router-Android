@@ -13,10 +13,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.speakerboxlite.router.ViewDialog
-import com.speakerboxlite.router.samplecompose.base.BaseViewCompose
+import com.speakerboxlite.router.compose.bootstrap.DialogCompose
 
-class DialogView: BaseViewCompose(), ViewDialog
+class DialogView: DialogCompose()
 {
     @Composable
     override fun Root()

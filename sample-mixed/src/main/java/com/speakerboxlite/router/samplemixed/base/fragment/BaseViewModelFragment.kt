@@ -11,16 +11,14 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import com.speakerboxlite.router.RouterTabs
 import com.speakerboxlite.router.ViewTabs
-import com.speakerboxlite.router.fragment.ViewFragmentVM
-import com.speakerboxlite.router.fragment.bootstrap.Fragment
+import com.speakerboxlite.router.fragment.bootstrap.FragmentViewModel
 import com.speakerboxlite.router.samplemixed.R
 import com.speakerboxlite.router.samplemixed.base.BaseViewModel
 
 abstract class BaseViewModelFragment<VM: BaseViewModel, VDB: ViewDataBinding>(@LayoutRes val layoutId: Int,
-                                                                              @MenuRes val menuId: Int = 0): Fragment(layoutId), ViewFragmentVM<VM>
+                                                                              @MenuRes val menuId: Int = 0):
+    FragmentViewModel<VM>(layoutId)
 {
-    override lateinit var viewModel: VM
-
     lateinit var dataBinding: VDB
 
     protected val isShowBackBtn get() = router.hasPreviousScreen
@@ -40,7 +38,7 @@ abstract class BaseViewModelFragment<VM: BaseViewModel, VDB: ViewDataBinding>(@L
 
         toolbar = view.findViewById(R.id.toolbar)
 
-        if (::viewModel.isInitialized)
+        if (isViewModelInjected)
             onBindData()
 
         if (toolbar != null)

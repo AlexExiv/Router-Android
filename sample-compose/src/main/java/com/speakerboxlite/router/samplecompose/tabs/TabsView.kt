@@ -12,7 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.speakerboxlite.router.compose.ComposeNavigatorTabs
 import com.speakerboxlite.router.compose.LocalRouter
-import com.speakerboxlite.router.samplecompose.base.BaseViewCompose
+import com.speakerboxlite.router.compose.bootstrap.BaseViewCompose
 import com.speakerboxlite.router.compose.currentOrThrow
 import com.speakerboxlite.router.samplecompose.tabs.tab.TabPath0
 import com.speakerboxlite.router.samplecompose.tabs.tab.TabPath1
@@ -32,6 +32,7 @@ fun Tabs(key: String)
 {
     Surface {
 
+        // create RouterTabs for this view
         val routerTabs = LocalRouter.currentOrThrow.createRouterTabs(key)
 
         Column(modifier = Modifier.fillMaxSize()) {

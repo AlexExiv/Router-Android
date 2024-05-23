@@ -10,12 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.speakerboxlite.router.ViewBTS
 import com.speakerboxlite.router.compose.LocalRouter
-import com.speakerboxlite.router.samplemixed.base.compose.BaseViewCompose
+import com.speakerboxlite.router.compose.bootstrap.BottomSheetCompose
 import com.speakerboxlite.router.compose.currentOrThrow
 import com.speakerboxlite.router.samplemixed.dialog.DialogPath
 import com.speakerboxlite.router.samplemixed.step.compose.StepComposePath
 
-class BottomSheetView: BaseViewCompose(), ViewBTS
+class BottomSheetView: BottomSheetCompose()
 {
     @Composable
     override fun Root()

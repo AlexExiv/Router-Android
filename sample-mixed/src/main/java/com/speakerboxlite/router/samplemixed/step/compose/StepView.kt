@@ -10,12 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import com.speakerboxlite.router.compose.LocalRouter
-import com.speakerboxlite.router.samplemixed.base.compose.BaseViewCompose
+import com.speakerboxlite.router.compose.bootstrap.BaseViewCompose
 import com.speakerboxlite.router.samplemixed.bts.BottomSheetPath
 import com.speakerboxlite.router.compose.currentOrThrow
 import com.speakerboxlite.router.compose.routerViewModel
 import com.speakerboxlite.router.samplemixed.dialog.DialogPath
-import com.speakerboxlite.router.samplemixed.dialog.fragment.DialogFragmentPath
 import com.speakerboxlite.router.samplemixed.step.StepViewModel
 
 class StepView: BaseViewCompose()

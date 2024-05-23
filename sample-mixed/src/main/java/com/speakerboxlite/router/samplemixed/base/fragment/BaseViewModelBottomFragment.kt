@@ -5,15 +5,12 @@ import android.app.Dialog
 import android.view.LayoutInflater
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
-import com.speakerboxlite.router.fragment.ViewFragmentVM
-import com.speakerboxlite.router.fragment.bootstrap.BottomSheetDialogFragment
+import com.speakerboxlite.router.fragment.bootstrap.BottomSheetDialogFragmentViewModel
 import com.speakerboxlite.router.samplemixed.base.BaseViewModel
 
 abstract class BaseViewModelBottomFragment<VM: BaseViewModel, VDB: ViewDataBinding>(open val layoutId: Int):
-    BottomSheetDialogFragment(), ViewFragmentVM<VM>
+    BottomSheetDialogFragmentViewModel<VM>()
 {
-    override lateinit var viewModel: VM
-
     lateinit var dataBinding: VDB
 
     @SuppressLint("RestrictedApi")

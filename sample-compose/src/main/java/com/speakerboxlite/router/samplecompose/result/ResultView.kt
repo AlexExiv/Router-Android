@@ -10,8 +10,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.speakerboxlite.router.compose.bootstrap.BaseViewCompose
 import com.speakerboxlite.router.compose.routerViewModel
-import com.speakerboxlite.router.samplecompose.base.BaseViewCompose
 
 class ResultView: BaseViewCompose()
 {
