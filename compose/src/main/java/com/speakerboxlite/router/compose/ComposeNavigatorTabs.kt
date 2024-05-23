@@ -22,11 +22,12 @@ typealias ComposeNavigatorTabsContent =
         @Composable (router: Router, navigator: ComposeNavigator, lastTab: Int, selectedTab: Int) -> Unit
 
 @Composable
-fun CurrentScreenTab(router: Router,
-                     navigator: ComposeNavigator,
-                     lastTab: Int,
-                     selectedTab: Int,
-                     transitionTabsSpec: AnimatedContentTransitionScope<StackEntry>.(prevTab: Int, currentTab: Int) -> ContentTransform)
+fun CurrentTabContent(
+    router: Router,
+    navigator: ComposeNavigator,
+    lastTab: Int,
+    selectedTab: Int,
+    transitionTabsSpec: AnimatedContentTransitionScope<StackEntry>.(prevTab: Int, currentTab: Int) -> ContentTransform)
 {
     val stackEntry = navigator.lastFullItem ?: return
 
@@ -55,16 +56,17 @@ fun CurrentScreenTab(router: Router,
 }
 
 @Composable
-fun ComposeNavigatorTabs(key: String = compositionUniqueId(),
-                         routerTabs: RouterTabs,
-                         tabPaths: List<RoutePath>,
-                         selectedTab: Int,
-                         hoster: ComposeViewHoster? = null,
-                         hostCloseable: HostCloseable? = null,
-                         transitionTabsSpec: AnimatedContentTransitionScope<StackEntry>.(prevTab: Int, currentTab: Int) -> ContentTransform = { p, c -> contentTransformChangeTab(p, c) },
-                         onTabChanged: (Int) -> Unit,
-                         executorFactory: CommandExecutorFactory = CommandExecutorFactory { CommandExecutorCompose(it, hoster, hostCloseable) },
-                         content: ComposeNavigatorTabsContent = { router, navigator, lastTab, selectedTab -> CurrentScreenTab(router, navigator, lastTab, selectedTab, transitionTabsSpec) })
+fun ComposeNavigatorTabs(
+    key: String = compositionUniqueId(),
+    routerTabs: RouterTabs,
+    tabPaths: List<RoutePath>,
+    selectedTab: Int,
+    hoster: ComposeViewHoster? = null,
+    hostCloseable: HostCloseable? = null,
+    transitionTabsSpec: AnimatedContentTransitionScope<StackEntry>.(prevTab: Int, currentTab: Int) -> ContentTransform = { p, c -> contentTransformChangeTab(p, c) },
+    onTabChanged: (Int) -> Unit,
+    executorFactory: CommandExecutorFactory = CommandExecutorFactory { CommandExecutorCompose(it, hoster, hostCloseable) },
+    content: ComposeNavigatorTabsContent = { router, navigator, lastTab, selectedTab -> CurrentTabContent(router, navigator, lastTab, selectedTab, transitionTabsSpec) })
 {
     val viewModelStore = LocalViewModelStoreOwner.current
     val tabs = remember(tabPaths) {
@@ -118,8 +120,9 @@ fun ComposeNavigatorTabs(key: String = compositionUniqueId(),
     }
 }
 
-class ComposeNavigatorTabs(val key: String,
-                           backStackMap: Map<String, List<StackEntrySaveable>>)
+class ComposeNavigatorTabs(
+    val key: String,
+    backStackMap: Map<String, List<StackEntrySaveable>>)
 {
     val backStackMap = mutableMapOf<String, List<StackEntrySaveable>>()
     var lastTab = 0

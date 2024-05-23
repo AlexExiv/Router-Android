@@ -11,9 +11,10 @@ internal val LocalComposeNavigatorStateHolder: ProvidableCompositionLocal<Saveab
     staticCompositionLocalOf { error("LocalNavigatorStateHolder not initialized") }
 
 @Composable
-internal fun rememberComposeNavigator(key: String,
-                                      initialBackStack: List<StackEntrySaveable> = listOf(),
-                                      viewModelProvider: RouterViewModelStoreProvider?): ComposeNavigator
+internal fun rememberComposeNavigator(
+    key: String,
+    initialBackStack: List<StackEntrySaveable> = listOf(),
+    viewModelProvider: RouterViewModelStoreProvider?): ComposeNavigator
 {
     val stateHolder = LocalComposeNavigatorStateHolder.current
     val navigatorSaver = LocalNavigatorSaver.current

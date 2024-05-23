@@ -45,7 +45,7 @@ val LocalRouterTabs: ProvidableCompositionLocal<RouterTabs?> = staticComposition
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun CurrentScreen(router: Router, navigator: ComposeNavigator)
+fun CurrentContent(router: Router, navigator: ComposeNavigator)
 {
     val stackEntry = navigator.lastFullItem
     val stackDialog = navigator.lastDialog
@@ -127,7 +127,7 @@ fun ComposeNavigator(
     hoster: ComposeViewHoster? = null,
     hostCloseable: HostCloseable? = null,
     executorFactory: CommandExecutorFactory = CommandExecutorFactory { CommandExecutorCompose(it, hoster, hostCloseable) },
-    content: ComposeNavigatorContent = { router, navigator -> CurrentScreen(router, navigator) })
+    content: ComposeNavigatorContent = { router, navigator -> CurrentContent(router, navigator) })
 {
     require(key.isNotEmpty()) { "ComposeNavigator key can't be empty" }
 
@@ -162,11 +162,11 @@ fun interface OnDisposeCallback
     fun onDispose(key: String)
 }
 
-class ComposeNavigator(val key: String,
-                       val stateHolder: SaveableStateHolder,
-                       val viewModelProvider: RouterViewModelStoreProvider?,
-                       items: List<StackEntry> = listOf(),
-                       val minSize: Int = 1)
+class ComposeNavigator(
+    val key: String,
+    val stateHolder: SaveableStateHolder,
+    val viewModelProvider: RouterViewModelStoreProvider?,
+    items: List<StackEntry> = listOf())
 {
     internal val stateStack: SnapshotStateList<StackEntry> = mutableStateListOf()
 
@@ -201,14 +201,12 @@ class ComposeNavigator(val key: String,
     }
 
     val size: Int by derivedStateOf { stateStack.size }
-
     val isEmpty: Boolean by derivedStateOf { stateStack.isEmpty() }
-
-    val canPop: Boolean by derivedStateOf { stateStack.size > minSize }
+    val canPop: Boolean by derivedStateOf { stateStack.size > 1 }
 
     fun push(view: ViewCompose, animationController: AnimationControllerCompose?)
     {
-        stateStack += StackEntry(view, viewModelProvider, animationController)
+        stateStack.add(StackEntry(view, viewModelProvider, animationController))
     }
 
     fun replace(view: ViewCompose)
@@ -225,18 +223,12 @@ class ComposeNavigator(val key: String,
             removeLast()
     }
 
-    fun popToRoot()
-    {
-        while (stateStack.size > minSize)
-            removeLast(stateStack.size - 1)
-    }
-
-    fun popUntil(predicate: (StackEntry) -> Boolean)
+    fun popUntil(key: String)
     {
         var n = 0
         while (canPop && stateStack.isNotEmpty())
         {
-            if (predicate(stateStack[stateStack.size - n - 1]))
+            if (stateStack[stateStack.size - n - 1].id == key)
                 break
 
             n += 1

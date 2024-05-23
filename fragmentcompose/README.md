@@ -1,5 +1,3 @@
-```gradle
-implementation "com.github.AlexExiv.Router-Android:fragment:$version"
-implementation "com.github.AlexExiv.Router-Android:compose:$version"
-implementation "com.github.AlexExiv.Router-Android:fragmentcompose:$version"
-```
+# Router-Android Mixed projects support
+
+[Documentation](https://android-navigation.modelmanager.dev/platforms/mixed)

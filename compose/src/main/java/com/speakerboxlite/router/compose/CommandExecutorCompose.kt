@@ -79,9 +79,7 @@ open class CommandExecutorCompose(val navigator: ComposeNavigator,
     private fun closeTo(key: String)
     {
         if (navigator.size > 1)
-        {
-            navigator.popUntil { it.id == key }
-        }
+            navigator.popUntil(key)
     }
 
     private fun startActivity(key: String, params: Serializable?)

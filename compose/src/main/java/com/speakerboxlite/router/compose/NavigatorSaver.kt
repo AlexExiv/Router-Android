@@ -28,10 +28,11 @@ fun defaultNavigatorSaver(): NavigatorSaver<Any> =
             })
     }
 
-data class StackEntrySaveable(val view: ViewCompose,
-                              val animationController: AnimationControllerCompose?,
-                              val isRemoving: Boolean,
-                              val savedState: Bundle): Serializable, Parcelable
+data class StackEntrySaveable(
+    val view: ViewCompose,
+    val animationController: AnimationControllerCompose?,
+    val isRemoving: Boolean,
+    val savedState: Bundle): Serializable, Parcelable
 {
     constructor(entry: StackEntry): this(
         entry.view,

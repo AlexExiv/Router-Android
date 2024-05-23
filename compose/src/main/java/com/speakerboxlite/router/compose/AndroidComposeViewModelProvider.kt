@@ -12,14 +12,16 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterModelProvider
 
-class AndroidViewModelFactory<T>(val app: Application,
-                                 val creator: (app: Application) -> T) : ViewModelProvider.Factory
+class AndroidViewModelFactory<T>(
+    val app: Application,
+    val creator: (app: Application) -> T) : ViewModelProvider.Factory
 {
     override fun <T: ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T = creator(app) as T
 }
 
-class AndroidComposeViewModelProvider(val app: Application,
-                                      val viewModelStoreOwner: ViewModelStoreOwner): RouterModelProvider
+class AndroidComposeViewModelProvider(
+    val app: Application,
+    val viewModelStoreOwner: ViewModelStoreOwner): RouterModelProvider
 {
     inline fun <reified VM: ViewModel> getViewModel(noinline creator: ((app: Application) -> VM)? = null): VM
     {
