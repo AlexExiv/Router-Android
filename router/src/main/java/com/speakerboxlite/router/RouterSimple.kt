@@ -1,5 +1,6 @@
 package com.speakerboxlite.router
 
+import android.os.Bundle
 import android.util.Log
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.annotations.RouteType
@@ -16,10 +17,13 @@ import com.speakerboxlite.router.controllers.RouteParamsGen
 import com.speakerboxlite.router.exceptions.ImpossibleRouteException
 import com.speakerboxlite.router.exceptions.RouteNotFoundException
 import com.speakerboxlite.router.ext.checkMainThread
+import com.speakerboxlite.router.ext.getBundles
+import com.speakerboxlite.router.ext.putBundles
 import com.speakerboxlite.router.result.ResultManager
 import com.speakerboxlite.router.result.RouterResultProvider
 import com.speakerboxlite.router.result.RouterResultProviderImpl
 import com.speakerboxlite.router.result.ViewResultType
+import java.io.Serializable
 import java.lang.ref.WeakReference
 import java.util.UUID
 import kotlin.reflect.KClass
@@ -34,6 +38,35 @@ data class ViewMeta(val key: String,
     override fun toString(): String
     {
         return "(key=$key, routeType=$routeType, route=${route::class.qualifiedName}, path=${path.qualifiedName}, lockBack=$lockBack)"
+    }
+
+    fun toBundle(): Bundle =
+        Bundle().also {
+            it.putString(KEY, key)
+            it.putSerializable(ROUTE_TYPE, routeType)
+            it.putBoolean(IS_COMPOSE, isCompose)
+            it.putBoolean(LOCK_BACK, lockBack)
+        }
+
+    companion object
+    {
+        const val KEY = "com.speakerboxlite.router.ViewMeta.key"
+        const val ROUTE_TYPE = "com.speakerboxlite.router.ViewMeta.routeType"
+        const val IS_COMPOSE = "com.speakerboxlite.router.ViewMeta.isCompose"
+        const val LOCK_BACK = "com.speakerboxlite.router.ViewMeta.lockBack"
+
+        fun fromBundle(bundle: Bundle, router: RouterSimple): ViewMeta
+        {
+            val key = bundle.getString(KEY)!!
+            val routeType = bundle.getSerializable(ROUTE_TYPE) as RouteType
+            val isCompose = bundle.getBoolean(IS_COMPOSE)
+            val lockBack = bundle.getBoolean(LOCK_BACK)
+
+            val path = router.getPath(key)
+            val route = router.findRoute(path)
+
+            return ViewMeta(key, routeType, isCompose, route, path::class, lockBack)
+        }
     }
 }
 
@@ -53,12 +86,16 @@ internal interface RouterInternal
     fun routeInternal(execRouter: Router?, path: RoutePath, routeType: RouteType, presentation: Presentation?, viewResult: ViewResultData?): Router?
 }
 
-open class RouterSimple(protected val callerKey: String?,
-                        parent: RouterSimple?,
-                        protected val routeManager: RouteManager,
-                        internal val routerManager: RouterManager,
-                        protected val resultManager: ResultManager): Router, RouterInternal
+open class RouterSimple(
+    protected var callerKey: String?,
+    parent: RouterSimple?,
+    protected val routeManager: RouteManager,
+    internal val routerManager: RouterManager,
+    protected val resultManager: ResultManager): Router, RouterInternal
 {
+    final override var key: String = UUID.randomUUID().toString()
+        private set
+
     protected val pathData = mutableMapOf<String, RoutePath>()
 
     protected val commandBuffer: CommandBuffer = CommandBufferImpl()
@@ -85,8 +122,8 @@ open class RouterSimple(protected val callerKey: String?,
     protected var isClosing = false
 
     protected val routerTabsByKey = mutableMapOf<String, RouterTabsImpl>()
-    internal var rootPath: RoutePath? = null
-        private set
+    internal var rootPathKey: String? = null
+    internal val rootPath: RoutePath? get() = rootPathKey?.let { pathData[it] }
 
     init
     {
@@ -237,7 +274,7 @@ open class RouterSimple(protected val callerKey: String?,
             if (returnRouter == null)
                 returnRouter = r
         }
-        else if (callerKey == null || parent == null)
+        else if (parent == null)
         {
             returnRouter = _closeTo(0)
         }
@@ -253,7 +290,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun closeToTop(): Router?
     {
-        val returnRouter = if (callerKey == null || parent == null)
+        val returnRouter = if (parent == null)
         {
             _closeTo(0)
         }
@@ -378,6 +415,86 @@ open class RouterSimple(protected val callerKey: String?,
     }
 
     override fun createResultProvider(key: String): RouterResultProvider = RouterResultProviderImpl(key, resultManager)
+
+    override fun performSave(bundle: Bundle)
+    {
+        bundle.putString(KEY, key)
+        bundle.putString(CALLER, callerKey)
+
+        val pathDataBundle = Bundle()
+        pathData.forEach {
+            pathDataBundle.putSerializable(it.key, it.value)
+        }
+        bundle.putBundle(PATH_DATA, pathDataBundle)
+
+        bundle.putBoolean(IS_CLOSING, isClosing)
+        bundle.putString(ROOT_PATH, rootPathKey)
+        bundle.putBundles(VIEW_STACK, viewsStack.map { it.toBundle() })
+
+        val tabsBundle = Bundle()
+        routerTabsByKey.forEach {
+            val b = Bundle()
+            it.value.performSave(b)
+            tabsBundle.putBundle(it.key, b)
+        }
+
+        bundle.putBundle(ROUTER_TABS, tabsBundle)
+
+        if (child != null)
+        {
+            val childBundle = Bundle()
+            child?.performSave(childBundle)
+            bundle.putBundle(CHILD, childBundle)
+        }
+
+        if (parent == null)
+        {
+            val resBundle = Bundle()
+            resultManager.performSave(resBundle)
+            bundle.putBundle(RESULT_MANAGER, resBundle)
+        }
+    }
+
+    override fun performRestore(bundle: Bundle)
+    {
+        key = bundle.getString(KEY)!!
+        routerManager.push(this)
+
+        callerKey = bundle.getString(CALLER)
+        isClosing = bundle.getBoolean(IS_CLOSING)
+        rootPathKey = bundle.getString(ROOT_PATH)
+
+        val pathDataBundle = bundle.getBundle(PATH_DATA)!!
+        pathDataBundle.keySet().forEach { pathData[it] = pathDataBundle.getSerializable(it) as RoutePath }
+
+        val viewStackBundles = bundle.getBundles(VIEW_STACK)!!
+        viewsStack.clear()
+        viewsStack.addAll(viewStackBundles.map { ViewMeta.fromBundle(it, this) })
+
+        viewsStackById.clear()
+        viewsStackById.putAll(viewsStack.associateBy { it.key })
+
+        routerTabsByKey.clear()
+        val tabsBundle = bundle.getBundle(ROUTER_TABS)!!
+        tabsBundle.keySet().forEach {
+            createRouterTabs(it)
+            routerTabsByKey[it]!!.performRestore(tabsBundle.getBundle(it)!!)
+        }
+
+        val childBundle = bundle.getBundle(CHILD)
+        if (childBundle != null)
+        {
+            val child = createRouter("") as RouterSimple
+            child.performRestore(childBundle)
+            weakChild = WeakReference(child)
+        }
+
+        if (parent == null)
+        {
+            val resBundle = bundle.getBundle(RESULT_MANAGER)!!
+            resultManager.performRestore(resBundle)
+        }
+    }
 
     internal fun bindResult(from: String, result: ViewResultData)
     {
@@ -700,7 +817,7 @@ open class RouterSimple(protected val callerKey: String?,
             bindResult(view.viewKey, viewResult)
 
         if (viewsStack.isEmpty())
-            rootPath = path
+            rootPathKey = view.viewKey
 
         val meta = ViewMeta(view.viewKey, routeType, route.isCompose, route, path::class)
         viewsStack.add(meta)
@@ -744,5 +861,18 @@ open class RouterSimple(protected val callerKey: String?,
         }
 
         return totalStack
+    }
+
+    companion object
+    {
+        val KEY = "com.speakerboxlite.router.RouterSimple.key"
+        val CALLER = "com.speakerboxlite.router.RouterSimple.callerKey"
+        val PATH_DATA = "com.speakerboxlite.router.RouterSimple.pathData"
+        val IS_CLOSING = "com.speakerboxlite.router.RouterSimple.isClosing"
+        val ROOT_PATH = "com.speakerboxlite.router.RouterSimple.rootPathKey"
+        val VIEW_STACK = "com.speakerboxlite.router.RouterSimple.viewStack"
+        val ROUTER_TABS = "com.speakerboxlite.router.RouterSimple.routerTabsByKey"
+        val CHILD = "com.speakerboxlite.router.RouterSimple.child"
+        val RESULT_MANAGER = "com.speakerboxlite.router.RouterSimple.resultManager"
     }
 }

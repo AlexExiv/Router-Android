@@ -1,5 +1,6 @@
 package com.speakerboxlite.router
 
+import android.os.Bundle
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
@@ -12,6 +13,8 @@ import java.util.UUID
 
 open class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
 {
+    override val key: String get() = viewKey
+
     override val topRouter: Router? get() = router?.topRouter
 
     override val hasPreviousScreen: Boolean get() = router!!.hasPreviousScreen
@@ -83,6 +86,16 @@ open class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLoc
     }
 
     override fun createResultProvider(key: String): RouterResultProvider = router!!.createResultProvider(key)
+
+    override fun performSave(bundle: Bundle)
+    {
+        TODO("Not yet implemented")
+    }
+
+    override fun performRestore(bundle: Bundle)
+    {
+        TODO("Not yet implemented")
+    }
 
     override fun routeInContainer(containerId: Int, path: RoutePath): String
     {

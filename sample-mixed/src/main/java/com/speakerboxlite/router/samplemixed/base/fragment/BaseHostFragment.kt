@@ -30,7 +30,8 @@ class ComposeHostFragment: BaseHostFragment(),
 
     override fun onCloseHost()
     {
-        onCloseCallback!!.invoke()
+        parentFragmentManager.popBackStackImmediate()
+        //onCloseCallback!!.invoke()
     }
 }
 

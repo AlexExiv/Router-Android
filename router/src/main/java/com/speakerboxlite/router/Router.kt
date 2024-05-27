@@ -1,5 +1,6 @@
 package com.speakerboxlite.router
 
+import android.os.Bundle
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.command.CommandExecutor
 import com.speakerboxlite.router.controllers.RouteParamsGen
@@ -19,6 +20,8 @@ fun interface RouterResultDispatcher<VR: ViewResult, R>: Serializable
 
 interface Router
 {
+    val key: String
+
     /** Current top router **/
     val topRouter: Router?
 
@@ -169,4 +172,7 @@ interface Router
     fun removeView(key: String)
 
     fun createResultProvider(key: String): RouterResultProvider
+
+    fun performSave(bundle: Bundle)
+    fun performRestore(bundle: Bundle)
 }

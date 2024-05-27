@@ -1,5 +1,9 @@
 package com.speakerboxlite.router
 
+import android.os.Bundle
+import com.speakerboxlite.router.ext.getBundles
+import com.speakerboxlite.router.ext.putBundles
+
 interface RouterStack
 {
     val top: Router
@@ -11,6 +15,9 @@ interface RouterStack
     fun remove(viewKey: String)
 
     fun pop(toKey: String?): Router?
+
+    fun performSaveStack(bundle: Bundle)
+    fun performRestore(bundle: Bundle, routerManager: RouterManager)
 }
 
 class RouterStackImpl: RouterStack
@@ -78,7 +85,26 @@ class RouterStackImpl: RouterStack
 
         return stack.last().top
     }
+
+    override fun performSaveStack(bundle: Bundle)
+    {
+        bundle.putBundles(STACK, stack.map { it.toBundle() })
+    }
+
+    override fun performRestore(bundle: Bundle, routerManager: RouterManager)
+    {
+        stack.clear()
+        bundle.getBundles(STACK)!!.forEach { stack.add(routerStackEntryFromBundle(it, routerManager)) }
+    }
+
+    companion object
+    {
+        val STACK = "com.speakerboxlite.router.RouterStackImpl.stack"
+    }
 }
+
+private const val RouterStackSingleType = 0
+private const val RouterStackReelType = 1
 
 interface RouterStackEntry
 {
@@ -88,7 +114,17 @@ interface RouterStackEntry
     fun push(viewKey: String, router: Router): Boolean
     fun pop(toKey: String?): Router?
     fun remove(key: String): Boolean
+
+    fun toBundle(): Bundle
 }
+
+private fun routerStackEntryFromBundle(bundle: Bundle, routerManager: RouterManager): RouterStackEntry =
+    when (bundle.getInt("type"))
+    {
+        RouterStackSingleType -> RouterStackSingle.fromBundle(bundle, routerManager)
+        RouterStackReelType -> RouterStackReel.fromBundle(bundle, routerManager)
+        else -> error("")
+    }
 
 class RouterStackSingle(override val viewKey: String,
                         override val top: Router?): RouterStackEntry
@@ -98,6 +134,20 @@ class RouterStackSingle(override val viewKey: String,
     override fun pop(toKey: String?): Router? = null
 
     override fun remove(key: String): Boolean = false
+
+    override fun toBundle(): Bundle = Bundle()
+        .also {
+            it.putInt("type", RouterStackSingleType)
+            it.putString("viewKey", viewKey)
+        }
+
+    companion object
+    {
+        fun fromBundle(bundle: Bundle, routerManager: RouterManager): RouterStackSingle =
+            bundle
+                .getString("viewKey")!!
+                .let { RouterStackSingle(it, routerManager[it]) }
+    }
 }
 
 class RouterStackReel(override val viewKey: String,
@@ -106,7 +156,7 @@ class RouterStackReel(override val viewKey: String,
     override val top: Router? get() = if (currentIndex == -1) null else stacks[currentIndex]?.lastOrNull()?.top
 
     internal var currentIndex = 0
-    private val stacks = mutableMapOf<Int, MutableList<RouterStackEntry>>()
+    private val stacks = mutableMapOf<Int, MutableList<RouterStackSingle>>()
 
     override fun push(viewKey: String, router: Router): Boolean
     {
@@ -151,6 +201,34 @@ class RouterStackReel(override val viewKey: String,
         }
 
         return false
+    }
+
+    override fun toBundle(): Bundle =
+        Bundle()
+            .also {
+                it.putInt("type", RouterStackReelType)
+                it.putString("viewKey", viewKey)
+                it.putInt("currentIndex", currentIndex)
+                val stacksBundle = Bundle()
+                stacks.forEach { stacksBundle.putBundles(it.key.toString(), it.value.map { it.toBundle() }) }
+                it.putBundle("stacks", stacksBundle)
+            }
+
+    companion object
+    {
+        fun fromBundle(bundle: Bundle, routerManager: RouterManager): RouterStackReel =
+            bundle
+                .getString("viewKey")!!
+                .let {
+                    val rss = RouterStackReel(it, routerManager[it]!!.createRouterTabs(it))
+                    rss.currentIndex = bundle.getInt("currentIndex")
+                    val stacksBundle = bundle.getBundle("stacks")!!
+                    stacksBundle.keySet().forEach {
+                        rss.stacks[it.toInt()] = stacksBundle.getBundles(it)!!.map { RouterStackSingle.fromBundle(it, routerManager) }.toMutableList()
+                    }
+
+                    return@let rss
+                }
     }
 }
 
