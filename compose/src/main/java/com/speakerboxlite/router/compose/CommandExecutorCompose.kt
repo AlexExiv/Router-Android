@@ -73,6 +73,7 @@ open class CommandExecutorCompose(val navigator: ComposeNavigator,
 
     private fun closeAll()
     {
+        navigator.prepareToDispose()
         hostCloseable?.onCloseHost()
     }
 

@@ -1,5 +1,6 @@
 package com.speakerboxlite.router.command
 
+import android.os.Bundle
 import com.speakerboxlite.router.OnTabChangeCallback
 import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.View
@@ -29,4 +30,7 @@ interface CommandBuffer
 
     fun apply(command: Command)
     fun sync(items: List<String>): List<String>
+
+    fun performSave(bundle: Bundle)
+    fun performRestore(bundle: Bundle)
 }

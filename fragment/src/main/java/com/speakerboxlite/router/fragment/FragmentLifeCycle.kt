@@ -9,7 +9,6 @@ import com.speakerboxlite.router.HostActivityFactory
 import com.speakerboxlite.router.HostCloseable
 import com.speakerboxlite.router.HostView
 import com.speakerboxlite.router.R
-import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterManager
 import com.speakerboxlite.router.RouterManagerImpl
 import com.speakerboxlite.router.RouterModelProvider
@@ -153,10 +152,7 @@ open class FragmentLifeCycle(private val routerManager: RouterManager,
     {
         super.onFragmentStopped(fm, f)
 
-        if (f is HostView)
-        {
-            f.router.unbindExecutor()
-        }
+        unbindExecutor(f)
 
         if (f is ViewFragment)
         {
@@ -185,6 +181,14 @@ open class FragmentLifeCycle(private val routerManager: RouterManager,
 
         if (f is HostView && (f.isPoppedRecursive || f.requireActivity().isFinishing))
             f.router.removeView(f.viewKey)
+    }
+
+    protected open fun unbindExecutor(fragment: Fragment)
+    {
+        if (fragment is HostView)
+        {
+            fragment.router.unbindExecutor()
+        }
     }
 
     protected open fun onCreateExecutor(fragment: Fragment): CommandExecutor? =

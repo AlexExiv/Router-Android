@@ -77,7 +77,7 @@ class RouterManagerImpl: RouterManager, RouterStack by RouterStackImpl()
 
     override fun performRestore(bundle: Bundle?)
     {
-        //if (isRestored) // restore state only once in case when the App has been recreated
+        //if (isRestored) // restore state only once in case when the App has been recreated because the Router lives in the App's context
             //return
 
         isRestored = true

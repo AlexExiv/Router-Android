@@ -1,5 +1,6 @@
 package com.speakerboxlite.router.command
 
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import com.speakerboxlite.router.ext.checkMainThread
@@ -62,6 +63,19 @@ internal class CommandBufferImpl : CommandBuffer
         return itemsRet
     }
 
+    override fun performSave(bundle: Bundle)
+    {
+        val root = Bundle()
+
+        //root.putSerializable("1", buffer[0])
+
+        bundle.putBundle(ROOT, root)
+    }
+
+    override fun performRestore(bundle: Bundle)
+    {
+
+    }
 
     private fun executeCommands()
     {
@@ -122,5 +136,10 @@ internal class CommandBufferImpl : CommandBuffer
 
         executingCommands = true
         mainHandler.postDelayed({ executeCommands() }, 1)
+    }
+
+    companion object
+    {
+        const val ROOT = "com.speakerboxlite.router.command.CommandBufferImpl"
     }
 }

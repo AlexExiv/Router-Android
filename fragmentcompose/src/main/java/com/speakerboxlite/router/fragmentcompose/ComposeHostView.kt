@@ -8,7 +8,7 @@ import com.speakerboxlite.router.compose.ComposeHostViewRoot
  */
 interface ComposeHostView: HostView
 {
-    var root: ComposeHostViewRoot
+    var root: ComposeHostViewRoot // unused
 }
 
 /**
@@ -16,5 +16,5 @@ interface ComposeHostView: HostView
  */
 interface ComposeFragmentHostView: HostView
 {
-    var onCloseCallback: (() -> Unit)?
+    var onCloseCallback: (() -> Unit)? // unused
 }

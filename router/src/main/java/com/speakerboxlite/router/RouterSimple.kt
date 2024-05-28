@@ -804,22 +804,23 @@ open class RouterSimple(
     internal fun createView(route: RouteControllerInterface<RoutePath, *>, routeType: RouteType, path: RoutePath, viewResult: ViewResultData?): View
     {
         val view = route.onCreateView(path)
-        view.viewKey = UUID.randomUUID().toString()
-        pathData[view.viewKey] = path
-        bindRouter(view.viewKey)
+        val viewKey = UUID.randomUUID().toString()
+        view.viewKey = viewKey
+        pathData[viewKey] = path
+        bindRouter(viewKey)
 
         val chain = scanForChain()
 
         // if there is a chain and this path is a part of the chain the result has to be delivered to the chain's caller
         if (chain != null && chain.route.isPartOfChain(path::class))
-            resultManager.bind(chain.key, view.viewKey)
+            resultManager.bind(chain.key, viewKey)
         else if (viewResult != null) //otherwise check for viewResult and result dispatcher
-            bindResult(view.viewKey, viewResult)
+            bindResult(viewKey, viewResult)
 
         if (viewsStack.isEmpty())
-            rootPathKey = view.viewKey
+            rootPathKey = viewKey
 
-        val meta = ViewMeta(view.viewKey, routeType, route.isCompose, route, path::class)
+        val meta = ViewMeta(viewKey, routeType, route.isCompose, route, path::class)
         viewsStack.add(meta)
         viewsStackById[meta.key] = meta
 
