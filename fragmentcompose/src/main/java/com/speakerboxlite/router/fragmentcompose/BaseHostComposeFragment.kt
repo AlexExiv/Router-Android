@@ -40,13 +40,14 @@ abstract class BaseHostComposeFragment: Fragment(),
     override fun onStart()
     {
         super.onStart()
-        //root.value = { Navigator() }
+        root.value = { Root() }
     }
 
-    override fun onPause()
+    override fun onStop()
     {
-        super.onPause()
+        super.onStop()
         savedState = stateRegistry?.performSave() ?: mapOf()
+        root.value = null
     }
 
     override fun onSaveInstanceState(outState: Bundle)

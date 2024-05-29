@@ -31,7 +31,7 @@ open class RouterInjector(callerKey: String?,
     {
         super.onPrepareView(view, viewModel)
 
-        val path = pathData[view.viewKey]!!
+        val path = dataStorage[view.viewKey]!!
         val route = routeManager.find(path) ?: throw RouteNotFoundException(path)
         val routeComponent = route as? RouteControllerComponent<RoutePath, View, *>
 
@@ -71,7 +71,7 @@ open class RouterInjector(callerKey: String?,
             return componentProvider.appComponent
 
         val compKey = componentProvider.componentKey(viewKey)
-        val meta = viewsStackById[compKey]!!
+        val meta = _viewsStackById[compKey]!!
 
         return if (metaComponents[meta.key] != null)
         {
@@ -84,11 +84,11 @@ open class RouterInjector(callerKey: String?,
         }
         else
         {
-            val i = viewsStack.indexOfFirst { it.key == compKey }
+            val i = _viewsStack.indexOfFirst { it.key == compKey }
 
             if (i == -1)
             {
-                val srcMeta = viewsStackById[viewKey]!!
+                val srcMeta = _viewsStackById[viewKey]!!
                 throw IllegalStateException("There is no such record in the views stack. How could it be. ViewMeta: $srcMeta ; CompMeta: $meta")
             }
 
@@ -99,13 +99,13 @@ open class RouterInjector(callerKey: String?,
 
     protected fun scanForTopComponent(viewKey: String, metaComponents: MutableMap<String, ViewMetaComponent>, startFrom: Int?, compClass: KClass<*>): Any
     {
-        if (parent == null && viewsStack.size == 1)
-            return getComponent(viewKey, metaComponents, viewsStack[0].key, viewsStack[0].route)
+        if (parent == null && _viewsStack.size == 1)
+            return getComponent(viewKey, metaComponents, _viewsStack[0].key, _viewsStack[0].route)
 
-        val s = startFrom ?: (viewsStack.size - 1)
+        val s = startFrom ?: (_viewsStack.size - 1)
         for (i in s downTo 0)
         {
-            val v = viewsStack[i]
+            val v = _viewsStack[i]
             val routeComp = (v.route as? RouteControllerComponent<RoutePath, View, *>)?.componentClass ?: continue
             if (routeComp == compClass && v.route.creatingInjector)
                 return getComponent(viewKey, metaComponents, v.key, v.route)
@@ -124,11 +124,11 @@ open class RouterInjector(callerKey: String?,
 
         if (comp == null)
         {
-            comp = routeComponent.onCreateInjector(pathData[componentKey]!!, componentProvider.appComponent)
+            comp = routeComponent.onCreateInjector(dataStorage[componentKey]!!, componentProvider.appComponent)
             componentProvider.bind(componentKey, comp)
         }
 
-        metaComponents[viewKey] = ViewMetaComponent(componentKey, routeComponent, pathData[componentKey]!!)
+        metaComponents[viewKey] = ViewMetaComponent(componentKey, routeComponent, dataStorage[componentKey]!!)
 
         return comp
     }

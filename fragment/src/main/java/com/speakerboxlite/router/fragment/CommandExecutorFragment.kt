@@ -15,15 +15,18 @@ import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandExecutor
+import com.speakerboxlite.router.command.ViewFactoryInterface
+import com.speakerboxlite.router.command.getViewKey
 import com.speakerboxlite.router.fragment.ext.isPopped
 import com.speakerboxlite.router.fragment.ext.isRemovingRecursive
 import java.io.Serializable
 
-open class CommandExecutorFragment(val activity: FragmentActivity,
-                                   @IdRes val containerId: Int,
-                                   val fragmentManager: FragmentManager,
-                                   val activityFactory: HostActivityFactory? = null,
-                                   val hostCloseable: HostCloseable? = null): CommandExecutor
+open class CommandExecutorFragment(
+    val activity: FragmentActivity,
+    @IdRes val containerId: Int,
+    val fragmentManager: FragmentManager,
+    val activityFactory: HostActivityFactory? = null,
+    val hostCloseable: HostCloseable? = null): CommandExecutor
 {
     val backstackCallback = object : OnBackStackChangedListener
     {
@@ -39,13 +42,17 @@ open class CommandExecutorFragment(val activity: FragmentActivity,
         }
     }
 
-    override fun onBind()
+    protected var viewFactory: ViewFactoryInterface? = null
+
+    override fun onBind(factory: ViewFactoryInterface?)
     {
+        viewFactory = factory
         fragmentManager.addOnBackStackChangedListener(backstackCallback)
     }
 
     override fun onUnbind()
     {
+        viewFactory = null
         fragmentManager.removeOnBackStackChangedListener(backstackCallback)
     }
 
@@ -70,20 +77,41 @@ open class CommandExecutorFragment(val activity: FragmentActivity,
     {
         checkFragmentManager()
 
+        val viewKey = command.getViewKey()
+        if (viewKey != null)
+        {
+            executeWithView(viewKey, command)
+        }
+        else
+        {
+            when (command)
+            {
+                is Command.Close -> close()
+                is Command.CloseTo -> closeTo(command.viewKey)
+                is Command.CloseAll -> closeAll()
+                is Command.StartModal -> startActivity(command.viewKey, command.params)
+                is Command.CloseDialog -> closeDialog(command.viewKey)
+                is Command.CloseBottomSheet -> closeBottomSheet(command.viewKey)
+                is Command.ChangeTab -> command.tabChangeCallback(command.tab)
+                else -> {}
+            }
+        }
+    }
+
+    protected fun executeWithView(viewKey: String, command: Command)
+    {
+        checkNotNull(viewFactory) { "ViewFactory hasn't been set" }
+        val view = viewFactory?.createView(viewKey) ?: return
+        val animation = viewFactory?.createAnimation(view) as? AnimationControllerFragment<RoutePath, View>
+
         when (command)
         {
-            is Command.Close -> close()
-            is Command.CloseTo -> closeTo(command.key)
-            is Command.CloseAll -> closeAll()
-            is Command.StartModal -> startActivity(command.key, command.params)
-            is Command.Dialog -> showDialog(command.view)
-            is Command.CloseDialog -> closeDialog(command.key)
-            is Command.Push -> pushFragment(command.path, command.view, command.animation as? AnimationControllerFragment<RoutePath, View>, false)
-            is Command.Replace -> replaceFragment(command.path, command.byView, command.animation as? AnimationControllerFragment<RoutePath, View>)
-            is Command.BottomSheet -> showBottomSheet(command.view)
-            is Command.CloseBottomSheet -> closeBottomSheet(command.key)
-            is Command.SubFragment -> showSubFragment(command.containerId, command.view)
-            is Command.ChangeTab -> command.tabChangeCallback(command.tab)
+            is Command.Dialog -> showDialog(view)
+            is Command.Push -> pushFragment(command.path, view, animation, false)
+            is Command.Replace -> replaceFragment(command.path, view, animation)
+            is Command.BottomSheet -> showBottomSheet(view)
+            is Command.SubFragment -> showSubFragment(command.containerId, view)
+            else -> {}
         }
     }
 

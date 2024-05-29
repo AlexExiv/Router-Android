@@ -20,4 +20,6 @@ interface RouterManager
     fun pushReel(viewKey: String, routerTabs: RouterTabs)
     fun switchReel(viewKey: String, index: Int)
     fun remove(viewKey: String)
+
+    fun provideDataStorage(): PathDataStorage
 }

@@ -7,6 +7,7 @@ import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
 import com.speakerboxlite.router.command.CommandBufferImpl
 import com.speakerboxlite.router.command.CommandExecutor
+import com.speakerboxlite.router.command.ViewFactory
 import com.speakerboxlite.router.controllers.RouteParamsGen
 import com.speakerboxlite.router.controllers.TabsProperties
 import java.lang.ref.WeakReference
@@ -28,7 +29,7 @@ class RouterTabsImpl(var viewKey: String,
 
     override var tabChangeCallback: OnTabChangeCallback? = null
 
-    protected val commandBuffer: CommandBuffer = CommandBufferImpl()
+    protected val commandBuffer: CommandBuffer = CommandBufferImpl(null)
     protected val tabRouters = mutableMapOf<Int, RouterSimple>()
     protected val tabRoutersKeys = mutableMapOf<Int, String>()
 

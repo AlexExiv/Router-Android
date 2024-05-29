@@ -18,12 +18,13 @@ interface HostFragmentComposeFactory
     fun onCreateAnimation(): AnimationControllerFragment<RoutePath, View>?
 }
 
-class CommandExecutorFragmentMixed(activity: FragmentActivity,
-                                   @IdRes containerId: Int,
-                                   fragmentManager: FragmentManager,
-                                   activityFactory: HostActivityFactory? = null,
-                                   hostCloseable: HostCloseable? = null,
-                                   val fragmentFactory: HostFragmentComposeFactory? = null): CommandExecutorFragment(activity, containerId, fragmentManager, activityFactory, hostCloseable)
+class CommandExecutorFragmentMixed(
+    activity: FragmentActivity,
+    @IdRes containerId: Int,
+    fragmentManager: FragmentManager,
+    activityFactory: HostActivityFactory? = null,
+    hostCloseable: HostCloseable? = null,
+    val fragmentFactory: HostFragmentComposeFactory? = null): CommandExecutorFragment(activity, containerId, fragmentManager, activityFactory, hostCloseable)
 {
     override fun pushFragment(path: RoutePath?, view: View, animation: AnimationControllerFragment<RoutePath, View>?, replacing: Boolean)
     {

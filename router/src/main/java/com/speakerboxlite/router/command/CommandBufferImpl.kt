@@ -3,9 +3,19 @@ package com.speakerboxlite.router.command
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import com.speakerboxlite.router.View
+import com.speakerboxlite.router.controllers.AnimationController
 import com.speakerboxlite.router.ext.checkMainThread
+import com.speakerboxlite.router.ext.getSerializables
+import com.speakerboxlite.router.ext.putSerializables
 
-internal class CommandBufferImpl : CommandBuffer
+interface ViewFactoryInterface
+{
+    fun createView(key: String): View?
+    fun createAnimation(view: View): AnimationController?
+}
+
+internal class CommandBufferImpl(val factory: ViewFactoryInterface?): CommandBuffer
 {
     private var executor: CommandExecutor? = null
     private val buffer = mutableListOf<Command>()
@@ -19,7 +29,7 @@ internal class CommandBufferImpl : CommandBuffer
 
         this.executor = executor
 
-        executor.onBind()
+        executor.onBind(factory)
         executeCommands()
     }
 
@@ -45,17 +55,7 @@ internal class CommandBufferImpl : CommandBuffer
 
         for (b in buffer)
         {
-            val key = when (b)
-            {
-                is Command.StartModal -> b.key
-                is Command.Push -> b.view.viewKey
-                is Command.Replace -> b.byView.viewKey
-                is Command.BottomSheet -> b.view.viewKey
-                is Command.Dialog -> b.view.viewKey
-                is Command.SubFragment -> b.view.viewKey
-                else -> null
-            }
-
+            val key = b.getViewKey()
             if (key != null)
                 itemsRet.remove(key)
         }
@@ -67,14 +67,16 @@ internal class CommandBufferImpl : CommandBuffer
     {
         val root = Bundle()
 
-        //root.putSerializable("1", buffer[0])
+        root.putSerializables(BUFFER, buffer)
 
         bundle.putBundle(ROOT, root)
     }
 
     override fun performRestore(bundle: Bundle)
     {
-
+        val root = bundle.getBundle(ROOT)
+        buffer.clear()
+        buffer.addAll(root!!.getSerializables(BUFFER) as? List<Command> ?: listOf())
     }
 
     private fun executeCommands()
@@ -141,5 +143,6 @@ internal class CommandBufferImpl : CommandBuffer
     companion object
     {
         const val ROOT = "com.speakerboxlite.router.command.CommandBufferImpl"
+        const val BUFFER = "com.speakerboxlite.router.command.CommandBufferImpl.buffer"
     }
 }

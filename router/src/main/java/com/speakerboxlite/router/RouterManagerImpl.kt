@@ -15,8 +15,10 @@ class RouterManagerImpl: RouterManager, RouterStack by RouterStackImpl()
     private var isRestored = false
     private var rootRouter: RouterSimple? = null
 
-    internal val routers = mutableMapOf<String, RouterRecord>()
+    private val routers = mutableMapOf<String, RouterRecord>()
     internal val routerByView = mutableMapOf<String, Router>()
+
+    private val dataStorage = PathDataStorageImpl()
 
     override fun push(router: Router)
     {
@@ -58,6 +60,8 @@ class RouterManagerImpl: RouterManager, RouterStack by RouterStackImpl()
     {
         val root = Bundle()
 
+        dataStorage.performSave(root)
+
         if (rootRouter != null)
         {
             val routerBundle = Bundle()
@@ -85,6 +89,8 @@ class RouterManagerImpl: RouterManager, RouterStack by RouterStackImpl()
 
         val root = bundle.getBundle(ROOT)!!
 
+        dataStorage.performRestore(root)
+
         routers.clear()
         val routerBundle = root.getBundle(ROOT_ROUTER)
         if (routerBundle != null)
@@ -100,6 +106,8 @@ class RouterManagerImpl: RouterManager, RouterStack by RouterStackImpl()
 
         performRestore(root, this)
     }
+
+    override fun provideDataStorage(): PathDataStorage = dataStorage
 
     @InternalApi
     fun resetToTop()
