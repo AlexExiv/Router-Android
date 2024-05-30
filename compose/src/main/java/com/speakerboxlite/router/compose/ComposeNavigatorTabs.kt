@@ -102,6 +102,7 @@ fun ComposeNavigatorTabs(
 
         DisposableEffect(navigator)
         {
+            navigator.onDisposeCallback = OnDisposeCallback { key -> router.removeView(key) }
             router.bindExecutor(executorFactory.onCreate(navigator))
 
             onDispose {

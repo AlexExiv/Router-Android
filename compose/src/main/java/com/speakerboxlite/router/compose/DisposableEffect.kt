@@ -4,12 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 
 @Composable
-fun CompleteTransitionEffect(stackEntry: StackEntry, navigator: ComposeNavigator)
+fun CompleteTransitionEffect(stackEntry: StackEntry?, navigator: ComposeNavigator)
 {
     DisposableEffect(key1 = stackEntry) {
 
         onDispose {
-            navigator.completeTransition(stackEntry.id)
+            if (stackEntry != null)
+                navigator.completeTransition(stackEntry.id)
         }
     }
 }

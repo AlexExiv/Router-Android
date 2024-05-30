@@ -63,6 +63,8 @@ fun CurrentContent(router: Router, navigator: ComposeNavigator)
 
     ModalBottomSheetLayout(
         sheetContent = {
+            CompleteTransitionEffect(stackEntry = stackBottomSheet, navigator = navigator)
+
             stackBottomSheet?.LocalOwnersProvider(navigator.stateHolder)
             {
                 stackBottomSheet.view.Root()
@@ -107,6 +109,8 @@ fun CurrentContent(router: Router, navigator: ComposeNavigator)
     {
         Dialog(onDismissRequest = { router.back() })
         {
+            CompleteTransitionEffect(stackEntry = stackDialog, navigator = navigator)
+
             stackDialog.LocalOwnersProvider(saveableStateHolder = navigator.stateHolder)
             {
                 stackDialog.view.Root()
