@@ -27,6 +27,8 @@ open class ActivityLifeCycle(val routerManager: RouterManager): Application.Acti
         if (p0 is BaseHostView)
         {
             p0.routerManager = routerManager
+            p0.routerManager.performRestore(p1)
+
             val router = routerManager[p0.hostActivityKey]
 
             //In case of we couldn't find the router start the restarting process. It may occur after the app restores the state after the reboot maybe better
@@ -68,6 +70,9 @@ open class ActivityLifeCycle(val routerManager: RouterManager): Application.Acti
 
     override fun onActivitySaveInstanceState(p0: Activity, p1: Bundle)
     {
+        if (p0 is BaseHostView)
+            p0.routerManager.performSave(p1)
+
         if (p0.hostActivityKey == START_ACTIVITY_KEY)//stop the app restarting process if this is a START_ACTIVITY
             (routerManager as? RouterManagerImpl)?.isAppRestarting = false
     }

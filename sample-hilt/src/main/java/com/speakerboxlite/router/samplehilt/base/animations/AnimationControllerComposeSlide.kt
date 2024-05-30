@@ -21,11 +21,11 @@ class AnimationControllerComposeSlide: AnimationControllerCompose
         if (navigator.lastFullItem == null)
             return ContentTransformNone
 
-        val lastEntry = navigator.poppingEntries?.lastOrNull()
-        val isPopping = if (lastEntry?.view is ViewDialog || lastEntry?.view is ViewBTS)
+        val lastEntry = scope.initialState
+        val isPopping = if (lastEntry.view is ViewDialog || lastEntry.view is ViewBTS)
             false
         else
-            lastEntry?.isRemoving == true
+            lastEntry.isRemoving
 
         val animTime = 300
         val fadeIn = fadeIn(animationSpec = tween(animTime)) + slideInHorizontally(animationSpec = tween(animTime), initialOffsetX = { if (isPopping) -it / 2 else it })

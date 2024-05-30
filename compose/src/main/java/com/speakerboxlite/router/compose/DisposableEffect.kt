@@ -9,7 +9,8 @@ fun CompleteTransitionEffect(stackEntry: StackEntry?, navigator: ComposeNavigato
     DisposableEffect(key1 = stackEntry) {
 
         onDispose {
-            navigator.completeTransition()
+            if (stackEntry != null)
+                navigator.completeTransition(stackEntry.id)
         }
     }
 }

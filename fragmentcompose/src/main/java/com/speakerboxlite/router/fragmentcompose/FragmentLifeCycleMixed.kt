@@ -3,6 +3,7 @@ package com.speakerboxlite.router.fragmentcompose
 import androidx.fragment.app.Fragment
 import com.speakerboxlite.router.HostActivityFactory
 import com.speakerboxlite.router.HostCloseable
+import com.speakerboxlite.router.HostView
 import com.speakerboxlite.router.R
 import com.speakerboxlite.router.RouterManager
 import com.speakerboxlite.router.command.CommandExecutor
@@ -13,6 +14,14 @@ class FragmentLifeCycleMixed(routerManager: RouterManager,
                              modelProvider: FragmentModelProvider? = null,
                              val fragmentFactory: HostFragmentComposeFactory? = null): FragmentLifeCycle(routerManager, modelProvider)
 {
+    override fun unbindExecutor(fragment: Fragment)
+    {
+        if (fragment is HostView && fragment !is ComposeHostView)
+        {
+            fragment.router.unbindExecutor()
+        }
+    }
+
     override fun onCreateExecutor(fragment: Fragment): CommandExecutor? =
         if (fragment is ComposeHostView)
             null

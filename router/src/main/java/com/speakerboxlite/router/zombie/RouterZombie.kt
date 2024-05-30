@@ -1,5 +1,6 @@
 package com.speakerboxlite.router.zombie
 
+import android.os.Bundle
 import com.speakerboxlite.router.RouterResultDispatcher
 import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.RoutePathResult
@@ -15,10 +16,13 @@ import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.command.CommandExecutor
 import com.speakerboxlite.router.controllers.RouteParamsGen
 import com.speakerboxlite.router.result.RouterResultProvider
+import java.util.UUID
 
 @InternalApi
 class RouterZombie : Router, RouterLocal
 {
+    override val key: String = UUID.randomUUID().toString()
+
     override var topRouter: Router? = null
 
     override val hasPreviousScreen: Boolean get() = false
@@ -77,6 +81,16 @@ class RouterZombie : Router, RouterLocal
     }
 
     override fun createResultProvider(key: String): RouterResultProvider = RouterResultProviderZombie()
+
+    override fun performSave(bundle: Bundle)
+    {
+
+    }
+
+    override fun performRestore(bundle: Bundle)
+    {
+
+    }
 
     override fun routeInContainer(containerId: Int, path: RoutePath): String = ""
 

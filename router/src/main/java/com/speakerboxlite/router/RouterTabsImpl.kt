@@ -1,18 +1,21 @@
 package com.speakerboxlite.router
 
+import android.os.Bundle
 import com.speakerboxlite.router.annotations.Presentation
+import com.speakerboxlite.router.annotations.SingleTop
 import com.speakerboxlite.router.annotations.TabUnique
 import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
 import com.speakerboxlite.router.command.CommandBufferImpl
 import com.speakerboxlite.router.command.CommandExecutor
+import com.speakerboxlite.router.command.ViewFactory
 import com.speakerboxlite.router.controllers.RouteParamsGen
 import com.speakerboxlite.router.controllers.TabsProperties
 import java.lang.ref.WeakReference
 import java.util.UUID
 import kotlin.reflect.KClass
 
-class RouterTabsImpl(val viewKey: String,
+class RouterTabsImpl(var viewKey: String,
                      val callerKey: String,
                      router: RouterSimple,
                      val tabRouteInParent: Boolean,
@@ -27,7 +30,7 @@ class RouterTabsImpl(val viewKey: String,
 
     override var tabChangeCallback: OnTabChangeCallback? = null
 
-    protected val commandBuffer: CommandBuffer = CommandBufferImpl()
+    protected val commandBuffer: CommandBuffer = CommandBufferImpl(null)
     protected val tabRouters = mutableMapOf<Int, RouterSimple>()
     protected val tabRoutersKeys = mutableMapOf<Int, String>()
 
@@ -57,8 +60,8 @@ class RouterTabsImpl(val viewKey: String,
             routerTab.route(path, Presentation.Push)
 
             tabRouters[index] = routerTab as RouterSimple
-            router.routerManager[viewKey] = tabRouters[index]!!
             tabRoutersKeys[index] = viewKey
+            router.routerManager[viewKey] = tabRouters[index]!!
 
             viewKey
         }
@@ -112,13 +115,18 @@ class RouterTabsImpl(val viewKey: String,
 
     override operator fun get(index: Int): RouterTab = tabRouters[index]!! as RouterTab
 
-    internal fun scanForPath(clazz: KClass<*>): ViewMeta?
+    internal fun scanForPath(path: RoutePath, singleTop: SingleTop): ViewMeta?
     {
         for (kv in tabRouters)
         {
-            val v = kv.value.scanForPath(clazz, false)
+            val top = kv.value.branchTopRouter
+            val v = top.scanForPath(path, singleTop, false)
             if (v != null)
+            {
+                route(kv.key)
+                top.closeTo(v.key)
                 return v
+            }
         }
 
         return null
@@ -138,6 +146,56 @@ class RouterTabsImpl(val viewKey: String,
         return if (i == -1) null else i
     }
 
+    internal fun performSave(bundle: Bundle)
+    {
+        bundle.putString(KEY, viewKey)
+        bundle.putString(CALLER, callerKey)
+        bundle.putBoolean("tabRouteInParent", tabRouteInParent)
+        bundle.putBoolean("backToFirst", backToFirst)
+        bundle.putSerializable("tabUnique", tabUnique)
+        bundle.putInt(TAB_INDEX, tabIndex)
+
+        val tabRoutersKeysBundle = Bundle()
+        tabRoutersKeys.forEach {
+            tabRoutersKeysBundle.putString(it.key.toString(), it.value)
+        }
+        bundle.putBundle(TAB_ROUTERS_KEY, tabRoutersKeysBundle)
+
+        val tabRoutersBundle = Bundle()
+        tabRouters.forEach {
+            val b = Bundle()
+            it.value.performSave(b)
+            tabRoutersBundle.putBundle(it.key.toString(), b)
+        }
+        bundle.putBundle(TAB_ROUTERS, tabRoutersBundle)
+    }
+
+    internal fun performRestore(bundle: Bundle)
+    {
+        viewKey = bundle.getString(KEY)!!
+        tabIndex = bundle.getInt(TAB_INDEX) // Will it be restored properly?
+
+        tabRouters.clear()
+        val tabRoutersBundle = bundle.getBundle(TAB_ROUTERS)!!
+        tabRoutersBundle.keySet().forEach {
+            val index = it.toInt()
+            val routerTab = router.createRouterTab(callerKey, index, this)
+            routerTab.performRestore(tabRoutersBundle.getBundle(it)!!)
+
+            tabRouters[index] = routerTab as RouterSimple
+        }
+
+        tabRoutersKeys.clear()
+        val tabRoutersKeysBundle = bundle.getBundle(TAB_ROUTERS_KEY)!!
+        tabRoutersKeysBundle.keySet().forEach {
+            val index = it.toInt()
+            val viewKey = tabRoutersKeysBundle.getString(it)!!
+
+            tabRoutersKeys[index] = viewKey
+            router.routerManager[viewKey] = tabRouters[index]!!
+        }
+    }
+
     protected fun showTab(i: Int)
     {
         tabIndex = i
@@ -146,5 +204,14 @@ class RouterTabsImpl(val viewKey: String,
             router.routerManager.switchReel(viewKey, i)
             commandBuffer.apply(Command.ChangeTab(tabChangeCallback!!, i))
         }
+    }
+
+    companion object
+    {
+        const val KEY = "com.speakerboxlite.router.RouterTabsImpl.viewKey"
+        const val CALLER = "com.speakerboxlite.router.RouterTabsImpl.callerKey"
+        const val TAB_INDEX = "com.speakerboxlite.router.RouterTabsImpl.tabIndex"
+        const val TAB_ROUTERS_KEY = "com.speakerboxlite.router.RouterTabsImpl.tabRoutersKeys"
+        const val TAB_ROUTERS = "com.speakerboxlite.router.RouterTabsImpl.tabRouters"
     }
 }

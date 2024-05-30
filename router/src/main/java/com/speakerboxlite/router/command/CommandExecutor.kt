@@ -2,7 +2,7 @@ package com.speakerboxlite.router.command
 
 interface CommandExecutor
 {
-    fun onBind()
+    fun onBind(factory: ViewFactoryInterface?)
     fun onUnbind()
 
     fun execute(command: Command)

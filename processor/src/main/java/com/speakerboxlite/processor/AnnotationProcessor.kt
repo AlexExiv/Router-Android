@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService
 import com.speakerboxlite.router.annotations.Chain
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.annotations.Route
+import com.speakerboxlite.router.annotations.SingleTop
 import com.speakerboxlite.router.annotations.Tabs
 import com.squareup.kotlinpoet.ANY
 import com.squareup.kotlinpoet.ClassName
@@ -58,7 +59,11 @@ class AnnotationProcessor : AbstractProcessor()
             val processorMiddleware = MiddlewareProcessor(roundEnv)
             val middlewares = processorMiddleware.prepareMiddlewares()
 
-            val pack = processingEnv.elementUtils.getPackageOf(roundEnv.rootElements.first()).toString()
+            val firstElem = roundEnv.rootElements
+                .mapNotNull { it as? TypeElement }
+                .firstOrNull { it.hasAnyParent(listOf("Application", "MultiDexApplication")) }
+
+            val pack = processingEnv.elementUtils.getPackageOf(firstElem ?: roundEnv.rootElements.first()).toString()
 
             val fileName = "RouterComponentImpl"
             val fileBuilder = FileSpec.builder(pack, fileName)
@@ -238,8 +243,11 @@ class AnnotationProcessor : AbstractProcessor()
         //val tabAnnotation = element.getAnnotation(Tab::class.java)
         val tabsAnnotation = element.getAnnotation(Tabs::class.java)
 
-        if (annotation.singleTop)
-            initBuilder.addStatement("${valName}.singleTop = true")
+        if (annotation.singleTop != SingleTop.None)
+        {
+            val singleTopEnum = ClassName("$MAIN_ROUTER_PACK.annotations", "SingleTop")
+            initBuilder.addStatement("${valName}.singleTop = %T.%L", singleTopEnum, annotation.singleTop.toString())
+        }
 
         if (tabsAnnotation != null)
         {
@@ -334,12 +342,12 @@ fun TypeElement.hasParent(name: String, interfaces: Boolean = false): Boolean
     val sc = superclass as? DeclaredType ?: return false
     val sd = sc.asElement() as TypeElement
 
-    println("TypeElement.hasParent: $name ; ${sd.simpleName} ; ${this.interfaces.mapNotNull { (it as? DeclaredType)?.asElement()?.simpleName }}")
-    println("TypeElement.hasParent: $name ; ${(this.interfaces.firstOrNull { (it as? DeclaredType)?.asElement()?.simpleName?.contentEquals(name) == true } != null)} ; ${this.interfaces.mapNotNull { (it as? DeclaredType)?.asElement()?.simpleName }}")
+    //println("TypeElement.hasParent: $name ; ${sd.simpleName} ; ${this.interfaces.mapNotNull { (it as? DeclaredType)?.asElement()?.simpleName }}")
+    //println("TypeElement.hasParent: $name ; ${(this.interfaces.firstOrNull { (it as? DeclaredType)?.asElement()?.simpleName?.contentEquals(name) == true } != null)} ; ${this.interfaces.mapNotNull { (it as? DeclaredType)?.asElement()?.simpleName }}")
 
     if (sd.simpleName.contentEquals(name) || (interfaces && this.interfaces.firstOrNull { (it as? DeclaredType)?.asElement()?.simpleName?.contentEquals(name) == true } != null))
     {
-        println("TypeElement.hasParent: $name ; Success ; ${sd.simpleName}")
+        //println("TypeElement.hasParent: $name ; Success ; ${sd.simpleName}")
         return true
     }
 

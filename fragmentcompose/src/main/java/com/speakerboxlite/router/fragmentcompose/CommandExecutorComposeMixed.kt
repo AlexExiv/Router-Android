@@ -18,11 +18,12 @@ interface ComposeViewHoster: com.speakerboxlite.router.compose.ComposeViewHoster
     fun onCreateAnimation(): AnimationControllerFragment<RoutePath, View>?
 }
 
-class CommandExecutorComposeMixed(navigator: ComposeNavigator,
-                                  @IdRes val containerId: Int,
-                                  val fragmentManager: FragmentManager,
-                                  hoster: ComposeViewHoster? = null,
-                                  hostCloseable: HostCloseable? = null): CommandExecutorCompose(navigator, hoster, hostCloseable)
+class CommandExecutorComposeMixed(
+    navigator: ComposeNavigator,
+    @IdRes val containerId: Int,
+    val fragmentManager: FragmentManager,
+    hoster: ComposeViewHoster? = null,
+    hostCloseable: HostCloseable? = null): CommandExecutorCompose(navigator, hoster, hostCloseable)
 {
     override fun push(path: RoutePath?, view: View, animationController: AnimationControllerCompose?)
     {

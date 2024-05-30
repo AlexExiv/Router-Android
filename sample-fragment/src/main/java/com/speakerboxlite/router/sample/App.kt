@@ -9,7 +9,6 @@ import com.speakerboxlite.router.sample.di.modules.AppModule
 import com.speakerboxlite.router.sample.di.modules.UserData
 import com.speakerboxlite.router.sample.di.modules.UserModule
 import com.speakerboxlite.router.sample.main.MainPath
-import com.speakerboxlite.router.samplefragment.RouterComponentImpl
 
 class App: FragmentApplication<RouterComponentImpl>()
 {

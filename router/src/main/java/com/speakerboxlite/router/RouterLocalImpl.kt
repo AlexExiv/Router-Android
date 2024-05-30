@@ -1,10 +1,12 @@
 package com.speakerboxlite.router
 
+import android.os.Bundle
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
 import com.speakerboxlite.router.command.CommandBufferImpl
 import com.speakerboxlite.router.command.CommandExecutor
+import com.speakerboxlite.router.command.ViewFactory
 import com.speakerboxlite.router.controllers.RouteParamsGen
 import com.speakerboxlite.router.result.RouterResultProvider
 import java.lang.ref.WeakReference
@@ -12,6 +14,8 @@ import java.util.UUID
 
 open class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLocal
 {
+    override val key: String get() = viewKey
+
     override val topRouter: Router? get() = router?.topRouter
 
     override val hasPreviousScreen: Boolean get() = router!!.hasPreviousScreen
@@ -20,7 +24,7 @@ open class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLoc
         get() = router!!.lockBack
         set(value) { router?.lockBack = value }
 
-    protected val commandBuffer: CommandBuffer = CommandBufferImpl()
+    protected val commandBuffer: CommandBuffer = CommandBufferImpl(ViewFactory(router))
     protected val routerTabsList = mutableListOf<RouterTabsLocal>()
 
     val weakRouter = WeakReference(router)
@@ -84,21 +88,29 @@ open class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLoc
 
     override fun createResultProvider(key: String): RouterResultProvider = router!!.createResultProvider(key)
 
+    override fun performSave(bundle: Bundle)
+    {
+        TODO("Not yet implemented")
+    }
+
+    override fun performRestore(bundle: Bundle)
+    {
+        TODO("Not yet implemented")
+    }
+
     override fun routeInContainer(containerId: Int, path: RoutePath): String
     {
         val router = router ?: return ""
-        val route = router.findRoute(path)
-        val view = route.onCreateView(path)
-        view.viewKey = UUID.randomUUID().toString()
-        router.setPath(view.viewKey, path)
-        router.bindRouter(view.viewKey)
+        val viewKey = UUID.randomUUID().toString()
+        router.setPath(viewKey, path)
+        router.bindRouter(viewKey)
 
         if (router is RouterInjector)
-            router.connectComponent(viewKey, view.viewKey)
+            router.connectComponent(this.viewKey, viewKey)
 
-        commandBuffer.apply(Command.SubFragment(containerId, view))
+        commandBuffer.apply(Command.SubFragment(containerId, viewKey))
 
-        return view.viewKey
+        return viewKey
     }
 
     override fun <VR: ViewResult, R: Any> routeInContainerWithResult(viewResult: VR, containerId: Int, path: RoutePath, result: RouterResultDispatcher<VR, R>): String
@@ -111,15 +123,13 @@ open class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLoc
     internal fun routeInternal(path: RoutePath)
     {
         val router = router ?: return
-        val route = router.findRoute(path)
-        val view = route.onCreateView(path)
-        view.viewKey = UUID.randomUUID().toString()
-        router.setPath(view.viewKey, path)
-        router.routerManager[view.viewKey] = this
+        val viewKey = UUID.randomUUID().toString()
+        router.setPath(viewKey, path)
+        router.routerManager[viewKey] = this
 
         if (router is RouterInjector)
-            router.connectComponent(viewKey, view.viewKey)
+            router.connectComponent(this.viewKey, viewKey)
 
-        commandBuffer.apply(Command.Push(path, view, null))
+        commandBuffer.apply(Command.Push(path, viewKey))
     }
 }

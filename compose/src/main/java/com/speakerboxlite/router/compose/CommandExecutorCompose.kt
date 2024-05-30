@@ -11,6 +11,8 @@ import com.speakerboxlite.router.ViewBTS
 import com.speakerboxlite.router.ViewDialog
 import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandExecutor
+import com.speakerboxlite.router.command.ViewFactoryInterface
+import com.speakerboxlite.router.command.getViewKey
 import java.io.Serializable
 
 interface ComposeViewHoster
@@ -18,36 +20,65 @@ interface ComposeViewHoster
     fun start(params: Serializable?, builder: IntentBuilder)
 }
 
-open class CommandExecutorCompose(val navigator: ComposeNavigator,
-                                  val hoster: ComposeViewHoster? = null,
-                                  val hostCloseable: HostCloseable? = null): CommandExecutor
+open class CommandExecutorCompose(
+    val navigator: ComposeNavigator,
+    val hoster: ComposeViewHoster? = null,
+    val hostCloseable: HostCloseable? = null): CommandExecutor
 {
-    override fun onBind()
-    {
+    protected var viewFactory: ViewFactoryInterface? = null
 
+    override fun onBind(factory: ViewFactoryInterface?)
+    {
+        viewFactory = factory
     }
 
     override fun onUnbind()
     {
-
+        viewFactory = null
     }
 
     override fun execute(command: Command)
     {
+        val viewKey = command.getViewKey()
+        if (viewKey != null)
+        {
+            executeWithView(viewKey, command)
+        }
+        else
+        {
+            when (command)
+            {
+                is Command.Close -> close()
+                is Command.CloseTo -> closeTo(command.viewKey)
+                is Command.CloseAll -> closeAll()
+                is Command.CloseDialog -> closeDialog(command.viewKey)
+                is Command.CloseBottomSheet -> closeBottomSheet(command.viewKey)
+                is Command.ChangeTab -> command.tabChangeCallback(command.tab)
+                else -> {}
+            }
+        }
+    }
+
+    protected fun executeWithView(viewKey: String, command: Command)
+    {
+        if (command is Command.StartModal)
+        {
+            startActivity(command.viewKey, command.params)
+            return
+        }
+
+        checkNotNull(viewFactory) { "ViewFactory hasn't been set" }
+        val view = viewFactory?.createView(viewKey) ?: return
+        val animation = viewFactory?.createAnimation(view) as? AnimationControllerCompose
+
         when (command)
         {
-            is Command.Close -> close()
-            is Command.CloseTo -> closeTo(command.key)
-            is Command.CloseAll -> closeAll()
-            is Command.StartModal -> startActivity(command.key, command.params)
-            is Command.Dialog -> showDialog(command.view)
-            is Command.CloseDialog -> closeDialog(command.key)
-            is Command.Push -> push(command.path, command.view, command.animation as? AnimationControllerCompose)
-            is Command.Replace -> replace(command.path, command.byView)
-            is Command.BottomSheet -> showBottomSheet(command.view)
-            is Command.CloseBottomSheet -> closeBottomSheet(command.key)
-            is Command.SubFragment -> showSubFragment(command.containerId, command.view)
-            is Command.ChangeTab -> command.tabChangeCallback(command.tab)
+            is Command.Dialog -> showDialog(view)
+            is Command.Push -> push(command.path, view, animation as? AnimationControllerCompose)
+            is Command.Replace -> replace(command.path, view)
+            is Command.BottomSheet -> showBottomSheet(view)
+            is Command.SubFragment -> showSubFragment(command.containerId, view)
+            else -> {}
         }
     }
 
@@ -73,6 +104,7 @@ open class CommandExecutorCompose(val navigator: ComposeNavigator,
 
     private fun closeAll()
     {
+        navigator.prepareToDispose()
         hostCloseable?.onCloseHost()
     }
 

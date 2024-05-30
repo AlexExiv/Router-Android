@@ -34,18 +34,25 @@ abstract class BaseHostComposeFragment: Fragment(),
 
     override var root: ComposeHostViewRoot = mutableStateOf(null)
 
+    protected var stateRegistry: SaveableStateRegistry? = null
     protected var savedState = mapOf<String, List<Any?>>()
 
     override fun onStart()
     {
         super.onStart()
-        root.value = { Navigator() }
+        root.value = { Root() }
+    }
+
+    override fun onStop()
+    {
+        super.onStop()
+        savedState = stateRegistry?.performSave() ?: mapOf()
+        root.value = null
     }
 
     override fun onSaveInstanceState(outState: Bundle)
     {
         super.onSaveInstanceState(outState)
-
         outState.putBundle(SAVED_STATE_KEY, savedState.toBundle())
     }
 
@@ -53,15 +60,17 @@ abstract class BaseHostComposeFragment: Fragment(),
     fun Root()
     {
         val parentRegistry = LocalSaveableStateRegistry.current
-        val registry = remember { SaveableStateRegistry(savedState) { parentRegistry?.canBeSaved(it) ?: true } }
+        val registry = remember(savedState) { SaveableStateRegistry(savedState) { parentRegistry?.canBeSaved(it) ?: true } }
+        stateRegistry = registry
 
         CompositionLocalProvider(
             LocalSaveableStateRegistry provides registry,
             LocalRouterManager provides routerManager)
         {
-            root.value?.invoke()
+            Navigator()
 
-            DisposableEffect(key1 = root.value)
+            // save state after this screen hides
+            DisposableEffect(key1 = this)
             {
                 onDispose {
                     savedState = registry.performSave()
@@ -75,7 +84,7 @@ abstract class BaseHostComposeFragment: Fragment(),
 
     companion object
     {
-        val SAVED_STATE_KEY = "com.speakerboxlite.router.fragmentcompose.BaseHostComposeFragment.Bundle"
+        val SAVED_STATE_KEY = "com.speakerboxlite.router.fragmentcompose.BaseHostComposeFragment.savedState"
     }
 }
 

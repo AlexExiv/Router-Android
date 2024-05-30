@@ -1,5 +1,6 @@
 package com.speakerboxlite.router.result
 
+import android.os.Bundle
 import com.speakerboxlite.router.RouterResultDispatcher
 import com.speakerboxlite.router.ViewResult
 
@@ -28,4 +29,7 @@ interface ResultManager
     fun bind(originalFrom: String, from: String)
     fun unbind(from: String)
     fun send(from: String, result: Any)
+
+    fun performSave(bundle: Bundle)
+    fun performRestore(bundle: Bundle)
 }

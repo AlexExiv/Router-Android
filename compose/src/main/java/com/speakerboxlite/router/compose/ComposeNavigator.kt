@@ -63,6 +63,8 @@ fun CurrentContent(router: Router, navigator: ComposeNavigator)
 
     ModalBottomSheetLayout(
         sheetContent = {
+            CompleteTransitionEffect(stackEntry = stackBottomSheet, navigator = navigator)
+
             stackBottomSheet?.LocalOwnersProvider(navigator.stateHolder)
             {
                 stackBottomSheet.view.Root()
@@ -107,6 +109,8 @@ fun CurrentContent(router: Router, navigator: ComposeNavigator)
     {
         Dialog(onDismissRequest = { router.back() })
         {
+            CompleteTransitionEffect(stackEntry = stackDialog, navigator = navigator)
+
             stackDialog.LocalOwnersProvider(saveableStateHolder = navigator.stateHolder)
             {
                 stackDialog.view.Root()
@@ -170,7 +174,7 @@ class ComposeNavigator(
 {
     internal val stateStack: SnapshotStateList<StackEntry> = mutableStateListOf()
 
-    var poppingEntries: List<StackEntry>? = null
+    var poppingEntries: MutableMap<String, List<StackEntry>> = mutableMapOf()
         private set
 
     var isAnimating: Boolean = false
@@ -243,28 +247,37 @@ class ComposeNavigator(
         isAnimating = true
     }
 
-    fun completeTransition()
+    fun completeTransition(key: String)
     {
         isAnimating = false
-        onDisposePopping()
+        onDisposePopping(key)
+    }
+
+    fun prepareToDispose()
+    {
+        if (stateStack.isNotEmpty())
+        {
+            stateStack.forEach { it.makeRemoving() }
+            poppingEntries[stateStack.last().id] = stateStack
+        }
     }
 
     protected fun removeLast(n: Int = 1)
     {
-        onDisposePopping()
-
-        poppingEntries = stateStack.subList(stateStack.size - n, stateStack.size).toList()
-        poppingEntries?.forEach { it.makeRemoving() }
+        val sub = stateStack.subList(stateStack.size - n, stateStack.size).toList()
+        poppingEntries[sub.last().id] = sub
+        sub.forEach { it.makeRemoving() }
         stateStack.removeRange(stateStack.size - n, stateStack.size)
     }
 
-    protected fun onDisposePopping()
+    protected fun onDisposePopping(key: String)
     {
-        poppingEntries?.forEach {
+        println("onDisposePopping: ${poppingEntries[key]?.map { it.id }}")
+        poppingEntries[key]?.forEach {
             it.onDispose()
             onDisposeCallback?.onDispose(it.id)
         }
-        poppingEntries = null
+        poppingEntries.remove(key)
     }
 
     fun getStackEntriesSaveable() = items.map { StackEntrySaveable(it) }

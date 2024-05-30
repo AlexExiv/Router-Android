@@ -1,13 +1,16 @@
 package com.speakerboxlite.router
 
+import android.os.Bundle
 import android.util.Log
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.annotations.RouteType
+import com.speakerboxlite.router.annotations.SingleTop
 import com.speakerboxlite.router.annotations.TabUnique
 import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
 import com.speakerboxlite.router.command.CommandBufferImpl
 import com.speakerboxlite.router.command.CommandExecutor
+import com.speakerboxlite.router.command.ViewFactory
 import com.speakerboxlite.router.controllers.RouteControllerComposable
 import com.speakerboxlite.router.controllers.RouteControllerInterface
 import com.speakerboxlite.router.controllers.RouteControllerViewModelHolder
@@ -16,6 +19,8 @@ import com.speakerboxlite.router.controllers.RouteParamsGen
 import com.speakerboxlite.router.exceptions.ImpossibleRouteException
 import com.speakerboxlite.router.exceptions.RouteNotFoundException
 import com.speakerboxlite.router.ext.checkMainThread
+import com.speakerboxlite.router.ext.getBundles
+import com.speakerboxlite.router.ext.putBundles
 import com.speakerboxlite.router.result.ResultManager
 import com.speakerboxlite.router.result.RouterResultProvider
 import com.speakerboxlite.router.result.RouterResultProviderImpl
@@ -24,22 +29,57 @@ import java.lang.ref.WeakReference
 import java.util.UUID
 import kotlin.reflect.KClass
 
-data class ViewMeta(val key: String,
-                    val routeType: RouteType,
-                    val isCompose: Boolean,
-                    val route: RouteControllerInterface<RoutePath, *>,
-                    val path: KClass<*>,
-                    var lockBack: Boolean = false)
+data class ViewMeta(
+    val key: String,
+    val routeType: RouteType,
+    val presentation: Presentation?,
+    val isCompose: Boolean,
+    val route: RouteControllerInterface<RoutePath, *>,
+    val path: KClass<*>,
+    var lockBack: Boolean = false)
 {
     override fun toString(): String
     {
         return "(key=$key, routeType=$routeType, route=${route::class.qualifiedName}, path=${path.qualifiedName}, lockBack=$lockBack)"
     }
+
+    fun toBundle(): Bundle =
+        Bundle().also {
+            it.putString(KEY, key)
+            it.putSerializable(ROUTE_TYPE, routeType)
+            it.putSerializable(PRESENTATION, presentation)
+            it.putBoolean(IS_COMPOSE, isCompose)
+            it.putBoolean(LOCK_BACK, lockBack)
+        }
+
+    companion object
+    {
+        const val KEY = "com.speakerboxlite.router.ViewMeta.key"
+        const val ROUTE_TYPE = "com.speakerboxlite.router.ViewMeta.routeType"
+        const val PRESENTATION = "com.speakerboxlite.router.ViewMeta.presentation"
+        const val IS_COMPOSE = "com.speakerboxlite.router.ViewMeta.isCompose"
+        const val LOCK_BACK = "com.speakerboxlite.router.ViewMeta.lockBack"
+
+        fun fromBundle(bundle: Bundle, router: RouterSimple): ViewMeta
+        {
+            val key = bundle.getString(KEY)!!
+            val routeType = bundle.getSerializable(ROUTE_TYPE) as RouteType
+            val presentation = bundle.getSerializable(PRESENTATION) as Presentation
+            val isCompose = bundle.getBoolean(IS_COMPOSE)
+            val lockBack = bundle.getBoolean(LOCK_BACK)
+
+            val path = router.getPath(key)!!
+            val route = router.findRoute(path)
+
+            return ViewMeta(key, routeType, presentation, isCompose, route, path::class, lockBack)
+        }
+    }
 }
 
-data class ViewResultData(val toKey: String,
-                          val resultType: ViewResultType,
-                          val result: RouterResultDispatcher<ViewResult, Any>)
+data class ViewResultData(
+    val toKey: String,
+    val resultType: ViewResultType,
+    val result: RouterResultDispatcher<ViewResult, Any>)
 {
     companion object
     {
@@ -53,15 +93,19 @@ internal interface RouterInternal
     fun routeInternal(execRouter: Router?, path: RoutePath, routeType: RouteType, presentation: Presentation?, viewResult: ViewResultData?): Router?
 }
 
-open class RouterSimple(protected val callerKey: String?,
-                        parent: RouterSimple?,
-                        protected val routeManager: RouteManager,
-                        internal val routerManager: RouterManager,
-                        protected val resultManager: ResultManager): Router, RouterInternal
+open class RouterSimple(
+    protected var callerKey: String?,
+    parent: RouterSimple?,
+    protected val routeManager: RouteManager,
+    internal val routerManager: RouterManager,
+    protected val resultManager: ResultManager): Router, RouterInternal
 {
-    protected val pathData = mutableMapOf<String, RoutePath>()
+    final override var key: String = UUID.randomUUID().toString()
+        private set
 
-    protected val commandBuffer: CommandBuffer = CommandBufferImpl()
+    val dataStorage: PathDataStorage = routerManager.provideDataStorage()
+
+    protected val commandBuffer: CommandBuffer = CommandBufferImpl(ViewFactory(this))
 
     private var weakParent = WeakReference(parent)
     val parent: RouterSimple? get() = weakParent.get()
@@ -70,23 +114,27 @@ open class RouterSimple(protected val callerKey: String?,
     val child: RouterSimple? get() = weakChild.get()
 
     override val topRouter: Router? get() = routerManager.top
+    val branchTopRouter: RouterSimple get() = child?.branchTopRouter ?: this
 
-    override val hasPreviousScreen: Boolean get() = parent != null || viewsStack.size > 1
+    override val hasPreviousScreen: Boolean get() = parent != null || _viewsStack.size > 1
 
     override var lockBack: Boolean
-        get() = viewsStack.lastOrNull()?.lockBack ?: false
-        set(value) { viewsStack.lastOrNull()?.lockBack = value }
+        get() = _viewsStack.lastOrNull()?.lockBack ?: false
+        set(value) { _viewsStack.lastOrNull()?.lockBack = value }
 
-    internal val viewsStack = mutableListOf<ViewMeta>()
-    protected val viewsStackById = mutableMapOf<String, ViewMeta>()
+    protected val _viewsStack = mutableListOf<ViewMeta>()
+    val viewsStack: List<ViewMeta> get() = _viewsStack
 
-    val isCurrentTop: Boolean get() = parent == null && viewsStack.size == 1
+    protected val _viewsStackById = mutableMapOf<String, ViewMeta>()
+    val viewsStackById: Map<String, ViewMeta> get() = _viewsStackById
+
+    val isCurrentTop: Boolean get() = parent == null && _viewsStack.size == 1
 
     protected var isClosing = false
 
     protected val routerTabsByKey = mutableMapOf<String, RouterTabsImpl>()
-    internal var rootPath: RoutePath? = null
-        private set
+    internal var rootPathKey: String? = null
+    internal val rootPath: RoutePath? get() = rootPathKey?.let { dataStorage[it] }
 
     init
     {
@@ -117,9 +165,9 @@ open class RouterSimple(protected val callerKey: String?,
 
         popViewStack()
 
-        val view = createView(route, RouteType.Simple, path, null)
-        routerManager.push(view.viewKey, this)
-        commandBuffer.apply(Command.Replace(path, view, route.animationController(null, view)))
+        val viewKey = createView(route, RouteType.Simple, null, path, null)
+        routerManager.push(viewKey, this)
+        commandBuffer.apply(Command.Replace(path, viewKey))
 
         return this
     }
@@ -136,7 +184,7 @@ open class RouterSimple(protected val callerKey: String?,
         }
         else if (path.tabIndex != null)
         {
-            val r = routerTabsByKey[viewsStack.lastOrNull()?.key]
+            val r = routerTabsByKey[_viewsStack.lastOrNull()?.key]
             r?.route(path.tabIndex)
             r?.get(path.tabIndex)
         }
@@ -167,7 +215,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun close(): Router?
     {
-        val v = viewsStack.lastOrNull() ?: return (parent ?: this)
+        val v = _viewsStack.lastOrNull() ?: return (parent ?: this)
         val chain = scanForChain()
         val returnRouter = if (chain != null && chain.key != v.key && chain.route.isPartOfChain(v.path))
         {
@@ -179,8 +227,8 @@ open class RouterSimple(protected val callerKey: String?,
             popViewStack()
             dispatchClose(v)
 
-            if (pathData[v.key] != null)
-                tryCloseMiddlewares(pathData[v.key]!!)
+            if (dataStorage[v.key] != null)
+                tryCloseMiddlewares(dataStorage[v.key]!!)
 
             if (isClosing) parent else this
         }
@@ -192,7 +240,7 @@ open class RouterSimple(protected val callerKey: String?,
     protected open fun unbind(key: String)
     {
         resultManager.unbind(key)
-        pathData.remove(key)
+        dataStorage[key] = null
         routerTabsByKey[key]?.releaseRouters()
         routerTabsByKey.remove(key)
         routerManager.remove(key)
@@ -204,25 +252,25 @@ open class RouterSimple(protected val callerKey: String?,
 
     internal fun releaseRouter()
     {
-        viewsStack.forEach { unbind(it.key) }
+        _viewsStack.forEach { unbind(it.key) }
     }
 
     override fun closeTo(key: String): Router?
     {
         var toIndex = -1
         var returnRouter: Router? = null
-        for (i in viewsStack.indices)
+        for (i in _viewsStack.indices)
         {
-            if (viewsStack[i].key == key)
+            if (_viewsStack[i].key == key)
             {
                 toIndex = i
                 break
             }
 
-            val routerTabs = routerTabsByKey[viewsStack[i].key]
+            val routerTabs = routerTabsByKey[_viewsStack[i].key]
             if (routerTabs != null && routerTabs.closeTabsTo(key))
             {
-                if (i == (viewsStack.size - 1))
+                if (i == (_viewsStack.size - 1))
                     return this
 
                 toIndex = i
@@ -237,7 +285,7 @@ open class RouterSimple(protected val callerKey: String?,
             if (returnRouter == null)
                 returnRouter = r
         }
-        else if (callerKey == null || parent == null)
+        else if (parent == null)
         {
             returnRouter = _closeTo(0)
         }
@@ -253,7 +301,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun closeToTop(): Router?
     {
-        val returnRouter = if (callerKey == null || parent == null)
+        val returnRouter = if (parent == null)
         {
             _closeTo(0)
         }
@@ -281,10 +329,10 @@ open class RouterSimple(protected val callerKey: String?,
     protected fun syncExecutor()
     {
         val isClosed = isClosing
-        val remove = commandBuffer.sync(viewsStack.map { it.key })
+        val remove = commandBuffer.sync(_viewsStack.map { it.key })
         remove.forEach { removeView(it) }
 
-        if (!isClosed && viewsStack.isEmpty() && rootPath != null)
+        if (!isClosed && _viewsStack.isEmpty() && rootPath != null)
         {
             println("|------RESTART ROUTER------|")
             isClosing = false
@@ -294,7 +342,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun onPrepareView(view: View, viewModel: ViewModel?)
     {
-        val path = pathData[view.viewKey]!!
+        val path = dataStorage[view.viewKey]!!
         val route = findRoute(path)
 
         (route as? RouteControllerComposable<RoutePath, View>)?.onPrepareView(this, view, path)
@@ -310,7 +358,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun <VM : ViewModel> provideViewModel(view: View, modelProvider: RouterModelProvider): VM
     {
-        val path = pathData[view.viewKey]!!
+        val path = dataStorage[view.viewKey]!!
         val route = findRoute(path)
         route as? RouteControllerViewModelProvider<RoutePath, VM> ?: error("${route::class} is not a RouteControllerViewModelProvider")
         return route.onProvideViewModel(modelProvider, path)
@@ -318,7 +366,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun onComposeAnimation(view: View)
     {
-        val path = pathData[view.viewKey]!!
+        val path = dataStorage[view.viewKey]!!
         val route = findRoute(path)
 
         //route.animationController()?.onConfigureView(path, view)
@@ -332,10 +380,10 @@ open class RouterSimple(protected val callerKey: String?,
     {
         if (routerTabsByKey[key] == null)
         {
-            val tabProps = viewsStackById[key]!!.route.tabProps ?: error("Tab props has not been specified. Use Tab annotation to specify props")
+            val tabProps = _viewsStackById[key]!!.route.tabProps ?: error("Tab props has not been specified. Use Tab annotation to specify props")
             val _tabRouteInParent = tabRouteInParent ?: tabProps.tabRouteInParent
 
-            routerTabsByKey[key] = RouterTabsImpl(key, viewsStack.lastOrNull()?.key ?: "", this, tabProps.copy(tabRouteInParent = _tabRouteInParent || !createReel))
+            routerTabsByKey[key] = RouterTabsImpl(key, _viewsStack.lastOrNull()?.key ?: "", this, tabProps.copy(tabRouteInParent = _tabRouteInParent || !createReel))
             if (createReel)
                 routerManager.pushReel(key, routerTabsByKey[key]!!)
         }
@@ -345,8 +393,8 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun removeView(key: String)
     {
-        viewsStack.removeAll { it.key == key }
-        if (viewsStack.isEmpty() && parent != null)
+        _viewsStack.removeAll { it.key == key }
+        if (_viewsStack.isEmpty() && parent != null)
             isClosing = true
 
         unbind(key)
@@ -362,10 +410,10 @@ open class RouterSimple(protected val callerKey: String?,
 
     internal fun setPath(key: String, path: RoutePath)
     {
-        pathData[key] = path
+        dataStorage[key] = path
     }
 
-    internal fun getPath(key: String): RoutePath = pathData[key]!!
+    internal fun getPath(key: String): RoutePath? = dataStorage[key]
 
     internal fun bindRouter(viewKey: String)
     {
@@ -379,6 +427,81 @@ open class RouterSimple(protected val callerKey: String?,
 
     override fun createResultProvider(key: String): RouterResultProvider = RouterResultProviderImpl(key, resultManager)
 
+    override fun performSave(bundle: Bundle)
+    {
+        bundle.putString(KEY, key)
+        bundle.putString(CALLER, callerKey)
+
+        bundle.putBoolean(IS_CLOSING, isClosing)
+        bundle.putString(ROOT_PATH, rootPathKey)
+        bundle.putBundles(VIEW_STACK, _viewsStack.map { it.toBundle() })
+
+        val tabsBundle = Bundle()
+        routerTabsByKey.forEach {
+            val b = Bundle()
+            it.value.performSave(b)
+            tabsBundle.putBundle(it.key, b)
+        }
+
+        bundle.putBundle(ROUTER_TABS, tabsBundle)
+
+        commandBuffer.performSave(bundle)
+
+        if (child != null)
+        {
+            val childBundle = Bundle()
+            child?.performSave(childBundle)
+            bundle.putBundle(CHILD, childBundle)
+        }
+
+        if (parent == null)
+        {
+            val resBundle = Bundle()
+            resultManager.performSave(resBundle)
+            bundle.putBundle(RESULT_MANAGER, resBundle)
+        }
+    }
+
+    override fun performRestore(bundle: Bundle)
+    {
+        key = bundle.getString(KEY)!!
+        routerManager.push(this)
+
+        callerKey = bundle.getString(CALLER)
+        isClosing = bundle.getBoolean(IS_CLOSING)
+        rootPathKey = bundle.getString(ROOT_PATH)
+
+        val viewStackBundles = bundle.getBundles(VIEW_STACK)!!
+        _viewsStack.clear()
+        _viewsStack.addAll(viewStackBundles.map { ViewMeta.fromBundle(it, this) })
+
+        _viewsStackById.clear()
+        _viewsStackById.putAll(_viewsStack.associateBy { it.key })
+
+        routerTabsByKey.clear()
+        val tabsBundle = bundle.getBundle(ROUTER_TABS)!!
+        tabsBundle.keySet().forEach {
+            createRouterTabs(it)
+            routerTabsByKey[it]!!.performRestore(tabsBundle.getBundle(it)!!)
+        }
+
+        val childBundle = bundle.getBundle(CHILD)
+        if (childBundle != null)
+        {
+            val child = createRouter("") as RouterSimple
+            child.performRestore(childBundle)
+            weakChild = WeakReference(child)
+        }
+
+        commandBuffer.performRestore(bundle)
+
+        if (parent == null)
+        {
+            val resBundle = bundle.getBundle(RESULT_MANAGER)!!
+            resultManager.performRestore(resBundle)
+        }
+    }
+
     internal fun bindResult(from: String, result: ViewResultData)
     {
         resultManager.bind(from, result.toKey, result.resultType, result.result)
@@ -386,7 +509,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     internal fun scanForChain(): ViewMeta?
     {
-        val chain = viewsStack.lastOrNull { it.route.isChain }
+        val chain = _viewsStack.lastOrNull { it.route.isChain }
         if (chain != null)
             return chain
 
@@ -396,33 +519,33 @@ open class RouterSimple(protected val callerKey: String?,
         return null
     }
 
-    internal open fun scanForPath(clazz: KClass<*>, recursive: Boolean = true): ViewMeta?
+    internal open fun scanForPath(path: RoutePath, singleTop: SingleTop, recursive: Boolean = true): ViewMeta?
     {
-        for (v in viewsStack)
+        for (v in _viewsStack)
         {
-            if (v.path == clazz)
+            if (arePathsEqual(dataStorage[v.key]!!, path, singleTop))
                 return v
 
-            val vs = routerTabsByKey[v.key]?.scanForPath(clazz)
+            val vs = routerTabsByKey[v.key]?.scanForPath(path, singleTop)
             if (vs != null)
-                return vs
+                return v
         }
 
         if (parent != null && recursive)
-            return parent?.scanForPath(clazz)
+            return parent?.scanForPath(path, singleTop)
 
         return null
     }
 
     internal fun containsView(key: String): Boolean =
-        viewsStack.lastOrNull { it.key == key } != null
+        _viewsStack.lastOrNull { it.key == key } != null
 
     internal fun tryRouteMiddlewares(params: RouteParamsGen, route: RouteControllerInterface<RoutePath, *>): Boolean
     {
         //onBeforeRoute only available for not empty viewsStack because it refers to current route
-        if (viewsStack.isNotEmpty())
+        if (_viewsStack.isNotEmpty())
         {
-            val curPath = pathData[viewsStack.last().key]!!
+            val curPath = dataStorage[_viewsStack.last().key]!!
             val curRoute = findRoute(curPath)
             if (curRoute.onBeforeRoute(this, curPath, params))
                 return true
@@ -435,14 +558,14 @@ open class RouterSimple(protected val callerKey: String?,
         }
 
         //skip if it's not a root router and viewsStack is empty because the caller has already dispatched middlewares
-        if (parent == null || viewsStack.isNotEmpty())
+        if (parent == null || _viewsStack.isNotEmpty())
         {
-            if (route.onRoute(this, viewsStack.lastOrNull()?.let { pathData[it.key] }, params))
+            if (route.onRoute(this, _viewsStack.lastOrNull()?.let { dataStorage[it.key] }, params))
                 return true
 
             for (mid in route.middlewares)
             {
-                if (mid.onRoute(this, viewsStack.lastOrNull()?.let { pathData[it.key] }, params))
+                if (mid.onRoute(this, _viewsStack.lastOrNull()?.let { dataStorage[it.key] }, params))
                     return true
             }
         }
@@ -453,11 +576,11 @@ open class RouterSimple(protected val callerKey: String?,
     internal fun tryCloseMiddlewares(path: RoutePath)
     {
         val _parent = parent
-        val router = if (viewsStack.isEmpty() && _parent != null) _parent else this
-        val prev = if (viewsStack.isEmpty() && _parent != null)
-            _parent.viewsStack.lastOrNull()?.let { _parent.pathData[it.key] }
+        val router = if (_viewsStack.isEmpty() && _parent != null) _parent else this
+        val prev = if (_viewsStack.isEmpty() && _parent != null)
+            _parent._viewsStack.lastOrNull()?.let { _parent.dataStorage[it.key] }
         else
-            viewsStack.lastOrNull()?.let { pathData[it.key] }
+            _viewsStack.lastOrNull()?.let { dataStorage[it.key] }
 
         val route = findRoute(path)
 
@@ -476,7 +599,7 @@ open class RouterSimple(protected val callerKey: String?,
      */
     protected fun tryRepeatTopIfEmpty()
     {
-        if (viewsStack.isEmpty() && parent == null && rootPath != null)
+        if (_viewsStack.isEmpty() && parent == null && rootPath != null)
             routeInternal(null, rootPath!!, RouteType.Simple, Presentation.Push, null)
     }
 
@@ -484,14 +607,14 @@ open class RouterSimple(protected val callerKey: String?,
     {
         closeAllNoStack()
 
-        if (i == (viewsStack.size - 1))
+        if (i == (_viewsStack.size - 1))
             return this
 
-        val deleteCount = viewsStack.size - i - 1
+        val deleteCount = _viewsStack.size - i - 1
         for (j in 0 until deleteCount)
             popViewStack()
 
-        commandBuffer.apply(Command.CloseTo(viewsStack.last().key))
+        commandBuffer.apply(Command.CloseTo(_viewsStack.last().key))
 
         return this
     }
@@ -500,7 +623,7 @@ open class RouterSimple(protected val callerKey: String?,
     {
         closeAllNoStack()
 
-        val count = viewsStack.size
+        val count = _viewsStack.size
         for (i in 0 until count)
             popViewStack()
 
@@ -512,7 +635,7 @@ open class RouterSimple(protected val callerKey: String?,
     internal fun closeAllNoStack(): Boolean
     {
         var was = false
-        while (viewsStack.isNotEmpty() && viewsStack.last().routeType.isNoStackStructure)
+        while (_viewsStack.isNotEmpty() && _viewsStack.last().routeType.isNoStackStructure)
         {
             close()
             was = true
@@ -561,9 +684,9 @@ open class RouterSimple(protected val callerKey: String?,
                 }
 
                 //if this route has singleTop flag try to find it in the hierarchy and route to the instance
-                if (route.singleTop)
+                if (route.singleTop != SingleTop.None && topRouter != null)
                 {
-                    val exist = scanForPath(path::class)
+                    val exist = (topRouter as RouterSimple).scanForPath(path, route.singleTop)
                     if (exist != null)
                         return closeTo(exist.key)
                 }
@@ -576,7 +699,7 @@ open class RouterSimple(protected val callerKey: String?,
 
     internal open fun tryRouteToTab(path: RoutePath): Router?
     {
-        val tabsRouter = routerTabsByKey[viewsStack.lastOrNull()?.key]
+        val tabsRouter = routerTabsByKey[_viewsStack.lastOrNull()?.key]
         if (tabsRouter != null)
         {
             val i = tabsRouter.containsPath(path)
@@ -593,8 +716,8 @@ open class RouterSimple(protected val callerKey: String?,
 
     internal fun testPathUnique(i: Int, path: RoutePath, tabUnique: TabUnique): Boolean
     {
-        val first = if (i < viewsStack.size) viewsStack[i] else return false
-        val tabPath = pathData[first.key] ?: return false
+        val first = if (i < _viewsStack.size) _viewsStack[i] else return false
+        val tabPath = dataStorage[first.key] ?: return false
 
         return when (tabUnique)
         {
@@ -606,30 +729,31 @@ open class RouterSimple(protected val callerKey: String?,
 
     internal fun doDialogRoute(route: RouteControllerInterface<RoutePath, *>, path: RoutePath, viewResult: ViewResultData?): Router?
     {
-        val lastIsCompose = viewsStack.lastOrNull()?.route?.isCompose
+        val lastIsCompose = _viewsStack.lastOrNull()?.route?.isCompose
         val view = if (lastIsCompose != null && lastIsCompose != route.isCompose)
         {
-            val newCallerKey = viewsStack.last().key
+            val newCallerKey = _viewsStack.last().key
             val router = createRouter(newCallerKey)
             if (viewResult == null)
                 router.route(path = path, presentation = Presentation.Push)
             else
                 (router as RouterInternal).routeInternal(null, path as RoutePathResult<Any>, RouteType.Simple, Presentation.Push, viewResult)
 
-            val key = UUID.randomUUID().toString()
-            routerManager[key] = router
+            val viewKey = UUID.randomUUID().toString()
+            routerManager[viewKey] = router
+            setPath(viewKey, path)
 
-            route.onCreateView(path).also { it.viewKey = key }
+            viewKey
         }
         else
         {
-            val view = if (viewResult == null)
-                createView(route, route.routeType, path, null)
+            val viewKey = if (viewResult == null)
+                createView(route, route.routeType, Presentation.Push, path, null)
             else
-                createView(route, route.routeType, path, viewResult)
+                createView(route, route.routeType, Presentation.Push, path, viewResult)
 
-            routerManager.push(view.viewKey, this)
-            view
+            routerManager.push(viewKey, this)
+            viewKey
         }
 
         val command = if (route.routeType == RouteType.Dialog)
@@ -643,10 +767,10 @@ open class RouterSimple(protected val callerKey: String?,
 
     internal fun doRoute(route: RouteControllerInterface<RoutePath, *>, routeType: RouteType, path: RoutePath, presentation: Presentation, viewResult: ViewResultData?): Router?
     {
-        val lastIsCompose = viewsStack.lastOrNull()?.route?.isCompose
+        val lastIsCompose = _viewsStack.lastOrNull()?.route?.isCompose
         return if (presentation == Presentation.ModalNewTask || (lastIsCompose != null && lastIsCompose != route.isCompose))
         {
-            val newCallerKey = viewsStack.last().key
+            val newCallerKey = _viewsStack.last().key
             val router = createRouter(newCallerKey)
             val returnRouter = when (routeType)
             {
@@ -661,52 +785,48 @@ open class RouterSimple(protected val callerKey: String?,
                 else -> throw ImpossibleRouteException("Modal route can't contains $routeType as ROOT")
             }
 
-            val key = UUID.randomUUID().toString()
-            routerManager[key] = router
+            val viewKey = UUID.randomUUID().toString()
+            routerManager[viewKey] = router
+            setPath(viewKey, path)
 
             if (presentation == Presentation.ModalNewTask)
-                commandBuffer.apply(Command.StartModal(key, route.params))
+                commandBuffer.apply(Command.StartModal(viewKey, route.params))
             else
-            {
-                val view = route.onCreateView(path)
-                view.viewKey = key
-                commandBuffer.apply(Command.Push(path, view, null))
-            }
+                commandBuffer.apply(Command.Push(path, viewKey))
 
             returnRouter
         }
         else
         {
-            val view = createView(route, routeType, path, viewResult)
-            routerManager.push(view.viewKey, this)
-            commandBuffer.apply(Command.Push(path, view, route.animationController(presentation, view)))
+            val viewKey = createView(route, routeType, presentation, path, viewResult)
+            routerManager.push(viewKey, this)
+            commandBuffer.apply(Command.Push(path, viewKey))
             this
         }
     }
 
-    internal fun createView(route: RouteControllerInterface<RoutePath, *>, routeType: RouteType, path: RoutePath, viewResult: ViewResultData?): View
+    internal fun createView(route: RouteControllerInterface<RoutePath, *>, routeType: RouteType, presentation: Presentation?, path: RoutePath, viewResult: ViewResultData?): String
     {
-        val view = route.onCreateView(path)
-        view.viewKey = UUID.randomUUID().toString()
-        pathData[view.viewKey] = path
-        bindRouter(view.viewKey)
+        val viewKey = UUID.randomUUID().toString()
+        setPath(viewKey, path)
+        bindRouter(viewKey)
 
         val chain = scanForChain()
 
         // if there is a chain and this path is a part of the chain the result has to be delivered to the chain's caller
         if (chain != null && chain.route.isPartOfChain(path::class))
-            resultManager.bind(chain.key, view.viewKey)
+            resultManager.bind(chain.key, viewKey)
         else if (viewResult != null) //otherwise check for viewResult and result dispatcher
-            bindResult(view.viewKey, viewResult)
+            bindResult(viewKey, viewResult)
 
-        if (viewsStack.isEmpty())
-            rootPath = path
+        if (_viewsStack.isEmpty())
+            rootPathKey = viewKey
 
-        val meta = ViewMeta(view.viewKey, routeType, route.isCompose, route, path::class)
-        viewsStack.add(meta)
-        viewsStackById[meta.key] = meta
+        val meta = ViewMeta(viewKey, routeType, presentation, route.isCompose, route, path::class)
+        _viewsStack.add(meta)
+        _viewsStackById[meta.key] = meta
 
-        return view
+        return viewKey
     }
 
     protected fun dispatchClose(v: ViewMeta)
@@ -721,13 +841,13 @@ open class RouterSimple(protected val callerKey: String?,
 
     protected fun popViewStack(): ViewMeta?
     {
-        if (viewsStack.isEmpty())
+        if (_viewsStack.isEmpty())
             return null
 
-        val v = viewsStack.removeLast()
+        val v = _viewsStack.removeLast()
         routerManager.remove(v.key)
 
-        if (viewsStack.isEmpty() && parent != null)
+        if (_viewsStack.isEmpty() && parent != null)
             isClosing = true
 
         return v
@@ -739,10 +859,30 @@ open class RouterSimple(protected val callerKey: String?,
         val totalStack = mutableListOf<ViewMeta>()
         while (prev != null)
         {
-            totalStack.addAll(0, prev.viewsStack)
+            totalStack.addAll(0, prev._viewsStack)
             prev = prev.parent
         }
 
         return totalStack
+    }
+
+    companion object
+    {
+        val KEY = "com.speakerboxlite.router.RouterSimple.key"
+        val CALLER = "com.speakerboxlite.router.RouterSimple.callerKey"
+        val IS_CLOSING = "com.speakerboxlite.router.RouterSimple.isClosing"
+        val ROOT_PATH = "com.speakerboxlite.router.RouterSimple.rootPathKey"
+        val VIEW_STACK = "com.speakerboxlite.router.RouterSimple.viewStack"
+        val ROUTER_TABS = "com.speakerboxlite.router.RouterSimple.routerTabsByKey"
+        val CHILD = "com.speakerboxlite.router.RouterSimple.child"
+        val RESULT_MANAGER = "com.speakerboxlite.router.RouterSimple.resultManager"
+
+        fun arePathsEqual(left: RoutePath, right: RoutePath, singleTop: SingleTop): Boolean =
+            when (singleTop)
+            {
+                SingleTop.None -> false
+                SingleTop.Class -> left::class == right::class
+                SingleTop.Equal -> left == right
+            }
     }
 }

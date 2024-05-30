@@ -26,11 +26,11 @@ class ComposeHostFragment: BaseHostFragment(),
     HostCloseable
 {
 
-    override var onCloseCallback: (() -> Unit)? = null
+    override var onCloseCallback: (() -> Unit)? = null // unused
 
     override fun onCloseHost()
     {
-        onCloseCallback!!.invoke()
+        parentFragmentManager.popBackStackImmediate()
     }
 }
 

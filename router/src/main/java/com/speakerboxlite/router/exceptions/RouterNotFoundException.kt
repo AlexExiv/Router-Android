@@ -29,7 +29,7 @@ class RouterNotFoundException: IllegalArgumentException
             return "Router hasn't been found. Key: ${activity.hostActivityKey} ; " +
                     "Class name ${activity::class.qualifiedName} ; " +
                     "Saved Instance: ${bundle != null} ; " +
-                    "Routers count: ${managerImpl.routers.size} ; " +
+                    "Routers count: ${managerImpl.routerByView.size} ; " +
                     "Top router: ${routerManager.top != null} ; " +
                     "Path to top: ${simpleTop?.buildViewStackPath() ?: listOf()}"
         }

@@ -1,5 +1,7 @@
 package com.speakerboxlite.router
 
-interface RoutePath
+import java.io.Serializable
+
+interface RoutePath: Serializable
 
 interface RoutePathResult<Result>: RoutePath
