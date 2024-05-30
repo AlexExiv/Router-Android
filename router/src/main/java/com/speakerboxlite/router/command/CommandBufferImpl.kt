@@ -41,7 +41,7 @@ internal class CommandBufferImpl(val factory: ViewFactoryInterface?): CommandBuf
 
     override fun apply(command: Command)
     {
-        checkMainThread("Applying of the commands only possible on the main thread.")
+        //checkMainThread("Applying of the commands only possible on the main thread.")
 
         if (executor == null)
             buffer.add(command)
