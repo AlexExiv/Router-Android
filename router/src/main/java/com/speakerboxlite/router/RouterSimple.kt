@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.annotations.RouteType
+import com.speakerboxlite.router.annotations.SingleTop
 import com.speakerboxlite.router.annotations.TabUnique
 import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
@@ -113,6 +114,7 @@ open class RouterSimple(
     val child: RouterSimple? get() = weakChild.get()
 
     override val topRouter: Router? get() = routerManager.top
+    val branchTopRouter: RouterSimple get() = child?.branchTopRouter ?: this
 
     override val hasPreviousScreen: Boolean get() = parent != null || _viewsStack.size > 1
 
@@ -517,20 +519,20 @@ open class RouterSimple(
         return null
     }
 
-    internal open fun scanForPath(clazz: KClass<*>, recursive: Boolean = true): ViewMeta?
+    internal open fun scanForPath(path: RoutePath, singleTop: SingleTop, recursive: Boolean = true): ViewMeta?
     {
         for (v in _viewsStack)
         {
-            if (v.path == clazz)
+            if (arePathsEqual(dataStorage[v.key]!!, path, singleTop))
                 return v
 
-            val vs = routerTabsByKey[v.key]?.scanForPath(clazz)
+            val vs = routerTabsByKey[v.key]?.scanForPath(path, singleTop)
             if (vs != null)
-                return vs
+                return v
         }
 
         if (parent != null && recursive)
-            return parent?.scanForPath(clazz)
+            return parent?.scanForPath(path, singleTop)
 
         return null
     }
@@ -682,9 +684,9 @@ open class RouterSimple(
                 }
 
                 //if this route has singleTop flag try to find it in the hierarchy and route to the instance
-                if (route.singleTop)
+                if (route.singleTop != SingleTop.None && topRouter != null)
                 {
-                    val exist = scanForPath(path::class)
+                    val exist = (topRouter as RouterSimple).scanForPath(path, route.singleTop)
                     if (exist != null)
                         return closeTo(exist.key)
                 }
@@ -868,12 +870,19 @@ open class RouterSimple(
     {
         val KEY = "com.speakerboxlite.router.RouterSimple.key"
         val CALLER = "com.speakerboxlite.router.RouterSimple.callerKey"
-        val PATH_DATA = "com.speakerboxlite.router.RouterSimple.pathData"
         val IS_CLOSING = "com.speakerboxlite.router.RouterSimple.isClosing"
         val ROOT_PATH = "com.speakerboxlite.router.RouterSimple.rootPathKey"
         val VIEW_STACK = "com.speakerboxlite.router.RouterSimple.viewStack"
         val ROUTER_TABS = "com.speakerboxlite.router.RouterSimple.routerTabsByKey"
         val CHILD = "com.speakerboxlite.router.RouterSimple.child"
         val RESULT_MANAGER = "com.speakerboxlite.router.RouterSimple.resultManager"
+
+        fun arePathsEqual(left: RoutePath, right: RoutePath, singleTop: SingleTop): Boolean =
+            when (singleTop)
+            {
+                SingleTop.None -> false
+                SingleTop.Class -> left::class == right::class
+                SingleTop.Equal -> left == right
+            }
     }
 }

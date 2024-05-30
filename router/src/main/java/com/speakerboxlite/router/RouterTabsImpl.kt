@@ -2,6 +2,7 @@ package com.speakerboxlite.router
 
 import android.os.Bundle
 import com.speakerboxlite.router.annotations.Presentation
+import com.speakerboxlite.router.annotations.SingleTop
 import com.speakerboxlite.router.annotations.TabUnique
 import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
@@ -114,13 +115,18 @@ class RouterTabsImpl(var viewKey: String,
 
     override operator fun get(index: Int): RouterTab = tabRouters[index]!! as RouterTab
 
-    internal fun scanForPath(clazz: KClass<*>): ViewMeta?
+    internal fun scanForPath(path: RoutePath, singleTop: SingleTop): ViewMeta?
     {
         for (kv in tabRouters)
         {
-            val v = kv.value.scanForPath(clazz, false)
+            val top = kv.value.branchTopRouter
+            val v = top.scanForPath(path, singleTop, false)
             if (v != null)
+            {
+                route(kv.key)
+                top.closeTo(v.key)
                 return v
+            }
         }
 
         return null

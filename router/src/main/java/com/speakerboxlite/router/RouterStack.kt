@@ -6,7 +6,7 @@ import com.speakerboxlite.router.ext.putBundles
 
 interface RouterStack
 {
-    val top: Router
+    val top: Router?
 
     fun push(viewKey: String, router: Router)
 
@@ -22,7 +22,7 @@ interface RouterStack
 
 class RouterStackImpl: RouterStack
 {
-    override val top: Router get() = stack.lastOrNull()?.top ?: error("No specified top router")
+    override val top: Router? get() = stack.lastOrNull()?.top
 
     private val stack = mutableListOf<RouterStackEntry>()
 

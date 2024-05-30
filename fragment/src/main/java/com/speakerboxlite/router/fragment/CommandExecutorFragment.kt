@@ -89,7 +89,6 @@ open class CommandExecutorFragment(
                 is Command.Close -> close()
                 is Command.CloseTo -> closeTo(command.viewKey)
                 is Command.CloseAll -> closeAll()
-                is Command.StartModal -> startActivity(command.viewKey, command.params)
                 is Command.CloseDialog -> closeDialog(command.viewKey)
                 is Command.CloseBottomSheet -> closeBottomSheet(command.viewKey)
                 is Command.ChangeTab -> command.tabChangeCallback(command.tab)
@@ -100,6 +99,12 @@ open class CommandExecutorFragment(
 
     protected fun executeWithView(viewKey: String, command: Command)
     {
+        if (command is Command.StartModal)
+        {
+            startActivity(command.viewKey, command.params)
+            return
+        }
+
         checkNotNull(viewFactory) { "ViewFactory hasn't been set" }
         val view = viewFactory?.createView(viewKey) ?: return
         val animation = viewFactory?.createAnimation(view) as? AnimationControllerFragment<RoutePath, View>

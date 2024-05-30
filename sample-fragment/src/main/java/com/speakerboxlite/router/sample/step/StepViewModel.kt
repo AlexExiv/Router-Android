@@ -43,7 +43,7 @@ class StepViewModel(val step: Int, app: Application): BaseViewModel(app)
 
     fun onShowSingleton()
     {
-        router.route(TabPath1())
+        router.route(StepSinglePath(1))
     }
 
     fun onShowTab()

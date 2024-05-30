@@ -19,7 +19,7 @@ annotation class Route(
      * Indicates that only one view with this path can exist in the views' hierarchy.
      * If a view with this path is already in the hierarchy, the `Router` will close all views until it reaches this view.
      */
-    val singleTop: Boolean = false,
+    val singleTop: SingleTop = SingleTop.None,
 
     /**
      * The class file of the animation inherited from `AnimationController`

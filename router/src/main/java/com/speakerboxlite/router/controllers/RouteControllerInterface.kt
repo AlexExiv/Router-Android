@@ -7,12 +7,13 @@ import com.speakerboxlite.router.RouterModelProvider
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.ViewModel
 import com.speakerboxlite.router.annotations.Presentation
+import com.speakerboxlite.router.annotations.SingleTop
 import java.io.Serializable
 import kotlin.reflect.KClass
 
 interface RouteControllerInterface<Path: RoutePath, V: View>
 {
-    val singleTop: Boolean
+    val singleTop: SingleTop
     val creatingInjector: Boolean
     val preferredPresentation: Presentation
     val isChain: Boolean

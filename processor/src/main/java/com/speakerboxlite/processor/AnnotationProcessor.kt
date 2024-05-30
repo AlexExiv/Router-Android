@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService
 import com.speakerboxlite.router.annotations.Chain
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.annotations.Route
+import com.speakerboxlite.router.annotations.SingleTop
 import com.speakerboxlite.router.annotations.Tabs
 import com.squareup.kotlinpoet.ANY
 import com.squareup.kotlinpoet.ClassName
@@ -238,8 +239,11 @@ class AnnotationProcessor : AbstractProcessor()
         //val tabAnnotation = element.getAnnotation(Tab::class.java)
         val tabsAnnotation = element.getAnnotation(Tabs::class.java)
 
-        if (annotation.singleTop)
-            initBuilder.addStatement("${valName}.singleTop = true")
+        if (annotation.singleTop != SingleTop.None)
+        {
+            val singleTopEnum = ClassName("$MAIN_ROUTER_PACK.annotations", "SingleTop")
+            initBuilder.addStatement("${valName}.singleTop = %T.%L", singleTopEnum, annotation.singleTop.toString())
+        }
 
         if (tabsAnnotation != null)
         {

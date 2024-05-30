@@ -6,7 +6,7 @@ interface RouterManager
 {
     val isAppRestarting: Boolean
 
-    val top: Router
+    val top: Router?
 
     fun push(router: Router)
     operator fun set(key: String, value: Router?)

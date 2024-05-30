@@ -6,6 +6,7 @@ import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.pattern.UrlMatcher
 import com.speakerboxlite.router.annotations.Presentation
+import com.speakerboxlite.router.annotations.SingleTop
 import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -20,7 +21,7 @@ abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterfa
     var preferredAnimationController: AnimationController? = null
     var animationControllerFactory: AnimationControllerFactory? = null
 
-    final override var singleTop: Boolean = false
+    final override var singleTop: SingleTop = SingleTop.None
     final override var creatingInjector: Boolean = false
     final override var preferredPresentation: Presentation = Presentation.Push
 
