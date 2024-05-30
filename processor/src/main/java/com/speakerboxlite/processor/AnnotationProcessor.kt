@@ -59,7 +59,11 @@ class AnnotationProcessor : AbstractProcessor()
             val processorMiddleware = MiddlewareProcessor(roundEnv)
             val middlewares = processorMiddleware.prepareMiddlewares()
 
-            val pack = processingEnv.elementUtils.getPackageOf(roundEnv.rootElements.first()).toString()
+            val firstElem = roundEnv.rootElements
+                .mapNotNull { it as? TypeElement }
+                .firstOrNull { it.hasAnyParent(listOf("Application", "MultiDexApplication")) }
+
+            val pack = processingEnv.elementUtils.getPackageOf(firstElem ?: roundEnv.rootElements.first()).toString()
 
             val fileName = "RouterComponentImpl"
             val fileBuilder = FileSpec.builder(pack, fileName)
@@ -338,12 +342,12 @@ fun TypeElement.hasParent(name: String, interfaces: Boolean = false): Boolean
     val sc = superclass as? DeclaredType ?: return false
     val sd = sc.asElement() as TypeElement
 
-    println("TypeElement.hasParent: $name ; ${sd.simpleName} ; ${this.interfaces.mapNotNull { (it as? DeclaredType)?.asElement()?.simpleName }}")
-    println("TypeElement.hasParent: $name ; ${(this.interfaces.firstOrNull { (it as? DeclaredType)?.asElement()?.simpleName?.contentEquals(name) == true } != null)} ; ${this.interfaces.mapNotNull { (it as? DeclaredType)?.asElement()?.simpleName }}")
+    //println("TypeElement.hasParent: $name ; ${sd.simpleName} ; ${this.interfaces.mapNotNull { (it as? DeclaredType)?.asElement()?.simpleName }}")
+    //println("TypeElement.hasParent: $name ; ${(this.interfaces.firstOrNull { (it as? DeclaredType)?.asElement()?.simpleName?.contentEquals(name) == true } != null)} ; ${this.interfaces.mapNotNull { (it as? DeclaredType)?.asElement()?.simpleName }}")
 
     if (sd.simpleName.contentEquals(name) || (interfaces && this.interfaces.firstOrNull { (it as? DeclaredType)?.asElement()?.simpleName?.contentEquals(name) == true } != null))
     {
-        println("TypeElement.hasParent: $name ; Success ; ${sd.simpleName}")
+        //println("TypeElement.hasParent: $name ; Success ; ${sd.simpleName}")
         return true
     }
 
