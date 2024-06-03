@@ -2,6 +2,7 @@ package com.speakerboxlite.router.fragmentcompose
 
 import android.os.Bundle
 import android.os.Parcelable
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -37,22 +38,17 @@ abstract class BaseHostComposeFragment: Fragment(),
     protected var stateRegistry: SaveableStateRegistry? = null
     protected var savedState = mapOf<String, List<Any?>>()
 
-    override fun onStart()
-    {
-        super.onStart()
-        root.value = { Root() }
-    }
-
     override fun onStop()
     {
         super.onStop()
         savedState = stateRegistry?.performSave() ?: mapOf()
-        root.value = null
+        Log.d("BaseHostComposeFragment", "Saved onStop: $savedState")
     }
 
     override fun onSaveInstanceState(outState: Bundle)
     {
         super.onSaveInstanceState(outState)
+        Log.d("BaseHostComposeFragment", "Saved onSaveInstanceState: $savedState")
         outState.putBundle(SAVED_STATE_KEY, savedState.toBundle())
     }
 
@@ -74,6 +70,7 @@ abstract class BaseHostComposeFragment: Fragment(),
             {
                 onDispose {
                     savedState = registry.performSave()
+                    Log.d("BaseHostComposeFragment", "Saved Root onDispose: $savedState")
                 }
             }
         }
