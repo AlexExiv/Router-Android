@@ -4,13 +4,15 @@ import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.ViewResultData
 import com.speakerboxlite.router.annotations.Presentation
+import java.io.Serializable
 
-data class RouteParams<Path: RoutePath>(val execRouter: Router? = null,
-                                        val path: Path,
-                                        val presentation: Presentation? = null,
-                                        val isReplace: Boolean = false,
-                                        val tabIndex: Int? = null,
-                                        val result: ViewResultData? = null)
+data class RouteParams<Path: RoutePath>(
+    val execRouter: String? = null,
+    val path: Path,
+    val presentation: Presentation? = null,
+    val isReplace: Boolean = false,
+    val tabIndex: Int? = null,
+    val result: ViewResultData? = null): Serializable
 
 typealias RouteParamsGen = RouteParams<RoutePath>
 

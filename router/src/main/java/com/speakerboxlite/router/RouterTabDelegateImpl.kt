@@ -4,11 +4,12 @@ import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.annotations.RouteType
 import java.lang.ref.WeakReference
 
-class RouterTabDelegateImpl(val index: Int,
-                            routerTabs: RouterTabsImpl,
-                            routerTab: RouterSimple,
-                            superRouterTab: RouterTabSuper,
-                            parent: RouterSimple): RouterTabDelegate
+class RouterTabDelegateImpl(
+    val index: Int,
+    routerTabs: RouterTabsImpl,
+    routerTab: RouterSimple,
+    superRouterTab: RouterTabSuper,
+    parent: RouterSimple): RouterTabDelegate
 {
     private val weakRouterTabs = WeakReference(routerTabs)
     private val weakRouterTab = WeakReference(routerTab)

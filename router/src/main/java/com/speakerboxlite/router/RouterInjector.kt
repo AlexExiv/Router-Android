@@ -8,16 +8,18 @@ import com.speakerboxlite.router.result.ResultManager
 import kotlin.reflect.KClass
 import kotlin.reflect.full.superclasses
 
-open class RouterInjector(callerKey: String?,
-                          parent: RouterSimple?,
-                          routeManager: RouteManager,
-                          routerManager: RouterManager,
-                          resultManager: ResultManager,
-                          protected val componentProvider: ComponentProvider): RouterSimple(callerKey, parent, routeManager, routerManager, resultManager)
+open class RouterInjector(
+    callerKey: String?,
+    parent: RouterSimple?,
+    routeManager: RouteManager,
+    routerManager: RouterManager,
+    resultManager: ResultManager,
+    protected val componentProvider: ComponentProvider): RouterSimple(callerKey, parent, routeManager, routerManager, resultManager)
 {
-    data class ViewMetaComponent(val componentKey: String,
-                                 val routeComponent: RouteControllerComponent<RoutePath, *, *>,
-                                 val componentPathData: RoutePath)
+    data class ViewMetaComponent(
+        val componentKey: String,
+        val routeComponent: RouteControllerComponent<RoutePath, *, *>,
+        val componentPathData: RoutePath)
 
     val parentInjector: RouterInjector get() = parent as RouterInjector
 

@@ -9,6 +9,7 @@ import com.speakerboxlite.router.sample.di.modules.AppModule
 import com.speakerboxlite.router.sample.di.modules.UserData
 import com.speakerboxlite.router.sample.di.modules.UserModule
 import com.speakerboxlite.router.sample.main.MainPath
+import com.speakerboxlite.router.sample.tabs.TabsPath
 
 class App: FragmentApplication<RouterComponentImpl>()
 {
@@ -27,6 +28,6 @@ class App: FragmentApplication<RouterComponentImpl>()
     override fun onCreateRouter()
     {
         routerComponent = RouterComponentImpl()
-        routerComponent.initialize(MainPath(), { _, _ -> AnimationControllerDefault() }, component)
+        routerComponent.initialize(TabsPath(), { _, _ -> AnimationControllerDefault() }, component)
     }
 }

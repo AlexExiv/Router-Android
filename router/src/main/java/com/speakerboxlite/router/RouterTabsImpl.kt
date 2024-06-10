@@ -15,15 +15,23 @@ import java.lang.ref.WeakReference
 import java.util.UUID
 import kotlin.reflect.KClass
 
-class RouterTabsImpl(var viewKey: String,
-                     val callerKey: String,
-                     router: RouterSimple,
-                     val tabRouteInParent: Boolean,
-                     val backToFirst: Boolean,
-                     val tabUnique: TabUnique): RouterTabs
+class RouterTabsImpl(
+    var viewKey: String,
+    val callerKey: String,
+    router: RouterSimple,
+    tabRouteInParent: Boolean,
+    backToFirst: Boolean,
+    tabUnique: TabUnique): RouterTabs
 {
     constructor(viewKey: String, callerKey: String, router: RouterSimple, tabsProperties: TabsProperties):
             this(viewKey, callerKey, router, tabsProperties.tabRouteInParent, tabsProperties.backToFirst, tabsProperties.tabUnique)
+
+    var tabRouteInParent: Boolean = tabRouteInParent
+        private set
+    var backToFirst: Boolean = backToFirst
+        private set
+    var tabUnique: TabUnique = tabUnique
+        private set
 
     protected val weakRouter = WeakReference(router)
     protected val router: RouterSimple get() = weakRouter.get()!!
@@ -150,9 +158,9 @@ class RouterTabsImpl(var viewKey: String,
     {
         bundle.putString(KEY, viewKey)
         bundle.putString(CALLER, callerKey)
-        bundle.putBoolean("tabRouteInParent", tabRouteInParent)
-        bundle.putBoolean("backToFirst", backToFirst)
-        bundle.putSerializable("tabUnique", tabUnique)
+        bundle.putBoolean(TAB_ROUTE_IN_PARENT, tabRouteInParent)
+        bundle.putBoolean(BACK_TO_FIRST, backToFirst)
+        bundle.putSerializable(TAB_UNIQUE, tabUnique)
         bundle.putInt(TAB_INDEX, tabIndex)
 
         val tabRoutersKeysBundle = Bundle()
@@ -173,6 +181,9 @@ class RouterTabsImpl(var viewKey: String,
     internal fun performRestore(bundle: Bundle)
     {
         viewKey = bundle.getString(KEY)!!
+        tabRouteInParent = bundle.getBoolean(TAB_ROUTE_IN_PARENT)
+        backToFirst = bundle.getBoolean(BACK_TO_FIRST)
+        tabUnique = bundle.getSerializable(TAB_UNIQUE) as TabUnique
         tabIndex = bundle.getInt(TAB_INDEX) // Will it be restored properly?
 
         tabRouters.clear()
@@ -210,6 +221,9 @@ class RouterTabsImpl(var viewKey: String,
     {
         const val KEY = "com.speakerboxlite.router.RouterTabsImpl.viewKey"
         const val CALLER = "com.speakerboxlite.router.RouterTabsImpl.callerKey"
+        const val TAB_ROUTE_IN_PARENT = "com.speakerboxlite.router.RouterTabsImpl.tabRouteInParent"
+        const val BACK_TO_FIRST = "com.speakerboxlite.router.RouterTabsImpl.backToFirst"
+        const val TAB_UNIQUE = "com.speakerboxlite.router.RouterTabsImpl.tabUnique"
         const val TAB_INDEX = "com.speakerboxlite.router.RouterTabsImpl.tabIndex"
         const val TAB_ROUTERS_KEY = "com.speakerboxlite.router.RouterTabsImpl.tabRoutersKeys"
         const val TAB_ROUTERS = "com.speakerboxlite.router.RouterTabsImpl.tabRouters"
