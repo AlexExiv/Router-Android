@@ -4,6 +4,10 @@ import android.os.Bundle
 import com.speakerboxlite.router.ext.getBundles
 import com.speakerboxlite.router.ext.putBundles
 
+data class PathComponent(
+    val viewKey: String,
+    val router: Router)
+
 interface RouterStack
 {
     val top: Router?
@@ -15,6 +19,8 @@ interface RouterStack
     fun remove(viewKey: String)
 
     fun pop(toKey: String?): Router?
+
+    fun buildPathToRoot(): List<PathComponent>
 
     fun performSaveStack(bundle: Bundle)
     fun performRestore(bundle: Bundle, routerManager: RouterManager)
@@ -86,6 +92,15 @@ class RouterStackImpl: RouterStack
         return stack.last().top
     }
 
+    override fun buildPathToRoot(): List<PathComponent>
+    {
+        val path = mutableListOf<PathComponent>()
+        for (i in (stack.size - 1) downTo 0)
+            stack[i].addToPath(path)
+
+        return path
+    }
+
     override fun performSaveStack(bundle: Bundle)
     {
         bundle.putBundles(STACK, stack.map { it.toBundle() })
@@ -115,6 +130,8 @@ interface RouterStackEntry
     fun pop(toKey: String?): Router?
     fun remove(key: String): Boolean
 
+    fun addToPath(path: MutableList<PathComponent>)
+
     fun toBundle(): Bundle
 }
 
@@ -126,14 +143,20 @@ private fun routerStackEntryFromBundle(bundle: Bundle, routerManager: RouterMana
         else -> error("")
     }
 
-class RouterStackSingle(override val viewKey: String,
-                        override val top: Router?): RouterStackEntry
+class RouterStackSingle(
+    override val viewKey: String,
+    override val top: Router?): RouterStackEntry
 {
     override fun push(viewKey: String, router: Router): Boolean = false
 
     override fun pop(toKey: String?): Router? = null
 
     override fun remove(key: String): Boolean = false
+
+    override fun addToPath(path: MutableList<PathComponent>)
+    {
+        path.add(PathComponent(viewKey, top!!))
+    }
 
     override fun toBundle(): Bundle = Bundle()
         .also {
@@ -150,8 +173,9 @@ class RouterStackSingle(override val viewKey: String,
     }
 }
 
-class RouterStackReel(override val viewKey: String,
-                      val routerTabs: RouterTabs): RouterStackEntry
+class RouterStackReel(
+    override val viewKey: String,
+    val routerTabs: RouterTabs): RouterStackEntry
 {
     override val top: Router? get() = if (currentIndex == -1) null else stacks[currentIndex]?.lastOrNull()?.top
 
@@ -201,6 +225,13 @@ class RouterStackReel(override val viewKey: String,
         }
 
         return false
+    }
+
+    override fun addToPath(path: MutableList<PathComponent>)
+    {
+        val tabStack = stacks[currentIndex]!!
+        for (i in (tabStack.size - 1) downTo 0)
+            path.add(PathComponent(tabStack[i].viewKey, tabStack[i].top!!))
     }
 
     override fun toBundle(): Bundle =

@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.sample.base.BaseViewModel
 import com.speakerboxlite.router.sample.di.modules.UserData
+import com.speakerboxlite.router.sample.shared.SharedPath
 import com.speakerboxlite.router.sample.step.StepPath
 import javax.inject.Inject
 
@@ -43,6 +44,11 @@ class TabViewModel(val index: Int, app: Application): BaseViewModel(app)
     fun onShowStepPresent()
     {
         router.route(StepPath(0), Presentation.ModalNewTask)
+    }
+
+    fun onShowShared()
+    {
+        router.route(SharedPath())
     }
 
     fun onResetAuth()

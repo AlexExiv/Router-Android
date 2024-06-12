@@ -23,5 +23,7 @@ interface RouterManager
     fun switchReel(viewKey: String, index: Int)
     fun remove(viewKey: String)
 
+    fun buildPathToRoot(): List<PathComponent>
+
     fun provideDataStorage(): PathDataStorage
 }

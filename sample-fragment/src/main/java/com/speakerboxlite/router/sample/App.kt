@@ -28,6 +28,6 @@ class App: FragmentApplication<RouterComponentImpl>()
     override fun onCreateRouter()
     {
         routerComponent = RouterComponentImpl()
-        routerComponent.initialize(TabsPath(), { _, _ -> AnimationControllerDefault() }, component)
+        routerComponent.initialize(MainPath(), { _, _ -> AnimationControllerDefault() }, component)
     }
 }
