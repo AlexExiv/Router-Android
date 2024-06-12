@@ -125,6 +125,7 @@ open class RouterInjector(
             var comp = componentProvider.find(mc.componentKey)
             if (comp == null)
                 comp = mc.routeComponent.onCreateInjector(mc.componentPathData, componentProvider.appComponent)
+                    .also { componentProvider.bind(mc.componentKey, it) }
 
             comp
         }
@@ -140,8 +141,10 @@ open class RouterInjector(
             return getComponent(viewKey, metaComponents, _viewsStack[0].key, _viewsStack[0].route)
 
         val path = routerManager.buildPathToRoot()
-        val startIndex = path.indexOfFirst { it.viewKey == viewKey }
-        assert(startIndex != -1) { "Couldn't find view with id = $viewKey in the stack" }
+        var startIndex = path.indexOfFirst { it.viewKey == viewKey }
+        if (startIndex == -1) // we suppose in this case that this screen will be in top of the stack
+            startIndex = 0
+        //assert(startIndex != -1) { "Couldn't find view with id = $viewKey in the stack" }
 
         for (i in startIndex until path.size)
         {
@@ -163,7 +166,7 @@ open class RouterInjector(
         if (comp == null)
         {
             comp = routeComponent.onCreateInjector(dataStorage[componentKey]!!, componentProvider.appComponent)
-            componentProvider.bind(componentKey, comp)
+                .also { componentProvider.bind(componentKey, it) }
         }
 
         metaComponents[viewKey] = ViewMetaComponent(componentKey, routeComponent, dataStorage[componentKey]!!)
