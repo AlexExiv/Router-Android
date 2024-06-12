@@ -5,11 +5,11 @@
         android:fromAlpha="1"
         android:toAlpha="0"
         android:interpolator="@android:anim/decelerate_interpolator"
-        android:duration="@android:integer/config_shortAnimTime" />
+        android:duration="@integer/slide_anim_time" />
 
     <translate android:fromXDelta="0%"
                android:toXDelta="100%"
                android:interpolator="@android:anim/decelerate_interpolator"
-               android:duration="@android:integer/config_shortAnimTime"/>
+               android:duration="@integer/slide_anim_time"/>
 
 </set>

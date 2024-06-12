@@ -18,7 +18,7 @@ abstract class HostComposeFragment: BaseHostComposeFragment()
 
         return ComposeView(requireContext()).also {
             it.setContent {
-                root.value?.invoke()
+                Root()
             }
         }
     }

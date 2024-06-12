@@ -10,7 +10,9 @@ import com.speakerboxlite.router.controllers.RouteParamsGen
 import java.lang.ref.WeakReference
 import java.util.UUID
 
-class RouterTabsLocal(val viewKey: String, router: RouterSimple): RouterTabs
+class RouterTabsLocal(
+    val viewKey: String,
+    router: RouterSimple): RouterTabs
 {
     override var tabChangeCallback: OnTabChangeCallback? = null
     override var tabIndex: Int = 0

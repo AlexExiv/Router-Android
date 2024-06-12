@@ -26,6 +26,8 @@ class RouterManagerImpl: RouterManager, RouterStack by RouterStackImpl()
             routers[router.key] = RouterRecord(router)
     }
 
+    override fun getByKey(key: String): Router? = routers[key]?.router
+
     override fun set(key: String, value: Router?)
     {
         if (value != null)
@@ -85,7 +87,7 @@ class RouterManagerImpl: RouterManager, RouterStack by RouterStackImpl()
             return
 
         isRestored = true
-        val bundle = bundle ?: return
+        bundle ?: return
 
         val root = bundle.getBundle(ROOT)!!
 

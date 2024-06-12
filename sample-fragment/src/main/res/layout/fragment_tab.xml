@@ -61,6 +61,12 @@
                 <Button
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:text="Show Shared"
+                    android:onClick="@{() -> viewmodel.onShowShared()}"/>
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:text="Reset Auth"
                     android:onClick="@{() -> viewmodel.onResetAuth()}"/>
 

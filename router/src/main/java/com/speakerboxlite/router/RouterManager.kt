@@ -9,6 +9,8 @@ interface RouterManager
     val top: Router?
 
     fun push(router: Router)
+    fun getByKey(key: String): Router?
+
     operator fun set(key: String, value: Router?)
     operator fun get(key: String): Router?
 
@@ -20,6 +22,8 @@ interface RouterManager
     fun pushReel(viewKey: String, routerTabs: RouterTabs)
     fun switchReel(viewKey: String, index: Int)
     fun remove(viewKey: String)
+
+    fun buildPathToRoot(): List<PathComponent>
 
     fun provideDataStorage(): PathDataStorage
 }

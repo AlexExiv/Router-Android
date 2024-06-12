@@ -1,5 +1,7 @@
 package com.speakerboxlite.router
 
+import com.speakerboxlite.router.controllers.ComponentCleanable
+
 class ComponentProviderImpl(override val appComponent: Any): ComponentProvider
 {
     private val componentByKey = mutableMapOf<String, Any>()
@@ -14,7 +16,8 @@ class ComponentProviderImpl(override val appComponent: Any): ComponentProvider
 
     override fun unbind(key: String)
     {
-        componentByKey.remove(key)
+        val comp = componentByKey.remove(key)
+        (comp as? ComponentCleanable)?.onCleared()
     }
 
     override fun componentKey(key: String): String

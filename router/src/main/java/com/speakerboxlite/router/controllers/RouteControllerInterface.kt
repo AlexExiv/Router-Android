@@ -75,6 +75,15 @@ interface RouteControllerComposable<Path: RoutePath, V: View>
 
 interface Component
 
+/**
+ * Implement this interface if you want your subcomponent to receive an event when it is no longer in use,
+ * providing an opportunity to clean up the resources this component is using.
+ */
+interface ComponentCleanable: Component
+{
+    fun onCleared()
+}
+
 interface RouteControllerComponent<Path: RoutePath, V: View, C: Component>
 {
     val componentClass: KClass<C>

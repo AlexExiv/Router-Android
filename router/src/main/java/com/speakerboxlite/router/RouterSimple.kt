@@ -25,6 +25,7 @@ import com.speakerboxlite.router.result.ResultManager
 import com.speakerboxlite.router.result.RouterResultProvider
 import com.speakerboxlite.router.result.RouterResultProviderImpl
 import com.speakerboxlite.router.result.ViewResultType
+import java.io.Serializable
 import java.lang.ref.WeakReference
 import java.util.UUID
 import kotlin.reflect.KClass
@@ -79,7 +80,7 @@ data class ViewMeta(
 data class ViewResultData(
     val toKey: String,
     val resultType: ViewResultType,
-    val result: RouterResultDispatcher<ViewResult, Any>)
+    val result: RouterResultDispatcher<ViewResult, Any>): Serializable
 {
     companion object
     {
@@ -133,8 +134,8 @@ open class RouterSimple(
     protected var isClosing = false
 
     protected val routerTabsByKey = mutableMapOf<String, RouterTabsImpl>()
-    internal var rootPathKey: String? = null
-    internal val rootPath: RoutePath? get() = rootPathKey?.let { dataStorage[it] }
+    //internal var rootPathKey: String? = null
+    internal var rootPath: RoutePath? = null //get() = rootPathKey?.let { dataStorage[it] }
 
     init
     {
@@ -174,9 +175,9 @@ open class RouterSimple(
 
     override fun route(path: RouteParamsGen): Router?
     {
-        return if (path.execRouter != null && path.execRouter !== this)
+        return if (path.execRouter != null && routerManager.getByKey(path.execRouter) !== this)
         {
-            path.execRouter.route(path)
+            routerManager.getByKey(path.execRouter)?.route(path)
         }
         else if (path.isReplace)
         {
@@ -433,7 +434,7 @@ open class RouterSimple(
         bundle.putString(CALLER, callerKey)
 
         bundle.putBoolean(IS_CLOSING, isClosing)
-        bundle.putString(ROOT_PATH, rootPathKey)
+        bundle.putSerializable(ROOT_PATH, rootPath)
         bundle.putBundles(VIEW_STACK, _viewsStack.map { it.toBundle() })
 
         val tabsBundle = Bundle()
@@ -469,7 +470,7 @@ open class RouterSimple(
 
         callerKey = bundle.getString(CALLER)
         isClosing = bundle.getBoolean(IS_CLOSING)
-        rootPathKey = bundle.getString(ROOT_PATH)
+        rootPath = bundle.getSerializable(ROOT_PATH) as? RoutePath
 
         val viewStackBundles = bundle.getBundles(VIEW_STACK)!!
         _viewsStack.clear()
@@ -481,7 +482,7 @@ open class RouterSimple(
         routerTabsByKey.clear()
         val tabsBundle = bundle.getBundle(ROUTER_TABS)!!
         tabsBundle.keySet().forEach {
-            createRouterTabs(it)
+            createRouterTabs(it, null, false)
             routerTabsByKey[it]!!.performRestore(tabsBundle.getBundle(it)!!)
         }
 
@@ -652,7 +653,7 @@ open class RouterSimple(
         val route = findRoute(path)
 
         //try to check all middlewares
-        val routeParams = RouteParamsGen(execRouter = execRouter, path = path, presentation = presentation, result = viewResult)
+        val routeParams = RouteParamsGen(execRouter = execRouter?.key, path = path, presentation = presentation, result = viewResult)
         if (tryRouteMiddlewares(routeParams, route))
             return null
 
@@ -820,7 +821,7 @@ open class RouterSimple(
             bindResult(viewKey, viewResult)
 
         if (_viewsStack.isEmpty())
-            rootPathKey = viewKey
+            rootPath = path
 
         val meta = ViewMeta(viewKey, routeType, presentation, route.isCompose, route, path::class)
         _viewsStack.add(meta)
