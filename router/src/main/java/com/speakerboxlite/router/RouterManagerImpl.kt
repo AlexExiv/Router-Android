@@ -102,8 +102,11 @@ class RouterManagerImpl: RouterManager, RouterStack by RouterStackImpl()
 
         routerByView.clear()
         val routerByViewBundle = root.getBundle(ROUTER_BY_VIEW)!!
-        routerByViewBundle.keySet().forEach {
-            this[it] = routers[routerByViewBundle.getString(it)!!]!!.router
+        routerByViewBundle.keySet().forEach { k ->
+            if (routers[routerByViewBundle.getString(k)!!] == null)
+                Log.d("RouterManagerImpl", "Unexpected View Key RouterManager")
+            routers[routerByViewBundle.getString(k)!!]?.also { this[k] = it.router } // weird bug
+            //this[it] = routers[routerByViewBundle.getString(it)!!]!!.router
         }
 
         performRestore(root, this)

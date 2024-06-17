@@ -27,7 +27,7 @@ abstract class BaseViewModelFragment<VM: BaseViewModel, VDB: ViewDataBinding>(@L
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): android.view.View?
     {
         dataBinding = DataBindingUtil.inflate(inflater, layoutId, container, false)
-        dataBinding.lifecycleOwner = this
+        dataBinding.lifecycleOwner = viewLifecycleOwner
 
         return dataBinding.root
     }

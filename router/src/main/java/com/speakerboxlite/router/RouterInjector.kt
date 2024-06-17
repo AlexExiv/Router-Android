@@ -45,8 +45,6 @@ open class RouterInjector(
         }
     }
 
-    val parentInjector: RouterInjector get() = parent as RouterInjector
-
     protected val appComponentClass: KClass<*> by lazy {
         componentProvider.appComponent::class.superclasses[0]
     }

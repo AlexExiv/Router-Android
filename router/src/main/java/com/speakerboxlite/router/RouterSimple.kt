@@ -254,6 +254,8 @@ open class RouterSimple(
     internal fun releaseRouter()
     {
         _viewsStack.forEach { unbind(it.key) }
+        _viewsStack.clear()
+        _viewsStackById.clear()
     }
 
     override fun closeTo(key: String): Router?
@@ -395,6 +397,8 @@ open class RouterSimple(
     override fun removeView(key: String)
     {
         _viewsStack.removeAll { it.key == key }
+        _viewsStackById.remove(key)
+
         if (_viewsStack.isEmpty() && parent != null)
             isClosing = true
 
@@ -482,8 +486,13 @@ open class RouterSimple(
         routerTabsByKey.clear()
         val tabsBundle = bundle.getBundle(ROUTER_TABS)!!
         tabsBundle.keySet().forEach {
-            createRouterTabs(it, null, false)
-            routerTabsByKey[it]!!.performRestore(tabsBundle.getBundle(it)!!)
+            if (_viewsStackById[it] != null)
+            {
+                createRouterTabs(it, null, false)
+                routerTabsByKey[it]!!.performRestore(tabsBundle.getBundle(it)!!)
+            }
+            else
+                Log.d("RouterSimple", "Unexpected View Key")
         }
 
         val childBundle = bundle.getBundle(CHILD)
