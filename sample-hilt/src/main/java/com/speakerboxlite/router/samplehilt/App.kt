@@ -1,5 +1,7 @@
 package com.speakerboxlite.router.samplehilt
 
+import android.util.Log
+import com.speakerboxlite.router.RouterConfigGlobal
 import com.speakerboxlite.router.compose.bootstrap.ComposeApplication
 import com.speakerboxlite.router.samplehilt.base.animations.AnimationControllerComposeSlide
 import com.speakerboxlite.router.samplehilt.di.AppComponent
@@ -11,6 +13,12 @@ import dagger.hilt.android.HiltAndroidApp
 class App: ComposeApplication<RouterComponentImpl>()
 {
     lateinit var component: AppComponent // Shared component for the Middleware controllers
+
+    init
+    {
+        RouterConfigGlobal.restoreSingleTime = false
+        RouterConfigGlobal.logFun = { t, m -> Log.d(t, m) }
+    }
 
     override fun onCreateComponent()
     {

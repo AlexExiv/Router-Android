@@ -12,6 +12,7 @@ import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
 import androidx.compose.runtime.saveable.SaveableStateRegistry
 import androidx.fragment.app.Fragment
 import com.speakerboxlite.router.Router
+import com.speakerboxlite.router.RouterConfigGlobal
 import com.speakerboxlite.router.RouterManager
 import com.speakerboxlite.router.compose.ComposeHostViewRoot
 import com.speakerboxlite.router.compose.LocalRouterManager
@@ -42,13 +43,13 @@ abstract class BaseHostComposeFragment: Fragment(),
     {
         super.onStop()
         savedState = stateRegistry?.performSave() ?: mapOf()
-        Log.d("BaseHostComposeFragment", "Saved onStop: $savedState")
+        RouterConfigGlobal.log("BaseHostComposeFragment", "Saved onStop: $savedState")
     }
 
     override fun onSaveInstanceState(outState: Bundle)
     {
         super.onSaveInstanceState(outState)
-        Log.d("BaseHostComposeFragment", "Saved onSaveInstanceState: $savedState")
+        RouterConfigGlobal.log("BaseHostComposeFragment", "Saved onSaveInstanceState: $savedState")
         outState.putBundle(SAVED_STATE_KEY, savedState.toBundle())
     }
 
@@ -70,7 +71,7 @@ abstract class BaseHostComposeFragment: Fragment(),
             {
                 onDispose {
                     savedState = registry.performSave()
-                    Log.d("BaseHostComposeFragment", "Saved Root onDispose: $savedState")
+                    RouterConfigGlobal.log("BaseHostComposeFragment", "Saved Root onDispose: $savedState")
                 }
             }
         }

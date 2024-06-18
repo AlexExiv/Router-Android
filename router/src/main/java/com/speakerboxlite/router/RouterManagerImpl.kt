@@ -1,7 +1,6 @@
 package com.speakerboxlite.router
 
 import android.os.Bundle
-import android.util.Log
 import com.speakerboxlite.router.annotations.InternalApi
 
 data class RouterRecord(
@@ -40,7 +39,7 @@ class RouterManagerImpl: RouterManager, RouterStack by RouterStackImpl()
             if ((value is RouterSimple) && (value.parent == null))
                 rootRouter = value
 
-            Log.d("RouterManager", "Bound routers: ${routerByView.size}")
+            RouterConfigGlobal.log(TAG, "Bound routers: ${routerByView.size}")
         }
         else
         {
@@ -52,7 +51,7 @@ class RouterManagerImpl: RouterManager, RouterStack by RouterStackImpl()
                     routers.remove(router.key)
             }
 
-            Log.d("RouterManager", "Bound routers after unbind: ${routerByView.size}")
+            RouterConfigGlobal.log(TAG, "Bound routers after unbind: ${routerByView.size}")
         }
     }
 
@@ -83,7 +82,7 @@ class RouterManagerImpl: RouterManager, RouterStack by RouterStackImpl()
 
     override fun performRestore(bundle: Bundle?)
     {
-        if (isRestored) // restore state only once in case when the App has been recreated because the Router lives in the App's context
+        if (isRestored && RouterConfigGlobal.restoreSingleTime) // restore state only once in case when the App has been recreated because the Router lives in the App's context
             return
 
         isRestored = true
@@ -104,7 +103,7 @@ class RouterManagerImpl: RouterManager, RouterStack by RouterStackImpl()
         val routerByViewBundle = root.getBundle(ROUTER_BY_VIEW)!!
         routerByViewBundle.keySet().forEach { k ->
             if (routers[routerByViewBundle.getString(k)!!] == null)
-                Log.d("RouterManagerImpl", "Unexpected View Key RouterManager")
+                RouterConfigGlobal.log(TAG, "Unexpected View Key RouterManager")
             routers[routerByViewBundle.getString(k)!!]?.also { this[k] = it.router } // weird bug
             //this[it] = routers[routerByViewBundle.getString(it)!!]!!.router
         }
@@ -122,6 +121,8 @@ class RouterManagerImpl: RouterManager, RouterStack by RouterStackImpl()
 
     companion object
     {
+        val TAG = "RouterManagerImpl"
+
         val ROOT = "com.speakerboxlite.router.RouterManagerImpl"
         val ROOT_ROUTER = "com.speakerboxlite.router.RouterManagerImpl.rootRouter"
         val ROUTER_BY_VIEW = "com.speakerboxlite.router.RouterManagerImpl.routerByView"

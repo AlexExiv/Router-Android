@@ -1,5 +1,7 @@
 package com.speakerboxlite.router.sample
 
+import android.util.Log
+import com.speakerboxlite.router.RouterConfigGlobal
 import com.speakerboxlite.router.fragment.bootstrap.FragmentApplication
 import com.speakerboxlite.router.sample.base.animations.AnimationControllerDefault
 import com.speakerboxlite.router.sample.di.AppComponent
@@ -14,6 +16,12 @@ import com.speakerboxlite.router.sample.tabs.TabsPath
 class App: FragmentApplication<RouterComponentImpl>()
 {
     lateinit var component: AppComponent
+
+    init
+    {
+        RouterConfigGlobal.restoreSingleTime = false
+        RouterConfigGlobal.logFun = { t, m -> Log.d(t, m) }
+    }
 
     override fun onCreateComponent()
     {
