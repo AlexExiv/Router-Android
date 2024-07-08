@@ -126,7 +126,8 @@ class StackEntry(val view: ViewCompose,
 
     fun onDispose()
     {
-        lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        if (isCreated)
+            lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         context = null
         parentLifecycleOwner = null
         viewModelProvider?.clear(id)

@@ -22,6 +22,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.speakerboxlite.router.HostCloseable
 import com.speakerboxlite.router.Router
+import com.speakerboxlite.router.RouterConfigGlobal
 import com.speakerboxlite.router.RouterManager
 import com.speakerboxlite.router.RouterTabs
 import com.speakerboxlite.router.ViewBTS
@@ -149,6 +150,7 @@ fun ComposeNavigator(
             router.bindExecutor(executorFactory.onCreate(navigator))
             
             onDispose {
+                navigator.tryDispose()
                 router.unbindExecutor()
             }
         }
@@ -208,6 +210,8 @@ class ComposeNavigator(
     val isEmpty: Boolean by derivedStateOf { stateStack.isEmpty() }
     val canPop: Boolean by derivedStateOf { stateStack.size > 1 }
 
+    private var disposeKey: String? = null // Key of item to dispose all stack
+
     fun push(view: ViewCompose, animationController: AnimationControllerCompose?)
     {
         stateStack.add(StackEntry(view, viewModelProvider, animationController))
@@ -253,13 +257,25 @@ class ComposeNavigator(
         onDisposePopping(key)
     }
 
+    /**
+     * Need to mark navigator for delete In case of host closing
+     */
     fun prepareToDispose()
     {
         if (stateStack.isNotEmpty())
         {
+            disposeKey = stateStack.last().id
             stateStack.forEach { it.makeRemoving() }
-            poppingEntries[stateStack.last().id] = stateStack
+            poppingEntries[disposeKey!!] = stateStack
         }
+    }
+
+    /**
+     * Try to delete all records
+     */
+    fun tryDispose()
+    {
+        disposeKey?.also { onDisposePopping(it) }
     }
 
     protected fun removeLast(n: Int = 1)
@@ -272,7 +288,7 @@ class ComposeNavigator(
 
     protected fun onDisposePopping(key: String)
     {
-        println("onDisposePopping: ${poppingEntries[key]?.map { it.id }}")
+        RouterConfigGlobal.log(TAG, "onDisposePopping: ${poppingEntries[key]?.map { it.id }}")
         poppingEntries[key]?.forEach {
             it.onDispose()
             onDisposeCallback?.onDispose(it.id)
@@ -281,6 +297,11 @@ class ComposeNavigator(
     }
 
     fun getStackEntriesSaveable() = items.map { StackEntrySaveable(it) }
+
+    companion object
+    {
+        val TAG = "ComposeNavigator"
+    }
 }
 
 @Composable

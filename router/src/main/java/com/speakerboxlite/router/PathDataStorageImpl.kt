@@ -1,7 +1,6 @@
 package com.speakerboxlite.router
 
 import android.os.Bundle
-import android.util.Log
 
 class PathDataStorageImpl : PathDataStorage
 {
@@ -12,12 +11,12 @@ class PathDataStorageImpl : PathDataStorage
         if (value == null)
         {
             data.remove(key)
-            Log.d("PathDataStorage", "Bound data after release: ${data.size}")
+            RouterConfigGlobal.log(TAG, "Bound data after release: ${data.size}")
         }
         else
         {
             data[key] = value
-            Log.d("PathDataStorage", "Bound data: ${data.size}")
+            RouterConfigGlobal.log(TAG, "Bound data: ${data.size}")
         }
     }
 
@@ -45,6 +44,8 @@ class PathDataStorageImpl : PathDataStorage
 
     companion object
     {
+        val TAG = "PathDataStorageImpl"
+
         val ROOT = "com.speakerboxlite.router.PathDataStorageImpl"
         val DATA = "com.speakerboxlite.router.PathDataStorageImpl.data"
     }

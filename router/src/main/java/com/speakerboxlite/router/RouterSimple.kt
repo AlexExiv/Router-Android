@@ -1,7 +1,6 @@
 package com.speakerboxlite.router
 
 import android.os.Bundle
-import android.util.Log
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.annotations.RouteType
 import com.speakerboxlite.router.annotations.SingleTop
@@ -101,6 +100,13 @@ open class RouterSimple(
     internal val routerManager: RouterManager,
     protected val resultManager: ResultManager): Router, RouterInternal
 {
+    enum class State
+    {
+        READY, CLOSING, CLOSED;
+
+        val isEnd: Boolean get() = this == CLOSING || this == CLOSED
+    }
+
     final override var key: String = UUID.randomUUID().toString()
         private set
 
@@ -131,16 +137,10 @@ open class RouterSimple(
 
     val isCurrentTop: Boolean get() = parent == null && _viewsStack.size == 1
 
-    protected var isClosing = false
+    protected var state = State.READY
 
     protected val routerTabsByKey = mutableMapOf<String, RouterTabsImpl>()
-    //internal var rootPathKey: String? = null
-    internal var rootPath: RoutePath? = null //get() = rootPathKey?.let { dataStorage[it] }
-
-    init
-    {
-        parent?.weakChild = WeakReference(this)
-    }
+    internal var rootPath: RoutePath? = null
 
     override fun route(url: String): Router?
     {
@@ -211,7 +211,7 @@ open class RouterSimple(
 */
 
         tryRepeatTopIfEmpty()
-        return if (isClosing) parent else this //routerManager.pop()//
+        return if (state.isEnd) parent else this //routerManager.pop()//
     }
 
     override fun close(): Router?
@@ -231,7 +231,7 @@ open class RouterSimple(
             if (dataStorage[v.key] != null)
                 tryCloseMiddlewares(dataStorage[v.key]!!)
 
-            if (isClosing) parent else this
+            if (state.isEnd) parent else this
         }
 
         tryRepeatTopIfEmpty()
@@ -253,7 +253,8 @@ open class RouterSimple(
 
     internal fun releaseRouter()
     {
-        _viewsStack.forEach { unbind(it.key) }
+        child?.releaseRouter()
+        _viewsStack.toMutableList().forEach { removeView(it.key) }
     }
 
     override fun closeTo(key: String): Router?
@@ -329,14 +330,12 @@ open class RouterSimple(
 
     protected fun syncExecutor()
     {
-        val isClosed = isClosing
         val remove = commandBuffer.sync(_viewsStack.map { it.key })
-        remove.forEach { removeView(it) }
+        remove.forEach { removeView(it, false) }
 
-        if (!isClosed && _viewsStack.isEmpty() && rootPath != null)
+        if (!state.isEnd && _viewsStack.isEmpty() && rootPath != null)
         {
-            println("|------RESTART ROUTER------|")
-            isClosing = false
+            RouterConfigGlobal.log(TAG, "|------RESTART ROUTER------|")
             routeInternal(null, rootPath!!, RouteType.Simple, Presentation.Push, null)
         }
     }
@@ -394,11 +393,26 @@ open class RouterSimple(
 
     override fun removeView(key: String)
     {
+        removeView(key, true)
+    }
+
+    protected fun removeView(key: String, updateState: Boolean)
+    {
+        RouterConfigGlobal.log(TAG, "Remove view: $key")
+
         _viewsStack.removeAll { it.key == key }
-        if (_viewsStack.isEmpty() && parent != null)
-            isClosing = true
+        _viewsStackById.remove(key)
+
+        if (updateState && _viewsStack.isEmpty() && parent != null)
+            state = State.CLOSING
 
         unbind(key)
+
+        if (updateState && routerManager.getByKey(this.key) == null)
+        {
+            state = State.CLOSED
+            //parent?.weakChild = WeakReference(null) // if reset child it leads to breaking of chain of routers and leaking in case of tabs releasing
+        }
 
         tryRepeatTopIfEmpty()
     }
@@ -433,9 +447,17 @@ open class RouterSimple(
         bundle.putString(KEY, key)
         bundle.putString(CALLER, callerKey)
 
-        bundle.putBoolean(IS_CLOSING, isClosing)
+        bundle.putSerializable(STATE, state)
         bundle.putSerializable(ROOT_PATH, rootPath)
         bundle.putBundles(VIEW_STACK, _viewsStack.map { it.toBundle() })
+
+        val actualViewStackById = _viewsStack.associateBy { it.key }
+        val viewStackByIdBundle = Bundle()
+        _viewsStackById.forEach {
+            if (actualViewStackById[it.key] == null) // save only items that don't exist in the actual viewStack
+                viewStackByIdBundle.putBundle(it.key, it.value.toBundle())
+        }
+        bundle.putBundle(VIEW_STACK_BY_ID, viewStackByIdBundle)
 
         val tabsBundle = Bundle()
         routerTabsByKey.forEach {
@@ -448,7 +470,7 @@ open class RouterSimple(
 
         commandBuffer.performSave(bundle)
 
-        if (child != null)
+        if (child != null && child!!.state != State.CLOSED) // don't save child if it has been closed
         {
             val childBundle = Bundle()
             child?.performSave(childBundle)
@@ -469,21 +491,30 @@ open class RouterSimple(
         routerManager.push(this)
 
         callerKey = bundle.getString(CALLER)
-        isClosing = bundle.getBoolean(IS_CLOSING)
+        state = bundle.getSerializable(STATE) as State
         rootPath = bundle.getSerializable(ROOT_PATH) as? RoutePath
 
         val viewStackBundles = bundle.getBundles(VIEW_STACK)!!
         _viewsStack.clear()
         _viewsStack.addAll(viewStackBundles.map { ViewMeta.fromBundle(it, this) })
 
+        val viewStackByIdBundle = bundle.getBundle(VIEW_STACK_BY_ID)!!
         _viewsStackById.clear()
+        viewStackByIdBundle.keySet().forEach {
+            _viewsStackById[it] = ViewMeta.fromBundle(viewStackByIdBundle.getBundle(it)!!, this)
+        }
         _viewsStackById.putAll(_viewsStack.associateBy { it.key })
 
         routerTabsByKey.clear()
         val tabsBundle = bundle.getBundle(ROUTER_TABS)!!
         tabsBundle.keySet().forEach {
-            createRouterTabs(it, null, false)
-            routerTabsByKey[it]!!.performRestore(tabsBundle.getBundle(it)!!)
+            if (_viewsStackById[it] != null)
+            {
+                createRouterTabs(it, null, false)
+                routerTabsByKey[it]!!.performRestore(tabsBundle.getBundle(it)!!)
+            }
+            else
+                RouterConfigGlobal.log(TAG, "Unexpected View Key")
         }
 
         val childBundle = bundle.getBundle(CHILD)
@@ -647,7 +678,7 @@ open class RouterSimple(
 
     override fun routeInternal(execRouter: Router?, path: RoutePath, routeType: RouteType, presentation: Presentation?, viewResult: ViewResultData?): Router?
     {
-        Log.i("Router", "Start route with path: ${path::class}")
+        RouterConfigGlobal.log(TAG, "Start route with path: ${path::class}")
 
         checkMainThread("Navigation between screen only possible on the main thread")
         val route = findRoute(path)
@@ -676,7 +707,7 @@ open class RouterSimple(
                     return tabRouter
 
                 //if this router in the Closing state pass this route to its path for the execution
-                if (isClosing)
+                if (state.isEnd)
                 {
                     return if (viewResult == null)
                         parent?.route(path, presentation)
@@ -788,6 +819,7 @@ open class RouterSimple(
 
             val viewKey = UUID.randomUUID().toString()
             routerManager[viewKey] = router
+            weakChild = WeakReference(router as RouterSimple)
             setPath(viewKey, path)
 
             if (presentation == Presentation.ModalNewTask)
@@ -849,7 +881,7 @@ open class RouterSimple(
         routerManager.remove(v.key)
 
         if (_viewsStack.isEmpty() && parent != null)
-            isClosing = true
+            state = State.CLOSING
 
         return v
     }
@@ -869,11 +901,14 @@ open class RouterSimple(
 
     companion object
     {
+        val TAG = "RouterSimple"
+
         val KEY = "com.speakerboxlite.router.RouterSimple.key"
         val CALLER = "com.speakerboxlite.router.RouterSimple.callerKey"
-        val IS_CLOSING = "com.speakerboxlite.router.RouterSimple.isClosing"
+        val STATE = "com.speakerboxlite.router.RouterSimple.state"
         val ROOT_PATH = "com.speakerboxlite.router.RouterSimple.rootPathKey"
         val VIEW_STACK = "com.speakerboxlite.router.RouterSimple.viewStack"
+        val VIEW_STACK_BY_ID = "com.speakerboxlite.router.RouterSimple.viewStackById"
         val ROUTER_TABS = "com.speakerboxlite.router.RouterSimple.routerTabsByKey"
         val CHILD = "com.speakerboxlite.router.RouterSimple.child"
         val RESULT_MANAGER = "com.speakerboxlite.router.RouterSimple.resultManager"
