@@ -75,7 +75,10 @@ open class RouterInjector(
     {
         super.unbind(key)
 
-        componentProvider.unbind(key)
+        componentProvider.unbind(key)?.also {
+            val route = viewsStackById[key]?.route as? RouteControllerComponent<RoutePath, View, *>
+            route?.onClearInjector(it)
+        }
         metaComponents.remove(key)
     }
 

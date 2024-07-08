@@ -91,6 +91,7 @@ interface RouteControllerComponent<Path: RoutePath, V: View, C: Component>
     fun onInject(component: Any) {}
 
     fun onCreateInjector(path: Path, component: Any): Any
+    fun onClearInjector(component: Any) {}
     fun onPrepareView(router: Router, view: V, path: Path, component: Any)
 }
 

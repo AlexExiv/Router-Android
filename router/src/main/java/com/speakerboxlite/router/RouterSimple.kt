@@ -401,12 +401,12 @@ open class RouterSimple(
         RouterConfigGlobal.log(TAG, "Remove view: $key")
 
         _viewsStack.removeAll { it.key == key }
-        _viewsStackById.remove(key)
 
         if (updateState && _viewsStack.isEmpty() && parent != null)
             state = State.CLOSING
 
         unbind(key)
+        _viewsStackById.remove(key)
 
         if (updateState && routerManager.getByKey(this.key) == null)
         {
