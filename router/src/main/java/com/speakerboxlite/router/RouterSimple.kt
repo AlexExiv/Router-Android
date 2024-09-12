@@ -216,6 +216,9 @@ open class RouterSimple(
 
     override fun close(): Router?
     {
+        if (!hasPreviousScreen)
+            return this
+
         val v = _viewsStack.lastOrNull() ?: return (parent ?: this)
         val chain = scanForChain()
         val returnRouter = if (chain != null && chain.key != v.key && chain.route.isPartOfChain(v.path))
