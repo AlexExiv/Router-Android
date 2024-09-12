@@ -20,7 +20,7 @@ interface RouterStack
 
     fun pop(toKey: String?): Router?
 
-    fun buildPathToRoot(): List<PathComponent>
+    fun buildPathToRoot(key: String): List<PathComponent>
 
     fun performSaveStack(bundle: Bundle)
     fun performRestore(bundle: Bundle, routerManager: RouterManager)
@@ -92,11 +92,11 @@ class RouterStackImpl: RouterStack
         return stack.last().top
     }
 
-    override fun buildPathToRoot(): List<PathComponent>
+    override fun buildPathToRoot(key: String): List<PathComponent>
     {
         val path = mutableListOf<PathComponent>()
         for (i in (stack.size - 1) downTo 0)
-            stack[i].addToPath(path)
+            stack[i].addToPath(if (path.isEmpty()) key else null, path) // if no records send key of the searching view
 
         return path
     }
@@ -130,7 +130,7 @@ interface RouterStackEntry
     fun pop(toKey: String?): Router?
     fun remove(key: String): Boolean
 
-    fun addToPath(path: MutableList<PathComponent>)
+    fun addToPath(startKey: String?, path: MutableList<PathComponent>)
 
     fun toBundle(): Bundle
 }
@@ -153,9 +153,10 @@ class RouterStackSingle(
 
     override fun remove(key: String): Boolean = false
 
-    override fun addToPath(path: MutableList<PathComponent>)
+    override fun addToPath(startKey: String?, path: MutableList<PathComponent>)
     {
-        path.add(PathComponent(viewKey, top!!))
+        if (startKey == null || startKey == viewKey)
+            path.add(PathComponent(viewKey, top!!))
     }
 
     override fun toBundle(): Bundle = Bundle()
@@ -227,11 +228,36 @@ class RouterStackReel(
         return false
     }
 
-    override fun addToPath(path: MutableList<PathComponent>)
+    override fun addToPath(startKey: String?, path: MutableList<PathComponent>)
     {
-        val tabStack = stacks[currentIndex]!!
-        for (i in (tabStack.size - 1) downTo 0)
-            path.add(PathComponent(tabStack[i].viewKey, tabStack[i].top!!))
+        if (startKey == null)
+        {
+            val tabStack = stacks[currentIndex]!!
+            for (i in (tabStack.size - 1) downTo 0)
+                path.add(PathComponent(tabStack[i].viewKey, tabStack[i].top!!))
+        }
+        else
+        {
+            var itemIndex = -1
+            var stackKey: Int = -1
+            for (k in stacks.keys)
+            {
+                val stack = stacks[k]!!
+                itemIndex = stack.indexOfFirst { it.viewKey == startKey }
+                if (itemIndex == -1)
+                    continue
+
+                stackKey = k
+                break
+            }
+
+            if (itemIndex != -1 && stackKey != -1)
+            {
+                val tabStack = stacks[stackKey]!!
+                for (i in itemIndex downTo 0)
+                    path.add(PathComponent(tabStack[i].viewKey, tabStack[i].top!!))
+            }
+        }
     }
 
     override fun toBundle(): Bundle =
