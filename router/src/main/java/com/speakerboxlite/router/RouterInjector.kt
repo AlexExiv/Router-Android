@@ -75,7 +75,10 @@ open class RouterInjector(
     {
         super.unbind(key)
 
-        componentProvider.unbind(key)
+        componentProvider.unbind(key)?.also {
+            val route = viewsStackById[key]?.route as? RouteControllerComponent<RoutePath, View, *>
+            route?.onClearInjector(it)
+        }
         metaComponents.remove(key)
     }
 
@@ -138,7 +141,7 @@ open class RouterInjector(
         if (parent == null && _viewsStack.size == 1)
             return getComponent(viewKey, metaComponents, _viewsStack[0].key, _viewsStack[0].route)
 
-        val path = routerManager.buildPathToRoot()
+        val path = routerManager.buildPathToRoot(viewKey)
         var startIndex = path.indexOfFirst { it.viewKey == viewKey }
         if (startIndex == -1) // we suppose in this case that this screen will be in top of the stack
             startIndex = 0

@@ -15,12 +15,19 @@ class SharedData
 {
     val sharedVar0 = MutableLiveData("")
     val sharedVar1 = MutableLiveData("")
+
+    fun onDispose()
+    {
+        println("I'm disposed!!!")
+    }
 }
 
 @MasterDetailScope
 @Component(dependencies = [AppComponent::class], modules = [SharedModule::class])
 interface SharedComponent: com.speakerboxlite.router.controllers.Component
 {
+    fun provideSharedData(): SharedData
+
     fun inject(vm: SharedViewModel)
     fun inject(vm: SharedSub0ViewModel)
     fun inject(vm: SharedSub1ViewModel)
@@ -29,6 +36,10 @@ interface SharedComponent: com.speakerboxlite.router.controllers.Component
 @Module
 class SharedModule(val sharedData: SharedData)
 {
+    @Provides
+    @MasterDetailScope
+    fun provideSharedDataFull(): SharedData = sharedData
+
     @Provides
     @MasterDetailScope
     @Named("sharedVar0")

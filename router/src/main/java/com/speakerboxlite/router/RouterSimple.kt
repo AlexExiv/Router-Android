@@ -216,6 +216,9 @@ open class RouterSimple(
 
     override fun close(): Router?
     {
+        if (!hasPreviousScreen)
+            return this
+
         val v = _viewsStack.lastOrNull() ?: return (parent ?: this)
         val chain = scanForChain()
         val returnRouter = if (chain != null && chain.key != v.key && chain.route.isPartOfChain(v.path))
@@ -401,12 +404,12 @@ open class RouterSimple(
         RouterConfigGlobal.log(TAG, "Remove view: $key")
 
         _viewsStack.removeAll { it.key == key }
-        _viewsStackById.remove(key)
 
         if (updateState && _viewsStack.isEmpty() && parent != null)
             state = State.CLOSING
 
         unbind(key)
+        _viewsStackById.remove(key)
 
         if (updateState && routerManager.getByKey(this.key) == null)
         {

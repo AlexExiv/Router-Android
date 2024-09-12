@@ -14,11 +14,10 @@ class ComponentProviderImpl(override val appComponent: Any): ComponentProvider
         componentByKey[key] = component
     }
 
-    override fun unbind(key: String)
-    {
-        val comp = componentByKey.remove(key)
-        (comp as? ComponentCleanable)?.onCleared()
-    }
+    override fun unbind(key: String): Any? =
+        componentByKey.remove(key)?.also {
+            (it as? ComponentCleanable)?.onCleared()
+        }
 
     override fun componentKey(key: String): String
     {

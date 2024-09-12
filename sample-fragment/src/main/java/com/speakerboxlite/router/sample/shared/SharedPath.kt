@@ -18,4 +18,9 @@ abstract class SharedRouteController: RouteControllerShared<SharedPath, SharedVi
             .appComponent(component as AppComponent)
             .sharedModule(SharedModule(SharedData()))
             .build()
+
+    override fun onClearInjector(component: Any)
+    {
+        (component as SharedComponent).provideSharedData().onDispose()
+    }
 }
