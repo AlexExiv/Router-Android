@@ -12,9 +12,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.speakerboxlite.router.Result
 import com.speakerboxlite.router.RouterResultDispatcher
+import com.speakerboxlite.router.compose.CompositionLocalRouterPreview
 import com.speakerboxlite.router.compose.LocalRouter
 import com.speakerboxlite.router.compose.bootstrap.BaseViewCompose
 import com.speakerboxlite.router.compose.currentOrThrow
@@ -89,5 +91,14 @@ fun MixedCompose(viewModel: MixedComposeViewModel)
                     .padding(16.dp),
                 text = "I'm a DI result from mixed in compose: $composeStepDI")
         }
+    }
+}
+
+@Preview
+@Composable
+fun MixedComposePreview()
+{
+    CompositionLocalRouterPreview {
+        ComposeNavigatorLocalMixed(path = MixedInComposePath())
     }
 }
