@@ -4,6 +4,9 @@ import com.speakerboxlite.router.samplemixed.di.modules.AppModule
 import com.speakerboxlite.router.samplemixed.di.modules.UserModule
 import com.speakerboxlite.router.samplemixed.dialog.fragment.DialogViewModel
 import com.speakerboxlite.router.samplemixed.main.MainViewModel
+import com.speakerboxlite.router.samplemixed.mixed.MixedComposeViewModel
+import com.speakerboxlite.router.samplemixed.mixed.compose.MixedInComposeViewModel
+import com.speakerboxlite.router.samplemixed.mixed.fragment.MixedInFragmentViewModel
 import com.speakerboxlite.router.samplemixed.step.StepViewModel
 import com.speakerboxlite.router.samplemixed.tabs.TabsViewModel
 import com.speakerboxlite.router.samplemixed.tabs.tab.TabViewModel
@@ -19,4 +22,7 @@ interface AppComponent: com.speakerboxlite.router.controllers.Component
     fun inject(vm: TabsViewModel)
     fun inject(vm: TabViewModel)
     fun inject(vm: DialogViewModel)
+    //fun inject(vm: MixedComposeViewModel)
+    //fun inject(vm: MixedInFragmentViewModel)
+    //fun inject(vm: MixedInComposeViewModel)
 }
