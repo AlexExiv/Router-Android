@@ -19,6 +19,7 @@ class MixedComposeViewModel(app: Application): BaseViewModel(app)
     @Named("mixedCompose")
     lateinit var mixedCompose: MutableLiveData<Int>
 
+    val showBlock = MutableStateFlow(true)
     val fragmentStep = MutableStateFlow(0)
     val composeStep = MutableStateFlow(0)
 

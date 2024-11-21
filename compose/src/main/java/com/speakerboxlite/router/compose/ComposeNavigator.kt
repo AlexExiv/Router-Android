@@ -192,14 +192,6 @@ open class ComposeNavigator(
     init
     {
         stateStack.addAll(items)
-/*
-        parent?.registerPopCallback {
-            if (it.contains(key))
-            {
-                prepareToDispose()
-                tryDispose()
-            }
-        }*/
     }
 
     val items: List<StackEntry> by derivedStateOf { stateStack.toList() }
@@ -280,8 +272,6 @@ open class ComposeNavigator(
         if (stateStack.isNotEmpty())
         {
             disposeKey = stateStack.last().id
-            //stateStack.forEach { it.makeRemoving() }
-            //poppingEntries[disposeKey!!] = stateStack
             removeLast(stateStack.size)
         }
     }
@@ -293,12 +283,7 @@ open class ComposeNavigator(
     {
         disposeKey?.also { onDisposePopping(it) }
     }
-/*
-    fun registerPopCallback(callback: OnPopNavigatorListener)
-    {
-        popCallbackListeners.add(callback)
-    }
-*/
+
     internal open fun addSubViewKey(parentKey: String, viewKey: String)
     {
         items.firstOrNull { it.id == parentKey }?.also { it.addSubView(viewKey) }
