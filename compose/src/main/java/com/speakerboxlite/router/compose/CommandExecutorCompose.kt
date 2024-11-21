@@ -159,8 +159,9 @@ open class CommandExecutorCompose(
         close()
     }
 
-    private fun showSubFragment(@IdRes containerId: Int, view: View)
+    protected open fun showSubFragment(@IdRes containerId: Int, view: View)
     {
-
+        view as? ViewCompose ?: error("")
+        navigator.replace(view)
     }
 }

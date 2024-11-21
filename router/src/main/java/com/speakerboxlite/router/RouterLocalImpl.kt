@@ -1,6 +1,7 @@
 package com.speakerboxlite.router
 
 import android.os.Bundle
+import com.speakerboxlite.router.RouterSimple.Companion.TAG
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandBuffer
@@ -108,6 +109,7 @@ open class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLoc
         if (router is RouterInjector)
             router.connectComponent(this.viewKey, viewKey)
 
+        RouterConfigGlobal.log(TAG, "Show route in container: ${path::class}, View Key: $viewKey")
         commandBuffer.apply(Command.SubFragment(containerId, viewKey))
 
         return viewKey
@@ -130,6 +132,7 @@ open class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLoc
         if (router is RouterInjector)
             router.connectComponent(this.viewKey, viewKey)
 
+        RouterConfigGlobal.log(TAG, "Show route internal: ${path::class}, View Key: $viewKey")
         commandBuffer.apply(Command.Push(path, viewKey))
     }
 }

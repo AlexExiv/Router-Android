@@ -401,9 +401,11 @@ open class RouterSimple(
 
     protected fun removeView(key: String, updateState: Boolean)
     {
-        RouterConfigGlobal.log(TAG, "Remove view: $key")
-
         _viewsStack.removeAll { it.key == key }
+
+        val path = dataStorage[key]
+        if (path != null)
+            RouterConfigGlobal.log(TAG, "Remove view: ${path::class}, View Key: $key")
 
         if (updateState && _viewsStack.isEmpty() && parent != null)
             state = State.CLOSING
@@ -796,6 +798,7 @@ open class RouterSimple(
         else
             Command.BottomSheet(view)
 
+        RouterConfigGlobal.log(TAG, "Show dialog with path: ${path::class} ; View Key: $view")
         commandBuffer.apply(command)
         return routerManager.top
     }
@@ -830,12 +833,14 @@ open class RouterSimple(
             else
                 commandBuffer.apply(Command.Push(path, viewKey))
 
+            RouterConfigGlobal.log(TAG, "Show screen host with path: ${path::class} ; View Key: $viewKey")
             returnRouter
         }
         else
         {
             val viewKey = createView(route, routeType, presentation, path, viewResult)
             routerManager.push(viewKey, this)
+            RouterConfigGlobal.log(TAG, "Show screen with path: ${path::class} ; View Key: $viewKey")
             commandBuffer.apply(Command.Push(path, viewKey))
             this
         }

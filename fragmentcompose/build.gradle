@@ -45,6 +45,7 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$appcompat"
     implementation "androidx.activity:activity-ktx:$activity_ktx"
     implementation "androidx.fragment:fragment-ktx:$fragment_ktx"
+    implementation "androidx.fragment:fragment-compose:$fragment_ktx"
 
     implementation "androidx.compose.runtime:runtime:$compose_version"
     implementation "androidx.compose.material:material:$compose_version"

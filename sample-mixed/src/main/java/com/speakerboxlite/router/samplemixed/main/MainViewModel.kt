@@ -2,6 +2,7 @@ package com.speakerboxlite.router.samplemixed.main
 
 import android.app.Application
 import com.speakerboxlite.router.samplemixed.base.BaseViewModel
+import com.speakerboxlite.router.samplemixed.mixed.MixedComposePath
 import com.speakerboxlite.router.samplemixed.step.compose.StepComposePath
 import com.speakerboxlite.router.samplemixed.step.fragment.StepFragmentPath
 import com.speakerboxlite.router.samplemixed.tabs.TabsPath
@@ -26,5 +27,10 @@ class MainViewModel(app: Application): BaseViewModel(app)
     fun onShowTabs()
     {
         router.route(TabsPath())
+    }
+
+    fun onShowMixedIn()
+    {
+        router.route(MixedComposePath())
     }
 }

@@ -53,6 +53,12 @@
                     android:text="Show Tabs"
                     android:onClick="@{() -> viewmodel.onShowTabs()}"/>
 
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Show Mixed"
+                    android:onClick="@{() -> viewmodel.onShowMixedIn()}"/>
+
             </LinearLayout>
 
         </ScrollView>

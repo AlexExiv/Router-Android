@@ -11,12 +11,12 @@ class PathDataStorageImpl : PathDataStorage
         if (value == null)
         {
             data.remove(key)
-            RouterConfigGlobal.log(TAG, "Bound data after release: ${data.size}")
+            RouterConfigGlobal.log(TAG, "Bound data after release: ${data.size} ; data: ${data}")
         }
         else
         {
             data[key] = value
-            RouterConfigGlobal.log(TAG, "Bound data: ${data.size}")
+            RouterConfigGlobal.log(TAG, "Bound data: ${data.size} ; data: ${data}")
         }
     }
 

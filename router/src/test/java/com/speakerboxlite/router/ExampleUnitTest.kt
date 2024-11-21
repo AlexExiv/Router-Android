@@ -24,6 +24,11 @@ class ExampleUnitTest
         val match01 = urlPattern.match("/products/325/?i=0&tt=123")
         val match1 = urlPattern.match("/products/test")
 
+        val urlPatternRoot = UrlPattern("/")
+        val b01 = urlPatternRoot.matches("/products/325?i=0&tt=123")
+        val b11 = urlPatternRoot.matches("/products/test")
+        val b21 = urlPatternRoot.matches("/")
+
         println()
     }
 }

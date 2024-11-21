@@ -1,7 +1,11 @@
 package com.speakerboxlite.router.ext
 
 import android.os.Bundle
+import android.os.Parcel
 import java.io.Serializable
+import java.nio.charset.Charset
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 fun Bundle.putBundles(key: String, bundles: List<Bundle>)
 {
@@ -33,4 +37,15 @@ fun Bundle.getSerializables(key: String): List<Serializable>?
     val list = mutableListOf<Serializable>()
     indices.forEach { list.add(bundle.getSerializable(it.toString())!!) }
     return list
+}
+
+@OptIn(ExperimentalEncodingApi::class)
+fun Bundle.toStringUTF(): String
+{
+    val p = Parcel.obtain()
+    writeToParcel(p, 0)
+    val bytes = p.marshall()
+    val str = Base64.encode(bytes)
+    p.recycle()
+    return str
 }

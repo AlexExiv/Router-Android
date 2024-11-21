@@ -44,6 +44,10 @@ val LocalRouter: ProvidableCompositionLocal<Router?> = staticCompositionLocalOf 
 
 val LocalRouterTabs: ProvidableCompositionLocal<RouterTabs?> = staticCompositionLocalOf { null }
 
+val LocalViewKey: ProvidableCompositionLocal<String?> = staticCompositionLocalOf { null }
+
+typealias OnPopNavigatorListener = (String) -> Unit
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CurrentContent(router: Router, navigator: ComposeNavigator)
@@ -155,7 +159,8 @@ fun ComposeNavigator(
             }
         }
 
-        CompositionLocalProvider(LocalComposeNavigator provides navigator,
+        CompositionLocalProvider(
+            LocalComposeNavigator provides navigator,
             LocalRouter provides router)
         {
             content(router, navigator)
@@ -168,7 +173,7 @@ fun interface OnDisposeCallback
     fun onDispose(key: String)
 }
 
-class ComposeNavigator(
+open class ComposeNavigator(
     val key: String,
     val stateHolder: SaveableStateHolder,
     val viewModelProvider: RouterViewModelStoreProvider?,
@@ -210,19 +215,21 @@ class ComposeNavigator(
     val isEmpty: Boolean by derivedStateOf { stateStack.isEmpty() }
     val canPop: Boolean by derivedStateOf { stateStack.size > 1 }
 
+    private val popCallbackListeners = mutableListOf<OnPopNavigatorListener>()
+
     private var disposeKey: String? = null // Key of item to dispose all stack
 
-    fun push(view: ViewCompose, animationController: AnimationControllerCompose?)
+    open fun push(view: ViewCompose, animationController: AnimationControllerCompose?)
     {
         stateStack.add(StackEntry(view, viewModelProvider, animationController))
     }
 
     fun replace(view: ViewCompose)
     {
-        if (stateStack.isEmpty())
-            push(view, null)
-        else
-            stateStack[stateStack.lastIndex] = StackEntry(view, viewModelProvider, null)
+        if (stateStack.isNotEmpty())
+            removeLast(1)
+
+        push(view, null)
     }
 
     fun pop()
@@ -265,8 +272,7 @@ class ComposeNavigator(
         if (stateStack.isNotEmpty())
         {
             disposeKey = stateStack.last().id
-            stateStack.forEach { it.makeRemoving() }
-            poppingEntries[disposeKey!!] = stateStack
+            removeLast(stateStack.size)
         }
     }
 
@@ -278,20 +284,35 @@ class ComposeNavigator(
         disposeKey?.also { onDisposePopping(it) }
     }
 
-    protected fun removeLast(n: Int = 1)
+    internal open fun addSubViewKey(parentKey: String, viewKey: String)
+    {
+        items.firstOrNull { it.id == parentKey }?.also { it.addSubView(viewKey) }
+    }
+
+    internal open fun removeSubViewKey(parentKey: String, viewKey: String)
+    {
+        items.firstOrNull { it.id == parentKey }?.also { it.removeSubView(viewKey) }
+    }
+
+    protected open fun removeLast(n: Int = 1): List<StackEntry>
     {
         val sub = stateStack.subList(stateStack.size - n, stateStack.size).toList()
         poppingEntries[sub.last().id] = sub
         sub.forEach { it.makeRemoving() }
         stateStack.removeRange(stateStack.size - n, stateStack.size)
+
+        return sub
     }
 
     protected fun onDisposePopping(key: String)
     {
         RouterConfigGlobal.log(TAG, "onDisposePopping: ${poppingEntries[key]?.map { it.id }}")
-        poppingEntries[key]?.forEach {
-            it.onDispose()
-            onDisposeCallback?.onDispose(it.id)
+
+        poppingEntries[key]?.forEach { e ->
+            popCallbackListeners.forEach { it.invoke(e.id) }
+            e.onDispose()
+            onDisposeCallback?.onDispose(e.id)
+            e.subKeys.forEach { onDisposeCallback?.onDispose(it) }
         }
         poppingEntries.remove(key)
     }

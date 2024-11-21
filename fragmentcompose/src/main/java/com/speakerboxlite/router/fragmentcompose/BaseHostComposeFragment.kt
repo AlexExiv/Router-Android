@@ -1,6 +1,7 @@
 package com.speakerboxlite.router.fragmentcompose
 
 import android.os.Bundle
+import android.os.Parcel
 import android.os.Parcelable
 import android.util.Log
 import androidx.compose.runtime.Composable
@@ -19,6 +20,7 @@ import com.speakerboxlite.router.compose.LocalRouterManager
 import com.speakerboxlite.router.fragment.HostClosableFragment
 import com.speakerboxlite.router.fragment.IHostClosableFragment
 import com.speakerboxlite.router.fragment.ext._viewKey
+import java.nio.charset.Charset
 
 abstract class BaseHostComposeFragment: Fragment(),
     ComposeHostView,

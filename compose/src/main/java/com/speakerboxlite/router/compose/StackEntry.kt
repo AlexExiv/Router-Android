@@ -28,17 +28,19 @@ import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 
-class StackEntry(val view: ViewCompose,
-                 val viewModelProvider: RouterViewModelStoreProvider?,
-                 val animationController: AnimationControllerCompose?,
-                 isPopped: Boolean = false,
-                 private val savedState: Bundle? = null):
-    ViewModelStoreOwner,
-    HasDefaultViewModelProviderFactory,
-    SavedStateRegistryOwner
+class StackEntry(
+    val view: ViewCompose,
+    val viewModelProvider: RouterViewModelStoreProvider?,
+    val animationController: AnimationControllerCompose?,
+    isPopped: Boolean = false,
+    val subKeys: MutableList<String> = mutableListOf(),
+    private val savedState: Bundle? = null):
+        ViewModelStoreOwner,
+        HasDefaultViewModelProviderFactory,
+        SavedStateRegistryOwner
 {
     constructor(entry: StackEntrySaveable, viewModelProvider: RouterViewModelStoreProvider?):
-            this(entry.view, viewModelProvider, entry.animationController, entry.isRemoving, entry.savedState)
+            this(entry.view, viewModelProvider, entry.animationController, entry.isRemoving, entry.subKeys.toMutableList(), entry.savedState)
 
     val id: String get() = view.viewKey
 
@@ -80,10 +82,23 @@ class StackEntry(val view: ViewCompose,
 
         LifecycleDisposableEffect()
 
-        CompositionLocalProvider(LocalViewModelStoreOwner provides this, LocalLifecycleOwner provides this)
+        CompositionLocalProvider(
+            LocalViewModelStoreOwner provides this,
+            LocalLifecycleOwner provides this,
+            LocalViewKey provides id)
         {
             saveableStateHolder.SaveableStateProvider(id, content)
         }
+    }
+
+    fun addSubView(key: String)
+    {
+        subKeys.add(key)
+    }
+
+    fun removeSubView(key: String)
+    {
+        subKeys.remove(key)
     }
 
     fun onCreate()
