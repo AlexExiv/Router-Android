@@ -10,6 +10,7 @@ import com.speakerboxlite.router.sample.dialogs.DialogPath
 import com.speakerboxlite.router.sample.shared.SharedPath
 import com.speakerboxlite.router.sample.simple.SimplePath
 import com.speakerboxlite.router.sample.simple.component.SimpleComponentPath
+import com.speakerboxlite.router.sample.step.ConstStepPath
 import com.speakerboxlite.router.sample.step.StepPath
 import com.speakerboxlite.router.sample.subtabs.SubTabsPath
 import com.speakerboxlite.router.sample.tabs.TabsPath
@@ -23,6 +24,11 @@ class MainViewModel(app: Application): BaseViewModel(app)
     fun onShowStep()
     {
         router.route(StepPath(0))
+    }
+
+    fun onShowInheritedStep()
+    {
+        router.route(ConstStepPath())
     }
 
     fun onShowStepUrl()

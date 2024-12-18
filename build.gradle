@@ -1,7 +1,7 @@
 
 buildscript {
     ext.build_gradle = '8.2.2'
-    ext.kotlin_version = '1.9.20'
+    ext.kotlin_version = '1.9.24'
     ext.kotlin_core = '1.13.1'
     ext.lifecycle_runtime_ktx = '2.7.0'
     ext.compose_version = '1.6.7'

@@ -37,6 +37,12 @@
                 <Button
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:text="Show Inherited Steps"
+                    android:onClick="@{() -> viewmodel.onShowInheritedStep()}"/>
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:text="Show Steps Url"
                     android:onClick="@{() -> viewmodel.onShowStepUrl()}"/>
 

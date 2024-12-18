@@ -10,6 +10,7 @@ import com.speakerboxlite.router.annotations.SingleTop
 import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.isSuperclassOf
 
 /**
  * Implement this controller if you are using a simple view without a ViewModel and Component for injection
@@ -38,7 +39,7 @@ abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterfa
 
     override fun check(url: String): Boolean = pattern?.matches(url) ?: false
 
-    override final fun check(path: RoutePath): Boolean = pathClass.isInstance(path)
+    override final fun check(path: RoutePath): Boolean = pathClass.isSuperclassOf(path::class)
 
     override final fun convert(url: String): RoutePath
     {
