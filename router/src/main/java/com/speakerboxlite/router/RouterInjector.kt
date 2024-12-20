@@ -118,7 +118,20 @@ open class RouterInjector(
             return componentProvider.appComponent
 
         val compKey = componentProvider.componentKey(viewKey)
-        val meta = _viewsStackById[compKey]!!
+
+        val meta = _viewsStackById[compKey]
+        if (meta == null)
+        {
+            var message =  "ViewKey: ${viewKey} ; CompKey: ${compKey}"
+            val viewPath = dataStorage[viewKey]
+            if (viewPath != null)
+                message += "viewPath: ${viewPath::class.qualifiedName} ; viewPathStr: ${viewPath.toString()}"
+            val compPath = dataStorage[compKey]
+            if (compPath != null)
+                message += "compPath: ${compPath::class.qualifiedName} ; compPathStr: ${compPath.toString()}"
+
+            throw IllegalStateException(message)
+        }
 
         return if (metaComponents[meta.key] != null)
         {
