@@ -5,7 +5,7 @@ buildscript {
     ext.kotlin_core = '1.13.1'
     ext.lifecycle_runtime_ktx = '2.7.0'
     ext.compose_version = '1.6.7'
-    ext.compose_compiler_version = '1.5.5'
+    ext.compose_compiler_version = '1.5.14'
     ext.compose_lifecycle = '2.8.6'
     ext.compose_bom = '2023.08.00'
     ext.compose_activity = '1.9.2'
