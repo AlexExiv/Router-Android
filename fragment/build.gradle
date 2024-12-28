@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace 'com.speakerboxlite.router.fragment'
-    compileSdk 34
+    compileSdk compileSdk_version
 
     defaultConfig {
         minSdk minSdk_version
