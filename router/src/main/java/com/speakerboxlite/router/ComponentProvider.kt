@@ -1,5 +1,7 @@
 package com.speakerboxlite.router
 
+import android.os.Bundle
+
 interface ComponentProvider
 {
     val appComponent: Any
@@ -10,4 +12,7 @@ interface ComponentProvider
 
     fun componentKey(key: String): String
     fun connectComponent(parentKey: String, childKey: String)
+
+    fun performSave(bundle: Bundle)
+    fun performRestore(bundle: Bundle)
 }

@@ -1,5 +1,6 @@
 package com.speakerboxlite.router
 
+import android.os.Bundle
 import com.speakerboxlite.router.controllers.ComponentCleanable
 
 class ComponentProviderImpl(override val appComponent: Any): ComponentProvider
@@ -36,5 +37,19 @@ class ComponentProviderImpl(override val appComponent: Any): ComponentProvider
     override fun connectComponent(parentKey: String, childKey: String)
     {
         parentByChild[childKey] = parentKey
+    }
+
+    override fun performSave(bundle: Bundle)
+    {
+        for (k in parentByChild)
+            bundle.putString(k.key, k.value)
+    }
+
+    override fun performRestore(bundle: Bundle)
+    {
+        parentByChild.clear()
+
+        for (k in bundle.keySet())
+            parentByChild[k] = bundle.getString(k)!!
     }
 }

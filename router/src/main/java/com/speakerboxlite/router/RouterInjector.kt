@@ -1,6 +1,7 @@
 package com.speakerboxlite.router
 
 import android.os.Bundle
+import com.speakerboxlite.router.RouterManagerImpl.Companion.ROUTER_BY_VIEW
 import com.speakerboxlite.router.controllers.RouteControllerComponent
 import com.speakerboxlite.router.controllers.RouteControllerInterface
 import com.speakerboxlite.router.controllers.RouteControllerViewModelHolderComponent
@@ -93,6 +94,13 @@ open class RouterInjector(
         val metaBundle = Bundle()
         metaComponents.forEach { metaBundle.putBundle(it.key, it.value.toBundle()) }
         bundle.putBundle(META_COMPONENTS, metaBundle)
+
+        if (parent == null)
+        {
+            val cpBundle = Bundle()
+            componentProvider.performSave(cpBundle)
+            bundle.putBundle(COMPONENT_PROVIDER, cpBundle)
+        }
     }
 
     override fun performRestore(bundle: Bundle)
@@ -104,6 +112,9 @@ open class RouterInjector(
         metaBundle.keySet().forEach {
             metaComponents[it] = ViewMetaComponent.fromBundle(metaBundle.getBundle(it)!!, this)
         }
+
+        if (parent == null)
+            componentProvider.performRestore(bundle.getBundle(COMPONENT_PROVIDER)!!)
     }
 
     internal fun connectComponent(parentKey: String, childKey: String)
@@ -119,20 +130,7 @@ open class RouterInjector(
 
         val compKey = componentProvider.componentKey(viewKey)
 
-        val meta = _viewsStackById[compKey]
-        if (meta == null)
-        {
-            var message =  "ViewKey: ${viewKey} ; CompKey: ${compKey}"
-            val viewPath = dataStorage[viewKey]
-            if (viewPath != null)
-                message += "viewPath: ${viewPath::class.qualifiedName} ; viewPathStr: ${viewPath.toString()}"
-            val compPath = dataStorage[compKey]
-            if (compPath != null)
-                message += "compPath: ${compPath::class.qualifiedName} ; compPathStr: ${compPath.toString()}"
-
-            throw IllegalStateException(message)
-        }
-
+        val meta = _viewsStackById[compKey]!!
         return if (metaComponents[meta.key] != null)
         {
             val mc = metaComponents[meta.key]!!
@@ -191,5 +189,6 @@ open class RouterInjector(
     companion object
     {
         const val META_COMPONENTS = "com.speakerboxlite.router.RouterInjector.metaComponents"
+        const val COMPONENT_PROVIDER = "com.speakerboxlite.router.RouterInjector.componentProvider"
     }
 }
