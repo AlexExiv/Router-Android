@@ -2,7 +2,7 @@
 buildscript {
     ext.build_gradle = '8.4.2'
     ext.kotlin_version = '1.9.24'
-    ext.kotlin_core = '1.15.0'
+    ext.kotlin_core = '1.13.1'
     ext.lifecycle_runtime_ktx = '2.7.0'
     ext.compose_version = '1.7.6'
     ext.compose_compiler_version = '1.5.14'
@@ -15,7 +15,7 @@ buildscript {
     ext.hilt_version = '2.51.1'
     ext.android_material = '1.12.0'
     ext.minSdk_version = 21
-    ext.compileSdk_version = 35
+    ext.compileSdk_version = 34
 
     repositories {
         google()
