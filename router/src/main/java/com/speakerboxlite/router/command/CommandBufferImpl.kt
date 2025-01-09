@@ -106,7 +106,7 @@ internal class CommandBufferImpl(val factory: ViewFactoryInterface?): CommandBuf
 
         while (removeCount > 0) // remove executed commands
         {
-            buffer.removeFirst()
+            buffer.removeFirstOrNull()
             removeCount -= 1
         }
     }

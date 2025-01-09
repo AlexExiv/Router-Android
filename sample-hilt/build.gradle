@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace 'com.speakerboxlite.router.samplehilt'
-    compileSdk 34
+    compileSdk compileSdk_version
 
     defaultConfig {
         applicationId "com.speakerboxlite.router.samplehilt"

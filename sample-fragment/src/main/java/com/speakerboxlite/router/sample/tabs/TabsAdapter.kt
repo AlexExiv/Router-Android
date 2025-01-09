@@ -24,7 +24,8 @@ class TabsAdapter(val router: RouterTabs, fm: FragmentManager, lifecycle: Lifecy
             val hv = when (i)
             {
                 0 -> router.route(i, TabPath0(), false)
-                1 -> router.route(i, SharedPath(), false)
+                //1 -> router.route(i, SharedPath(), false)
+                1 -> router.route(i, TabPath1(), false)
                 2 -> router.route(i, TabPath2(), false)
                 3 -> router.route(i, TabPath3(), false)
                 4 -> router.route(i, TabPath4(), false)

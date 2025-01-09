@@ -7,7 +7,9 @@ import com.speakerboxlite.router.fragment.FragmentViewModelProvider
 import com.speakerboxlite.router.sample.base.RouteControllerApp
 import com.speakerboxlite.router.sample.base.middlewares.MiddlewarePro
 
-data class StepPath(val step: Int): RoutePath
+open class StepPath(val step: Int): RoutePath
+
+class ConstStepPath: StepPath(100)
 
 @Route("/steps/{id}")
 @MiddlewarePro

@@ -146,7 +146,7 @@ class ResultManagerImpl: ResultManager
     {
         while (postponedUnbinding.size > maxPostponed)
         {
-            val first = postponedUnbinding.removeFirst()
+            val first = postponedUnbinding.removeFirstOrNull() ?: break
             connectors.remove(first)
             providers.remove(first)
             resultsPool.remove(first)
