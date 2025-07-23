@@ -59,6 +59,12 @@
                     android:text="Show Mixed"
                     android:onClick="@{() -> viewmodel.onShowMixedIn()}"/>
 
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Show Dialog Compose"
+                    android:onClick="@{() -> viewmodel.onShowDialogCompose()}"/>
+
             </LinearLayout>
 
         </ScrollView>

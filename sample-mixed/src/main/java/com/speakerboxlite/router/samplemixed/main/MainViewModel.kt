@@ -2,6 +2,7 @@ package com.speakerboxlite.router.samplemixed.main
 
 import android.app.Application
 import com.speakerboxlite.router.samplemixed.base.BaseViewModel
+import com.speakerboxlite.router.samplemixed.dialog.DialogPath
 import com.speakerboxlite.router.samplemixed.mixed.MixedComposePath
 import com.speakerboxlite.router.samplemixed.step.compose.StepComposePath
 import com.speakerboxlite.router.samplemixed.step.fragment.StepFragmentPath
@@ -32,5 +33,10 @@ class MainViewModel(app: Application): BaseViewModel(app)
     fun onShowMixedIn()
     {
         router.route(MixedComposePath())
+    }
+
+    fun onShowDialogCompose()
+    {
+        router.route(DialogPath())
     }
 }

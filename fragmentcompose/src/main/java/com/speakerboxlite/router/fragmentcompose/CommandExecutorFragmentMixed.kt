@@ -14,8 +14,8 @@ import com.speakerboxlite.router.fragment.CommandExecutorFragment
 
 interface HostFragmentComposeFactory
 {
-    fun onCreateComposeHostView(): ComposeHostView
-    fun onCreateAnimation(): AnimationControllerFragment<RoutePath, View>?
+    fun onCreateComposeHostView(view: View): ComposeHostView
+    fun onCreateAnimation(view: View): AnimationControllerFragment<RoutePath, View>?
 }
 
 class CommandExecutorFragmentMixed(
@@ -30,9 +30,9 @@ class CommandExecutorFragmentMixed(
     {
         if (view is ViewCompose)
         {
-            val host = fragmentFactory?.onCreateComposeHostView() ?: error("You are trying to create host fragment for compose view but haven't specified HostFragmentComposeFactory")
+            val host = fragmentFactory?.onCreateComposeHostView(view) ?: error("You are trying to create host fragment for compose view but haven't specified HostFragmentComposeFactory")
             host.viewKey = view.viewKey
-            pushFragment(path, host, fragmentFactory.onCreateAnimation(), replacing)
+            pushFragment(path, host, fragmentFactory.onCreateAnimation(view), replacing)
         }
         else
             super.pushFragment(path, view, animation, replacing)
@@ -67,7 +67,7 @@ class CommandExecutorFragmentMixed(
 
     private fun addHost(view: View)
     {
-        val host = fragmentFactory?.onCreateComposeHostView() ?: error("You are trying to create host fragment for compose view but haven't specified HostFragmentComposeFactory")
+        val host = fragmentFactory?.onCreateComposeHostView(view) ?: error("You are trying to create host fragment for compose view but haven't specified HostFragmentComposeFactory")
         host.viewKey = view.viewKey
 
         host as Fragment
