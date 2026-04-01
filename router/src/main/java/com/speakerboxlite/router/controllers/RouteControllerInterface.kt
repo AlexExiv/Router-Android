@@ -33,6 +33,7 @@ interface RouteControllerInterface<Path: RoutePath, V: View>
 
     fun animationController(presentation: Presentation?, view: View): AnimationController?
     fun onCreateView(path: Path): V
+    fun onUpdateData(path: Path, view: V)
 
     /**
      * Called when the router attempts to leave this route and navigate to another path (`next`).
@@ -98,6 +99,7 @@ interface RouteControllerComponent<Path: RoutePath, V: View, C: Component>
 interface RouteControllerViewModelProvider<Path: RoutePath, VM: ViewModel>
 {
     fun onProvideViewModel(modelProvider: RouterModelProvider, path: Path): VM
+    fun onUpdateData(path: Path, vm: VM)
 }
 
 interface RouteControllerViewModelHolder<VM: ViewModel>

@@ -86,6 +86,15 @@ interface Router
     fun route(path: RouteParamsGen): Router?
 
     /**
+     * Replaces the top screen on the stack with a new one specified by the given `path`.
+     *
+     * @param path The path to the screen connected by the `RouteController`.
+     * @return A router that will execute the route; may be null (usually when a middleware interrupts the route).
+     * @throws RouteNotFoundException If the provided path is not found in the routes manager.
+     */
+    fun update(path: RoutePath)
+
+    /**
      * Closes the top view in the router. This method should be called when handling a physical Back button click
      * or a toolbar back button click. Unlike the `close()` method, this method does not close a chain, even if
      * the view's path is part of that chain.

@@ -55,10 +55,10 @@ class App: MixedApplication<RouterComponentImpl>()
 
 class HostFragmentComposeFactoryImpl: HostFragmentComposeFactory
 {
-    override fun onCreateComposeHostView(): ComposeHostView =
+    override fun onCreateComposeHostView(view: View): ComposeHostView =
         HostComposeFragment()
 
-    override fun onCreateAnimation(): AnimationControllerFragment<RoutePath, View>? =
+    override fun onCreateAnimation(view: View): AnimationControllerFragment<RoutePath, View>? =
         AnimationControllerFragmentDefault()
 }
 

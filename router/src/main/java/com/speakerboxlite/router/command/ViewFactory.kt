@@ -1,6 +1,8 @@
 package com.speakerboxlite.router.command
 
 import com.speakerboxlite.router.RouterSimple
+import com.speakerboxlite.router.RouterModelStorage
+import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.controllers.AnimationController
 import java.lang.ref.WeakReference
@@ -29,5 +31,10 @@ class ViewFactory(router: RouterSimple): ViewFactoryInterface
         val route = meta?.route ?: router.findRoute(path)
 
         return route.animationController(meta?.presentation, view)
+    }
+
+    override fun dispatchUpdate(path: RoutePath, key: String, view: View, modelStorage: RouterModelStorage?)
+    {
+        weakRouter.get()?.dispatchUpdate(path, key, view, modelStorage)
     }
 }

@@ -38,6 +38,11 @@ class RouterZombie : Router, RouterLocal
 
     override fun replace(path: RoutePath): Router? = null
 
+    override fun update(path: RoutePath)
+    {
+
+    }
+
     override fun back(): Router? = null
 
     override fun close(): Router? = null

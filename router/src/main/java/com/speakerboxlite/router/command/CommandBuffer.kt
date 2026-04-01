@@ -13,6 +13,7 @@ sealed class Command: Serializable
     class StartModal(val viewKey: String, val params: Serializable?): Command()
     class Push(val path: RoutePath, val viewKey: String): Command()
     class Replace(val path: RoutePath, val byViewKey: String): Command()
+    class Update(val path: RoutePath, val viewKey: String): Command()
     class BottomSheet(val viewKey: String): Command()
     class CloseBottomSheet(val viewKey: String): Command()
     class Dialog(val viewKey: String): Command()
@@ -26,6 +27,7 @@ fun Command.getViewKey(): String? = when (this)
         is Command.StartModal -> this.viewKey
         is Command.Push -> this.viewKey
         is Command.Replace -> this.byViewKey
+        is Command.Update -> this.viewKey
         is Command.BottomSheet -> this.viewKey
         is Command.Dialog -> this.viewKey
         is Command.SubFragment -> this.viewKey

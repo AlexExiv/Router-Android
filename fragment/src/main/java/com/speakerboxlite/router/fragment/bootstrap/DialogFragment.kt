@@ -4,6 +4,7 @@ import android.view.KeyEvent
 import androidx.annotation.LayoutRes
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterLocal
+import com.speakerboxlite.router.RouterModelStorage
 import com.speakerboxlite.router.ViewDialog
 import com.speakerboxlite.router.ViewModel
 import com.speakerboxlite.router.fragment.ViewFragment
@@ -50,11 +51,14 @@ open class DialogFragment(@LayoutRes layoutId: Int): androidx.fragment.app.Dialo
     }*/
 }
 
-open class DialogFragmentViewModel<VM: ViewModel>(@LayoutRes layoutId: Int): DialogFragment(layoutId), ViewFragmentVM<VM>
+open class DialogFragmentViewModel<VM: ViewModel>(@LayoutRes layoutId: Int): DialogFragment(layoutId), ViewFragmentVM<VM>, RouterModelStorage
 {
     override lateinit var viewModel: VM
 
     val isViewModelInjected: Boolean get() = ::viewModel.isInitialized
+
+    override fun get(viewKey: String): ViewModel? =
+        if (this.viewKey == viewKey && isViewModelInjected) viewModel else null
 
     constructor(): this(0)
 }

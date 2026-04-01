@@ -20,6 +20,11 @@ abstract class RouteControllerStep: RouteControllerApp<StepPath, StepViewModel, 
 
     override fun onCreateViewModel(modelProvider: FragmentViewModelProvider, path: StepPath): StepViewModel =
         modelProvider.getViewModel { StepViewModel(path.step, it) }
+
+    override fun onUpdateData(path: StepPath, vm: StepViewModel)
+    {
+        vm.updateStep(path.step)
+    }
 }
 
 data class StepSinglePath(val step: Int): RoutePath

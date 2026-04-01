@@ -7,7 +7,7 @@ import com.speakerboxlite.router.samplecompose.base.BaseViewModel
 import com.speakerboxlite.router.samplecompose.tabs.TabsPath
 import com.speakerboxlite.router.samplecompose.tabs.tab.TabPath1
 
-class StepViewModel(val step: Int, app: Application): BaseViewModel(app)
+class StepViewModel(var step: Int, app: Application): BaseViewModel(app)
 {
     val stepStr = MutableLiveData(step.toString())
     val counter = MutableLiveData(0)
@@ -26,6 +26,12 @@ class StepViewModel(val step: Int, app: Application): BaseViewModel(app)
     {
         super.onInit()
         lockBack = false
+    }
+
+    fun updateStep(step: Int)
+    {
+        this.step = step
+        stepStr.value = step.toString()
     }
 
     fun onIncCounter()
@@ -69,5 +75,10 @@ class StepViewModel(val step: Int, app: Application): BaseViewModel(app)
     fun onCloseAndShow()
     {
         router.close()?.route(StepPath(step + 1000))
+    }
+
+    fun onIncrStep()
+    {
+        router.update(StepPath(step + 1))
     }
 }

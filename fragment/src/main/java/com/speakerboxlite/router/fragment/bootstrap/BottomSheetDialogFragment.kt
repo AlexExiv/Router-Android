@@ -4,6 +4,7 @@ import android.view.KeyEvent
 import androidx.annotation.LayoutRes
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterLocal
+import com.speakerboxlite.router.RouterModelStorage
 import com.speakerboxlite.router.ViewBTS
 import com.speakerboxlite.router.ViewModel
 import com.speakerboxlite.router.fragment.ViewFragment
@@ -45,11 +46,14 @@ open class BottomSheetDialogFragment(@LayoutRes layoutId: Int): com.google.andro
     }
 }
 
-open class BottomSheetDialogFragmentViewModel<VM: ViewModel>(@LayoutRes layoutId: Int): BottomSheetDialogFragment(layoutId), ViewFragmentVM<VM>
+open class BottomSheetDialogFragmentViewModel<VM: ViewModel>(@LayoutRes layoutId: Int): BottomSheetDialogFragment(layoutId), ViewFragmentVM<VM>, RouterModelStorage
 {
     override lateinit var viewModel: VM
 
     val isViewModelInjected: Boolean get() = ::viewModel.isInitialized
+
+    override fun get(viewKey: String): ViewModel? =
+        if (this.viewKey == viewKey && isViewModelInjected) viewModel else null
 
     constructor(): this(0)
 }

@@ -45,6 +45,11 @@ abstract class RouteControllerVMC<Path: RoutePath, VM: ViewModel, ModelProvider:
         }
     }
 
+    override fun onUpdateData(path: Path, vm: VM)
+    {
+
+    }
+
     protected abstract fun onCreateViewModel(modelProvider: ModelProvider, path: Path): VM
 
     override fun onCreateInjector(path: Path, component: Any): Any = component

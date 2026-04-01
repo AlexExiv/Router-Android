@@ -49,12 +49,15 @@ inline fun <reified VM: com.speakerboxlite.router.ViewModel> routerViewModel(
 
     val vm: VM = _router.provideViewModel(view, modelProvider)
     _router.onPrepareView(view, vm)
+    val navigator = LocalComposeNavigator.current
 
     DisposableEffect(view.viewKey)
     {
+        navigator?.registerActiveViewModel(view.viewKey, vm)
         vm.resultProvider.start(vm)
 
         onDispose {
+            navigator?.unregisterActiveViewModel(view.viewKey, vm)
             vm.resultProvider.pause()
         }
     }
