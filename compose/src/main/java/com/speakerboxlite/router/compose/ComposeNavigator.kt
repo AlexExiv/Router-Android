@@ -226,9 +226,9 @@ open class ComposeNavigator(
 
     override fun get(viewKey: String): ViewModel?
     {
-        val viewModel = activeViewModelsByKey[key]?.get()
+        val viewModel = activeViewModelsByKey[viewKey]?.get()
         if (viewModel == null)
-            activeViewModelsByKey.remove(key)
+            activeViewModelsByKey.remove(viewKey)
 
         return viewModel
     }

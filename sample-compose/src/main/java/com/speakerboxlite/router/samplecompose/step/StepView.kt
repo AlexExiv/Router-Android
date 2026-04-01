@@ -40,6 +40,10 @@ fun Step(viewModel: StepViewModel)
                     Text(text = "Next step ${step.value}")
                 }
 
+                Button(onClick = { viewModel.onIncrStep() }) {
+                    Text(text = "Incr step ${step.value}")
+                }
+
                 Button(onClick = { viewModel.onIncCounter() }) {
                     Text(text = "Fake button ${counter.value}")
                 }

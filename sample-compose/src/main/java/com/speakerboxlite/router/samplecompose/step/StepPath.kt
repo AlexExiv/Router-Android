@@ -12,4 +12,9 @@ abstract class StepRouteController: RouteControllerApp<StepPath, StepViewModel, 
 {
     override fun onCreateViewModel(modelProvider: AndroidComposeViewModelProvider, path: StepPath): StepViewModel =
         modelProvider.getViewModel { StepViewModel(path.step, it) }
+
+    override fun onUpdateData(path: StepPath, vm: StepViewModel)
+    {
+        vm.updateStep(path.step)
+    }
 }
