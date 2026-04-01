@@ -42,6 +42,11 @@ open class RouterLocalImpl(val viewKey: String, router: RouterSimple): RouterLoc
 
     override fun replace(path: RoutePath): Router? = router?.replace(path)
 
+    override fun update(path: RoutePath)
+    {
+        router?.update(path)
+    }
+
     override fun back(): Router? = router?.back()
 
     override fun close(): Router? = router?.close()

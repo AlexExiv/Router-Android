@@ -206,7 +206,7 @@ open class RouterSimple(
         if (_viewsStack.firstOrNull() === viewMeta)
             rootPath = path
 
-
+        commandBuffer.apply(Command.Update(path, viewMeta.key))
     }
 
     override fun back(): Router?
@@ -445,6 +445,20 @@ open class RouterSimple(
     }
 
     internal fun getPath(key: String): RoutePath? = dataStorage[key]
+
+    @Suppress("UNCHECKED_CAST")
+    internal fun dispatchUpdate(path: RoutePath, key: String, view: View, modelStorage: RouterModelStorage?)
+    {
+        val route = viewsStackById[key]?.route ?: findRoute(path)
+        val viewModel = modelStorage?.get(key)
+
+        if (viewModel != null)
+        {
+            (route as? RouteControllerViewModelProvider<RoutePath, ViewModel>)?.onUpdateData(path, viewModel)
+        }
+
+        (route as RouteControllerInterface<RoutePath, View>).onUpdateData(path, view)
+    }
 
     internal fun bindRouter(viewKey: String)
     {

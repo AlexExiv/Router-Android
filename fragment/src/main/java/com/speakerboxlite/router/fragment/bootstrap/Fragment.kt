@@ -3,6 +3,7 @@ package com.speakerboxlite.router.fragment.bootstrap
 import androidx.annotation.LayoutRes
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterLocal
+import com.speakerboxlite.router.RouterModelStorage
 import com.speakerboxlite.router.ViewModel
 import com.speakerboxlite.router.fragment.ViewFragment
 import com.speakerboxlite.router.fragment.ViewFragmentVM
@@ -25,11 +26,14 @@ open class Fragment(@LayoutRes layoutId: Int): androidx.fragment.app.Fragment(la
     constructor(): this(0)
 }
 
-open class FragmentViewModel<VM: ViewModel>(@LayoutRes layoutId: Int): Fragment(layoutId), ViewFragmentVM<VM>
+open class FragmentViewModel<VM: ViewModel>(@LayoutRes layoutId: Int): Fragment(layoutId), ViewFragmentVM<VM>, RouterModelStorage
 {
     override lateinit var viewModel: VM
 
     val isViewModelInjected: Boolean get() = ::viewModel.isInitialized
+
+    override fun get(viewKey: String): ViewModel? =
+        if (this.viewKey == viewKey && isViewModelInjected) viewModel else null
 
     constructor(): this(0)
 }

@@ -3,6 +3,8 @@ package com.speakerboxlite.router.command
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import com.speakerboxlite.router.RoutePath
+import com.speakerboxlite.router.RouterModelStorage
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.controllers.AnimationController
 import com.speakerboxlite.router.ext.checkMainThread
@@ -13,6 +15,7 @@ interface ViewFactoryInterface
 {
     fun createView(key: String): View?
     fun createAnimation(view: View): AnimationController?
+    fun dispatchUpdate(path: RoutePath, key: String, view: View, modelStorage: RouterModelStorage?)
 }
 
 internal class CommandBufferImpl(val factory: ViewFactoryInterface?): CommandBuffer

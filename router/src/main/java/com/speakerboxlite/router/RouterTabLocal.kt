@@ -17,5 +17,10 @@ class RouterTabLocal(
         routeInternal(rootPath)
     }
 
+    override fun update(path: RoutePath)
+    {
+        super.update(path)
+    }
+
     override fun closeTabToTop(): RouterTab? = this
 }

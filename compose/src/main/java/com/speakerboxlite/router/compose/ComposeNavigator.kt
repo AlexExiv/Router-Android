@@ -24,11 +24,14 @@ import com.speakerboxlite.router.HostCloseable
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.RouterConfigGlobal
 import com.speakerboxlite.router.RouterManager
+import com.speakerboxlite.router.RouterModelStorage
 import com.speakerboxlite.router.RouterTabs
 import com.speakerboxlite.router.ViewBTS
 import com.speakerboxlite.router.ViewDialog
+import com.speakerboxlite.router.ViewModel
 import com.speakerboxlite.router.command.CommandExecutor
 import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 
 typealias ComposeNavigatorContent = @Composable (router: Router, navigator: ComposeNavigator) -> Unit
 
@@ -178,8 +181,10 @@ open class ComposeNavigator(
     val stateHolder: SaveableStateHolder,
     val viewModelProvider: RouterViewModelStoreProvider?,
     items: List<StackEntry> = listOf())
+    : RouterModelStorage
 {
     internal val stateStack: SnapshotStateList<StackEntry> = mutableStateListOf()
+    private val activeViewModelsByKey = mutableMapOf<String, WeakReference<ViewModel>>()
 
     var poppingEntries: MutableMap<String, List<StackEntry>> = mutableMapOf()
         private set
@@ -219,6 +224,15 @@ open class ComposeNavigator(
 
     private var disposeKey: String? = null // Key of item to dispose all stack
 
+    override fun get(viewKey: String): ViewModel?
+    {
+        val viewModel = activeViewModelsByKey[key]?.get()
+        if (viewModel == null)
+            activeViewModelsByKey.remove(key)
+
+        return viewModel
+    }
+
     open fun push(view: ViewCompose, animationController: AnimationControllerCompose?)
     {
         stateStack.add(StackEntry(view, viewModelProvider, animationController))
@@ -256,6 +270,19 @@ open class ComposeNavigator(
     fun beginTransition()
     {
         isAnimating = true
+    }
+
+    fun findEntry(key: String): StackEntry? = stateStack.lastOrNull { it.id == key }
+
+    fun registerActiveViewModel(key: String, viewModel: ViewModel)
+    {
+        activeViewModelsByKey[key] = WeakReference(viewModel)
+    }
+
+    fun unregisterActiveViewModel(key: String, viewModel: ViewModel)
+    {
+        if (activeViewModelsByKey[key]?.get() === viewModel)
+            activeViewModelsByKey.remove(key)
     }
 
     fun completeTransition(key: String)

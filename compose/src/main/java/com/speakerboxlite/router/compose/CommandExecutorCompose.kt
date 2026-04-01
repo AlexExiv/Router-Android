@@ -66,6 +66,11 @@ open class CommandExecutorCompose(
             startActivity(command.viewKey, command.params)
             return
         }
+        else if (command is Command.Update)
+        {
+            updateView(command.path, command.viewKey)
+            return
+        }
 
         checkNotNull(viewFactory) { "ViewFactory hasn't been set" }
         val view = viewFactory?.createView(viewKey) ?: return
@@ -163,5 +168,11 @@ open class CommandExecutorCompose(
     {
         view as? ViewCompose ?: error("")
         navigator.replace(view)
+    }
+
+    protected open fun updateView(path: RoutePath, viewKey: String)
+    {
+        val entry = navigator.findEntry(viewKey) ?: return
+        viewFactory?.dispatchUpdate(path, viewKey, entry.view, navigator)
     }
 }

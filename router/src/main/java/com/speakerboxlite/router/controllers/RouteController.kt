@@ -78,9 +78,7 @@ abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterfa
 
     abstract override fun onCreateView(path: Path): V
 
-    override fun onUpdateData(path: Path, view: V) {
-        
-    }
+    override fun onUpdateData(path: Path, view: V) { }
 
     override fun onBeforeRoute(router: Router, current: Path, next: RouteParamsGen): Boolean = false
     override fun onRoute(router: Router, prev: RoutePath?, current: RouteParams<Path>): Boolean = false

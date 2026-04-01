@@ -12,6 +12,7 @@ import com.speakerboxlite.router.HOST_ACTIVITY_KEY
 import com.speakerboxlite.router.HostActivityFactory
 import com.speakerboxlite.router.HostCloseable
 import com.speakerboxlite.router.RoutePath
+import com.speakerboxlite.router.RouterModelStorage
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.command.Command
 import com.speakerboxlite.router.command.CommandExecutor
@@ -106,7 +107,7 @@ open class CommandExecutorFragment(
         }
         else if (command is Command.Update)
         {
-
+            updateFragment(command.path, command.viewKey)
             return
         }
 
@@ -198,7 +199,8 @@ open class CommandExecutorFragment(
     protected open fun updateFragment(path: RoutePath, viewKey: String)
     {
         val view = fragmentManager.findFragmentByTag(viewKey) ?: return
-
+        val fragmentView = view as? View ?: return
+        viewFactory?.dispatchUpdate(path, viewKey, fragmentView, view as? RouterModelStorage)
     }
 
     protected open fun showBottomSheet(view: View)
