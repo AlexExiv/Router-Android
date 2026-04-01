@@ -20,6 +20,11 @@ abstract class RouteControllerVM<Path: RoutePath, VM: ViewModel, ModelProvider: 
 
     }
 
+    override fun onUpdateData(path: Path, view: VM)
+    {
+
+    }
+
     override fun onProvideViewModel(modelProvider: RouterModelProvider, path: Path): VM
     {
         return onCreateViewModel(modelProvider as ModelProvider, path)

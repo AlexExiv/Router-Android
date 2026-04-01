@@ -198,6 +198,17 @@ open class RouterSimple(
         }
     }
 
+    override fun update(path: RoutePath)
+    {
+        val viewMeta = _viewsStack.lastOrNull { it.path == path::class } ?: return
+        setPath(viewMeta.key, path)
+
+        if (_viewsStack.firstOrNull() === viewMeta)
+            rootPath = path
+
+
+    }
+
     override fun back(): Router?
     {
         if (lockBack || !hasPreviousScreen)

@@ -104,6 +104,11 @@ open class CommandExecutorFragment(
             startActivity(command.viewKey, command.params)
             return
         }
+        else if (command is Command.Update)
+        {
+
+            return
+        }
 
         checkNotNull(viewFactory) { "ViewFactory hasn't been set" }
         val view = viewFactory?.createView(viewKey) ?: return
@@ -188,6 +193,12 @@ open class CommandExecutorFragment(
             fragmentManager.popBackStack()
             pushFragment(path, byView, animation, true)
         }
+    }
+
+    protected open fun updateFragment(path: RoutePath, viewKey: String)
+    {
+        val view = fragmentManager.findFragmentByTag(viewKey) ?: return
+
     }
 
     protected open fun showBottomSheet(view: View)

@@ -4,6 +4,7 @@ import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.annotations.RouteType
 import com.speakerboxlite.router.Router
 import com.speakerboxlite.router.View
+import com.speakerboxlite.router.ViewVM
 import com.speakerboxlite.router.pattern.UrlMatcher
 import com.speakerboxlite.router.annotations.Presentation
 import com.speakerboxlite.router.annotations.SingleTop
@@ -76,6 +77,10 @@ abstract class RouteController<Path: RoutePath, V: View>: RouteControllerInterfa
         preferredAnimationController ?: animationControllerFactory?.onCreate(presentation, view)
 
     abstract override fun onCreateView(path: Path): V
+
+    override fun onUpdateData(path: Path, view: V) {
+        
+    }
 
     override fun onBeforeRoute(router: Router, current: Path, next: RouteParamsGen): Boolean = false
     override fun onRoute(router: Router, prev: RoutePath?, current: RouteParams<Path>): Boolean = false
