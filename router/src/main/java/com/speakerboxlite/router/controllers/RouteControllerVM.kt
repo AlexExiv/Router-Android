@@ -20,7 +20,7 @@ abstract class RouteControllerVM<Path: RoutePath, VM: ViewModel, ModelProvider: 
 
     }
 
-    override fun onUpdateData(path: Path, view: VM)
+    override fun onUpdateData(path: Path, vm: VM)
     {
 
     }

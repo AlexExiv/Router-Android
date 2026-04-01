@@ -99,7 +99,7 @@ interface RouteControllerComponent<Path: RoutePath, V: View, C: Component>
 interface RouteControllerViewModelProvider<Path: RoutePath, VM: ViewModel>
 {
     fun onProvideViewModel(modelProvider: RouterModelProvider, path: Path): VM
-    fun onUpdateData(path: Path, view: VM)
+    fun onUpdateData(path: Path, vm: VM)
 }
 
 interface RouteControllerViewModelHolder<VM: ViewModel>
