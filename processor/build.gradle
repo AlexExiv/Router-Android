@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
-    id 'org.jetbrains.kotlin.jvm'
-    id 'kotlin-kapt'
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.kapt)
 }
 
 java {
@@ -9,21 +9,15 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
-}
-
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    implementation libs.kotlin.reflect
     implementation project(':annotations')
 
 
-    implementation 'com.squareup:kotlinpoet:2.3.0'
+    implementation libs.kotlinpoet
 
-    compileOnly "com.google.auto.service:auto-service:1.1.1"
-    annotationProcessor "com.google.auto.service:auto-service:1.1.1"
-    kapt "com.google.auto.service:auto-service:1.1.1"
+    compileOnly libs.auto.service
+    annotationProcessor libs.auto.service
+    kapt libs.auto.service
 }

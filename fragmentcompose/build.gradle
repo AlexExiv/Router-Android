@@ -1,15 +1,15 @@
 plugins {
-    id 'com.android.library'
-    id 'org.jetbrains.kotlin.android'
-    id 'org.jetbrains.kotlin.plugin.compose'
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
     namespace 'com.speakerboxlite.router.fragmentcompose'
-    compileSdk compileSdk_version
+    compileSdk libs.versions.compileSdk.get().toInteger()
 
     defaultConfig {
-        minSdk minSdk_version
+        minSdk libs.versions.minSdk.get().toInteger()
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -25,9 +25,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
     buildFeatures {
         compose true
     }
@@ -39,24 +36,24 @@ dependencies {
     implementation project(':fragment')
     implementation project(':compose')
 
-    implementation "androidx.core:core-ktx:$kotlin_core"
-    implementation "androidx.appcompat:appcompat:$appcompat"
-    implementation "androidx.activity:activity-ktx:$activity_ktx"
-    implementation "androidx.fragment:fragment-ktx:$fragment_ktx"
-    implementation "androidx.fragment:fragment-compose:$fragment_ktx"
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.activity.ktx
+    implementation libs.androidx.fragment.ktx
+    implementation libs.androidx.fragment.compose
 
-    implementation "androidx.compose.runtime:runtime:$compose_version"
-    implementation "androidx.compose.material:material:$compose_version"
-    implementation "androidx.compose.runtime:runtime-saveable-android:$compose_version"
+    implementation libs.androidx.compose.runtime
+    implementation libs.androidx.compose.material
+    implementation libs.androidx.compose.runtime.saveable.android
 
-    implementation platform("androidx.compose:compose-bom:$compose_bom")
-    implementation "androidx.compose.ui:ui:$compose_version"
-    implementation "androidx.compose.foundation:foundation:$compose_version"
-    implementation "androidx.compose.ui:ui-viewbinding:$compose_version"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$compose_lifecycle"
+    implementation platform(libs.androidx.compose.bom)
+    implementation libs.androidx.compose.ui
+    implementation libs.androidx.compose.foundation
+    implementation libs.androidx.compose.ui.viewbinding
+    implementation libs.androidx.lifecycle.viewmodel.compose
 
-    testImplementation 'junit:junit:4.13.2'
+    testImplementation libs.junit
 
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation libs.androidx.test.ext.junit
+    androidTestImplementation libs.androidx.test.espresso.core
 }

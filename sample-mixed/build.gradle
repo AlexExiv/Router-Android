@@ -1,19 +1,19 @@
 plugins {
-    id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
-    id 'org.jetbrains.kotlin.plugin.compose'
-    id 'com.google.devtools.ksp'
-    id 'kotlin-kapt'
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.kapt)
 }
 
 android {
     namespace 'com.speakerboxlite.router.samplemixed'
-    compileSdk compileSdk_version
+    compileSdk libs.versions.compileSdk.get().toInteger()
 
     defaultConfig {
         applicationId "com.speakerboxlite.router.samplemixed"
-        minSdk minSdk_version
-        targetSdk 34
+        minSdk libs.versions.minSdk.get().toInteger()
+        targetSdk libs.versions.targetSdk.get().toInteger()
         versionCode 1
         versionName "1.0"
 
@@ -32,9 +32,6 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = '1.8'
     }
     buildFeatures {
         compose true
@@ -58,37 +55,37 @@ dependencies {
     implementation project(':fragmentcompose')
     ksp project(':processor-ksp')
 
-    implementation "androidx.core:core-ktx:$kotlin_core"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_runtime_ktx"
-    implementation "androidx.activity:activity-compose:$compose_activity"
-    implementation "androidx.appcompat:appcompat:$appcompat"
-    implementation "androidx.activity:activity-ktx:$activity_ktx"
-    implementation "androidx.fragment:fragment-ktx:$fragment_ktx"
-    implementation "androidx.fragment:fragment-compose:$fragment_ktx"
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
-    implementation "com.google.android.material:material:$android_material"
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.lifecycle.runtime.ktx
+    implementation libs.androidx.activity.compose
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.activity.ktx
+    implementation libs.androidx.fragment.ktx
+    implementation libs.androidx.fragment.compose
+    implementation libs.androidx.lifecycle.extensions
+    implementation libs.androidx.constraintlayout
+    implementation libs.google.material
 
-    implementation platform("androidx.compose:compose-bom:$compose_bom")
+    implementation platform(libs.androidx.compose.bom)
 
-    implementation "androidx.compose.ui:ui:$compose_version"
-    implementation "androidx.compose.ui:ui-graphics:$compose_version"
-    implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$compose_lifecycle"
-    implementation("androidx.compose.runtime:runtime-livedata:$compose_version")
-    implementation "androidx.compose.material3:material3"
+    implementation libs.androidx.compose.ui
+    implementation libs.androidx.compose.ui.graphics
+    implementation libs.androidx.compose.ui.tooling.preview
+    implementation libs.androidx.lifecycle.viewmodel.compose
+    implementation libs.androidx.compose.runtime.livedata
+    implementation libs.androidx.compose.material3
 
-    implementation "com.google.dagger:dagger-android:$hilt_version"
-    implementation "com.google.dagger:dagger-android-support:$hilt_version"
+    implementation libs.dagger.android
+    implementation libs.dagger.android.support
 
-    kapt "com.google.dagger:dagger-android-processor:$hilt_version"
-    kapt "com.google.dagger:dagger-compiler:$hilt_version"
+    kapt libs.dagger.android.processor
+    kapt libs.dagger.compiler
 
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-    androidTestImplementation platform("androidx.compose:compose-bom:$compose_bom")
-    androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
-    debugImplementation 'androidx.compose.ui:ui-tooling'
-    debugImplementation 'androidx.compose.ui:ui-test-manifest'
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.test.ext.junit
+    androidTestImplementation libs.androidx.test.espresso.core
+    androidTestImplementation platform(libs.androidx.compose.bom)
+    androidTestImplementation libs.androidx.compose.ui.test.junit4
+    debugImplementation libs.androidx.compose.ui.tooling
+    debugImplementation libs.androidx.compose.ui.test.manifest
 }

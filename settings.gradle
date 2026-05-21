@@ -1,4 +1,12 @@
 
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 rootProject.name = "Router"
 include ':processor', ':processor-ksp', ':router', ':sample-fragment'
 include ':annotations'
