@@ -5,6 +5,7 @@ import com.speakerboxlite.router.RoutePath
 import com.speakerboxlite.router.RouterConfigGlobal
 import com.speakerboxlite.router.View
 import com.speakerboxlite.router.annotations.Presentation
+import com.speakerboxlite.router.annotations.RouterApp
 import com.speakerboxlite.router.controllers.AnimationController
 import com.speakerboxlite.router.controllers.AnimationControllerFactory
 import com.speakerboxlite.router.fragment.AnimationControllerFragment
@@ -23,6 +24,7 @@ import com.speakerboxlite.router.samplemixed.di.modules.AppModule
 import com.speakerboxlite.router.samplemixed.di.modules.UserData
 import com.speakerboxlite.router.samplemixed.di.modules.UserModule
 
+@RouterApp
 class App: MixedApplication<RouterComponentImpl>()
 {
     lateinit var component: AppComponent

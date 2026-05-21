@@ -1,7 +1,6 @@
 plugins {
     id 'java-library'
     id 'org.jetbrains.kotlin.jvm'
-    id 'kotlin-kapt'
 }
 
 java {
@@ -16,14 +15,14 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation project(':annotations')
 
-
+    implementation "com.google.devtools.ksp:symbol-processing-api:$ksp_version"
     implementation 'com.squareup:kotlinpoet:1.14.2'
+    implementation 'com.squareup:kotlinpoet-ksp:1.14.2'
 
-    compileOnly "com.google.auto.service:auto-service:1.1.1"
-    annotationProcessor "com.google.auto.service:auto-service:1.1.1"
-    kapt "com.google.auto.service:auto-service:1.1.1"
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation project(':annotations')
+    testImplementation 'com.github.tschuchortdev:kotlin-compile-testing:1.5.0'
+    testImplementation 'com.github.tschuchortdev:kotlin-compile-testing-ksp:1.6.0'
 }

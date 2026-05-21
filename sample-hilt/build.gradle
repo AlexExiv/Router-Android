@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'com.google.dagger.hilt.android'
+    id 'com.google.devtools.ksp'
     id 'kotlin-kapt'
 }
 
@@ -55,7 +56,7 @@ dependencies {
     implementation project(':compose')
     implementation project(':android-hilt')
     implementation project(':compose-hilt')
-    kapt project(':processor')
+    ksp project(':processor-ksp')
 
     implementation "androidx.core:core-ktx:$kotlin_core"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_runtime_ktx"

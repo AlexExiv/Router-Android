@@ -2,6 +2,7 @@ package com.speakerboxlite.router.sample
 
 import android.util.Log
 import com.speakerboxlite.router.RouterConfigGlobal
+import com.speakerboxlite.router.annotations.RouterApp
 import com.speakerboxlite.router.fragment.bootstrap.FragmentApplication
 import com.speakerboxlite.router.sample.base.animations.AnimationControllerDefault
 import com.speakerboxlite.router.sample.di.AppComponent
@@ -13,6 +14,7 @@ import com.speakerboxlite.router.sample.di.modules.UserModule
 import com.speakerboxlite.router.sample.main.MainPath
 import com.speakerboxlite.router.sample.tabs.TabsPath
 
+@RouterApp
 class App: FragmentApplication<RouterComponentImpl>()
 {
     lateinit var component: AppComponent

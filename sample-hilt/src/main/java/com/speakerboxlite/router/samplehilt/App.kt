@@ -2,6 +2,7 @@ package com.speakerboxlite.router.samplehilt
 
 import android.util.Log
 import com.speakerboxlite.router.RouterConfigGlobal
+import com.speakerboxlite.router.annotations.RouterApp
 import com.speakerboxlite.router.compose.bootstrap.ComposeApplication
 import com.speakerboxlite.router.samplehilt.base.animations.AnimationControllerComposeSlide
 import com.speakerboxlite.router.samplehilt.di.AppComponent
@@ -10,6 +11,7 @@ import dagger.hilt.EntryPoints
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
+@RouterApp
 class App: ComposeApplication<RouterComponentImpl>()
 {
     lateinit var component: AppComponent // Shared component for the Middleware controllers
