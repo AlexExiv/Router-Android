@@ -1,7 +1,6 @@
 plugins {
     id 'java-library'
     alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.kapt)
 }
 
 java {
@@ -10,14 +9,14 @@ java {
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation libs.kotlin.reflect
     implementation project(':annotations')
 
-
+    implementation libs.ksp.symbol.processing.api
     implementation libs.kotlinpoet
+    implementation libs.kotlinpoet.ksp
 
-    compileOnly libs.auto.service
-    annotationProcessor libs.auto.service
-    kapt libs.auto.service
+    testImplementation libs.junit
+    testImplementation project(':annotations')
+    testImplementation libs.kctfork.core
+    testImplementation libs.kctfork.ksp
 }

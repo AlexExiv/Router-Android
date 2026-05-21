@@ -2,6 +2,7 @@ package com.speakerboxlite.router.samplecompose
 
 import android.util.Log
 import com.speakerboxlite.router.RouterConfigGlobal
+import com.speakerboxlite.router.annotations.RouterApp
 import com.speakerboxlite.router.compose.bootstrap.ComposeApplication
 import com.speakerboxlite.router.samplecompose.main.MainPath
 import com.speakerboxlite.router.samplecompose.base.animations.AnimationControllerComposeSlide
@@ -12,6 +13,7 @@ import com.speakerboxlite.router.samplecompose.di.modules.AppModule
 import com.speakerboxlite.router.samplecompose.di.modules.UserData
 import com.speakerboxlite.router.samplecompose.di.modules.UserModule
 
+@RouterApp
 class App: ComposeApplication<RouterComponentImpl>()
 {
     lateinit var component: AppComponent

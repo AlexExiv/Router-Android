@@ -1,14 +1,14 @@
 plugins {
-    id 'com.android.library'
-    id 'org.jetbrains.kotlin.android'
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
     namespace 'com.speakerboxlite.router'
-    compileSdk compileSdk_version
+    compileSdk libs.versions.compileSdk.get().toInteger()
 
     defaultConfig {
-        minSdk minSdk_version
+        minSdk libs.versions.minSdk.get().toInteger()
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -24,9 +24,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
     testOptions {
         unitTests.returnDefaultValues = true
     }
@@ -34,14 +31,14 @@ android {
 
 dependencies {
 
-    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    implementation "androidx.core:core-ktx:$kotlin_core"
+    implementation libs.kotlin.reflect
+    implementation libs.androidx.core.ktx
 
     implementation project(':processor')
     implementation project(':annotations')
 
-    testImplementation 'junit:junit:4.13.2'
-    testImplementation 'androidx.arch.core:core-testing:2.2.0'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    testImplementation libs.junit
+    testImplementation libs.androidx.arch.core.testing
+    androidTestImplementation libs.androidx.test.ext.junit
+    androidTestImplementation libs.androidx.test.espresso.core
 }

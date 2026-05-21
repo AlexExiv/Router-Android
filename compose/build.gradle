@@ -1,14 +1,15 @@
 plugins {
-    id 'com.android.library'
-    id 'org.jetbrains.kotlin.android'
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
     namespace 'com.speakerboxlite.router.compose'
-    compileSdk compileSdk_version
+    compileSdk libs.versions.compileSdk.get().toInteger()
 
     defaultConfig {
-        minSdk minSdk_version
+        minSdk libs.versions.minSdk.get().toInteger()
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -24,14 +25,8 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
     buildFeatures {
         compose true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion compose_compiler_version
     }
 }
 
@@ -40,19 +35,19 @@ dependencies {
     implementation project(':annotations')
     implementation project(':router')
 
-    implementation "androidx.core:core-ktx:$kotlin_core"
-    implementation "androidx.activity:activity-compose:$compose_activity"
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.activity.compose
 
-    implementation "androidx.compose.runtime:runtime:$compose_version"
-    implementation "androidx.compose.material:material:$compose_version"
-    implementation "androidx.compose.runtime:runtime-saveable-android:$compose_version"
+    implementation libs.androidx.compose.runtime
+    implementation libs.androidx.compose.material
+    implementation libs.androidx.compose.runtime.saveable.android
 
-    implementation platform("androidx.compose:compose-bom:$compose_bom")
-    implementation "androidx.compose.ui:ui:$compose_version"
-    implementation "androidx.compose.foundation:foundation:$compose_version"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$compose_lifecycle"
+    implementation platform(libs.androidx.compose.bom)
+    implementation libs.androidx.compose.ui
+    implementation libs.androidx.compose.foundation
+    implementation libs.androidx.lifecycle.viewmodel.compose
 
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.test.ext.junit
+    androidTestImplementation libs.androidx.test.espresso.core
 }
