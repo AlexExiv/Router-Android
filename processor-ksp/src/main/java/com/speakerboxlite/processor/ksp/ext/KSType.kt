@@ -30,7 +30,7 @@ internal fun KSType.nonSerializablePropertyPaths(path: String, visited: MutableS
             when
             {
                 name in serializableValueTypes || decl.classKind == ClassKind.ENUM_CLASS -> emptyList()
-                !decl.hasType("java.io.Serializable") -> listOf("$path: ${name ?: decl.simpleName.asString()}")
+                !decl.hasSerializableContract() -> listOf("$path: ${name ?: decl.simpleName.asString()}")
                 else ->
                 {
                     val typeArgumentErrors = arguments

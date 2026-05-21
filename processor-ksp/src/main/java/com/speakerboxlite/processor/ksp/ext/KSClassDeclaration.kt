@@ -56,6 +56,9 @@ internal fun KSClassDeclaration.hasType(qualifiedName: String): Boolean =
 
 internal fun KSClassDeclaration.hasTypeSimple(name: String): Boolean = hasParent(name)
 
+internal fun KSClassDeclaration.hasSerializableContract(): Boolean =
+    qualifiedName?.asString() == "java.io.Serializable" || hasParent("Serializable")
+
 internal fun KSClassDeclaration.routeType(): RouteType =
     when
     {

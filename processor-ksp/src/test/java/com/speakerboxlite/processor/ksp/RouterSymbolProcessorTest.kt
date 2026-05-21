@@ -329,6 +329,38 @@ class RouterSymbolProcessorTest
         assertEquals(run.result.messages, KotlinCompilation.ExitCode.OK, run.result.exitCode)
     }
 
+    @Test
+    fun acceptsCustomSerializableContractPathProperties()
+    {
+        val run = compile(
+            SourceFile.kotlin("CustomSerializablePathRoute.kt", """
+                package test
+
+                import com.speakerboxlite.router.RoutePath
+                import com.speakerboxlite.router.View
+                import com.speakerboxlite.router.annotations.Route
+                import com.speakerboxlite.router.annotations.RouterApp
+                import com.speakerboxlite.router.controllers.RouteController
+
+                interface Serializable
+
+                @RouterApp
+                class App
+
+                data class SerializableArg(val value: String): Serializable
+                data class SafePath(val arg: SerializableArg): RoutePath
+
+                class SafeView: View {
+                    override var viewKey: String = ""
+                }
+
+                @Route
+                abstract class SafeRouteController: RouteController<SafePath, SafeView>()
+            """.trimIndent()))
+
+        assertEquals(run.result.messages, KotlinCompilation.ExitCode.OK, run.result.exitCode)
+    }
+
     private fun compile(vararg sources: SourceFile): CompilationRun
     {
         val workingDir = createTempDirectory("router-ksp-test").toFile()
