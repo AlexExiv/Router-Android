@@ -1,8 +1,10 @@
 package com.speakerboxlite.processor.ksp
 
 import com.tschuchort.compiletesting.KotlinCompilation
+import com.tschuchort.compiletesting.JvmCompilationResult
 import com.tschuchort.compiletesting.SourceFile
-import com.tschuchort.compiletesting.symbolProcessorProviders
+import com.tschuchort.compiletesting.configureKsp
+import com.tschuchort.compiletesting.useKsp2
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -119,7 +121,10 @@ class RouterSymbolProcessorTest
         val result = KotlinCompilation().apply {
             inheritClassPath = true
             this.workingDir = workingDir
-            symbolProcessorProviders = listOf(RouterSymbolProcessorProvider())
+            useKsp2()
+            configureKsp {
+                symbolProcessorProviders.add(RouterSymbolProcessorProvider())
+            }
             this.sources = routerStubs() + sources
             messageOutputStream = System.out
         }.compile()
@@ -127,7 +132,7 @@ class RouterSymbolProcessorTest
     }
 
     private data class CompilationRun(
-        val result: KotlinCompilation.Result,
+        val result: JvmCompilationResult,
         val workingDir: File)
     {
         fun generatedFile(packageName: String, fileName: String): File =
@@ -151,9 +156,12 @@ class RouterSymbolProcessorTest
             interface RoutePath: Serializable
             interface View { var viewKey: String }
             interface ViewModel
-            interface Router
+            interface Router {
+                fun route(path: RoutePath, presentation: Presentation? = null): Router?
+            }
             interface RouterComponent {
                 val routeManager: RouteManager
+                val resultManager: ResultManager
                 val routerManager: RouterManager
             }
             interface RouteManager {
@@ -171,7 +179,7 @@ class RouterSymbolProcessorTest
             interface ComponentProvider
             class ComponentProviderImpl(component: Any): ComponentProvider
             open class RouterSimple(callerKey: String?, parent: RouterSimple?, routeManager: RouteManager, routerManager: RouterManager, resultManager: ResultManager): Router {
-                fun route(path: RoutePath, presentation: Presentation): Router? = this
+                override fun route(path: RoutePath, presentation: Presentation?): Router? = this
             }
             class RouterInjector(callerKey: String?, parent: RouterSimple?, routeManager: RouteManager, routerManager: RouterManager, resultManager: ResultManager, componentProvider: ComponentProvider): RouterSimple(callerKey, parent, routeManager, routerManager, resultManager)
         """.trimIndent()),
@@ -197,6 +205,10 @@ class RouterSymbolProcessorTest
                 fun onInject(component: Any)
             }
             interface Component
+            interface RouteControllerComponent<Path: RoutePath, V: View, C: Component> {
+                var componentClass: KClass<C>
+                fun onInject(component: Any) {}
+            }
             interface RouterModelProvider {
                 fun <VM: ViewModel> getViewModel(): VM = error("stub")
             }
@@ -235,7 +247,8 @@ class RouterSymbolProcessorTest
                 abstract fun onCreateView(path: Path): V
             }
 
-            abstract class RouteControllerVMC<Path: RoutePath, VM: ViewModel, ModelProvider: RouterModelProvider, V: View, C: Component>: RouteController<Path, V>() {
+            abstract class RouteControllerVMC<Path: RoutePath, VM: ViewModel, ModelProvider: RouterModelProvider, V: View, C: Component>: RouteController<Path, V>(), RouteControllerComponent<Path, V, C> {
+                override lateinit var componentClass: KClass<C>
                 protected abstract fun onCreateViewModel(modelProvider: ModelProvider, path: Path): VM
                 protected abstract fun onInject(vm: VM, component: C)
             }

@@ -1,19 +1,18 @@
 
 buildscript {
     ext.build_gradle = '8.4.2'
-    ext.kotlin_version = '1.9.24'
-    ext.ksp_version = '1.9.24-1.0.20'
+    ext.kotlin_version = '2.3.20'
+    ext.ksp_version = '2.3.6'
     ext.kotlin_core = '1.13.1'
     ext.lifecycle_runtime_ktx = '2.7.0'
     ext.compose_version = '1.7.6'
-    ext.compose_compiler_version = '1.5.14'
     ext.compose_lifecycle = '2.8.6'
     ext.compose_bom = '2024.12.01'
     ext.compose_activity = '1.9.3'
     ext.appcompat = '1.7.0'
     ext.fragment_ktx = '1.8.5'
     ext.activity_ktx = '1.9.3'
-    ext.hilt_version = '2.51.1'
+    ext.hilt_version = '2.58'
     ext.android_material = '1.12.0'
     ext.minSdk_version = 21
     ext.compileSdk_version = 34
@@ -25,8 +24,6 @@ buildscript {
     dependencies {
         classpath "com.android.tools.build:gradle:$build_gradle"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$ksp_version"
-        classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -36,6 +33,8 @@ buildscript {
 plugins {
     // other plugins...
     id 'com.google.dagger.hilt.android' version "$hilt_version" apply false
+    id 'com.google.devtools.ksp' version "$ksp_version" apply false
+    id 'org.jetbrains.kotlin.plugin.compose' version "$kotlin_version" apply false
     //id 'com.android.application' version "$build_gradle" apply false
     //id 'com.android.library' version "$build_gradle" apply false
 }
