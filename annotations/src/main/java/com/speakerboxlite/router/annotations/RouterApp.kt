@@ -8,4 +8,8 @@ package com.speakerboxlite.router.annotations
  */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.SOURCE)
-annotation class RouterApp
+annotation class RouterApp(
+    /**
+     * Default factory method name used by @RouterFragment when its factory is not set.
+     */
+    val viewFactoryName: String = "newInstance")

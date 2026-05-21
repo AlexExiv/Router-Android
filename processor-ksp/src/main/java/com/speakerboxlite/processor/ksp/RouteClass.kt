@@ -10,6 +10,7 @@ import com.squareup.kotlinpoet.ClassName
 
 internal data class RouterAppInfo(
     val packageName: String,
+    val viewFactoryName: String,
     val sourceFile: KSFile?)
 
 internal data class RouteClass(

@@ -2,10 +2,20 @@ package com.speakerboxlite.processor.ksp
 
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
-import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.speakerboxlite.processor.ksp.ext.allPropsAreSerializable
+import com.speakerboxlite.processor.ksp.ext.annotationEnum
+import com.speakerboxlite.processor.ksp.ext.annotationKClass
+import com.speakerboxlite.processor.ksp.ext.annotationKClassList
+import com.speakerboxlite.processor.ksp.ext.annotationValue
+import com.speakerboxlite.processor.ksp.ext.getDeclaredFunctions
+import com.speakerboxlite.processor.ksp.ext.hasParent
+import com.speakerboxlite.processor.ksp.ext.hasType
+import com.speakerboxlite.processor.ksp.ext.isEmptyAnimationMarker
+import com.speakerboxlite.processor.ksp.ext.resolveControllerArguments
+import com.speakerboxlite.processor.ksp.ext.routeType
+import com.speakerboxlite.processor.ksp.ext.tabsProperties
 import com.speakerboxlite.router.annotations.Presentation
-import com.speakerboxlite.router.annotations.RouteType
 import com.speakerboxlite.router.annotations.SingleTop
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
@@ -17,7 +27,7 @@ import com.squareup.kotlinpoet.ksp.writeTo
 
 internal abstract class RouteControllerProcessorBase(
     private val codeGenerator: CodeGenerator,
-    private val logger: KSPLogger): RouteControllerProcessorInterface
+    private val reporter: KspErrorReporter): RouteControllerProcessorInterface
 {
     abstract val controllerName: String
     abstract val requiredTypeArgumentCount: Int
@@ -39,19 +49,19 @@ internal abstract class RouteControllerProcessorBase(
         val typeArguments = element.resolveControllerArguments(this)
         if (typeArguments == null)
         {
-            logger.error("Router KSP: couldn't resolve $controllerName supertype for ${element.qualifiedName?.asString()}. Avoid unsupported generic typealias shapes.", element)
+            reporter.fail("Router KSP: couldn't resolve $controllerName supertype for ${element.qualifiedName?.asString()}. Avoid unsupported generic typealias shapes.", element)
             return null
         }
 
         if (typeArguments.size < requiredTypeArgumentCount)
         {
-            logger.error("Router KSP: ${element.qualifiedName?.asString()} has invalid $controllerName type arguments.", element)
+            reporter.fail("Router KSP: ${element.qualifiedName?.asString()} has invalid $controllerName type arguments.", element)
             return null
         }
 
         fun classArg(index: Int, label: String): KSClassDeclaration? =
             typeArguments.getOrNull(index) ?: run {
-                logger.error("Router KSP: couldn't resolve $label type argument for ${element.qualifiedName?.asString()}.", element)
+                reporter.fail("Router KSP: couldn't resolve $label type argument for ${element.qualifiedName?.asString()}.", element)
                 null
             }
 
@@ -60,6 +70,20 @@ internal abstract class RouteControllerProcessorBase(
         val vmDecl = vmIndex?.let { classArg(it, "view model") }
         val mpDecl = modelProviderIndex?.let { classArg(it, "model provider") }
         val componentDecl = componentIndex?.let { classArg(it, "component") }
+
+        if (!pathDecl.allPropsAreSerializable())
+        {
+            reporter.failNonSerializablePath(pathDecl, element)
+            return null
+        }
+
+        if (!viewDecl.hasType("$MAIN_ROUTER_PACK.View"))
+        {
+            reporter.fail(
+                "Router KSP: ${element.qualifiedName?.asString()} uses ${viewDecl.qualifiedName?.asString()} as route view, but it must implement $MAIN_ROUTER_PACK.View.",
+                element)
+            return null
+        }
 
         if ((vmIndex != null && vmDecl == null) ||
             (modelProviderIndex != null && mpDecl == null) ||
@@ -79,7 +103,7 @@ internal abstract class RouteControllerProcessorBase(
             componentCntrl = hasComponent,
             componentName = componentDecl?.toClassName(),
             isCompose = viewDecl.hasParent("ViewCompose"),
-            routeType = getRouteType(viewDecl),
+            routeType = viewDecl.routeType(),
             sourceFile = element.containingFile,
             uri = element.annotationValue(ROUTE_ANNOTATION, "uri") ?: "",
             presentation = element.annotationEnum(ROUTE_ANNOTATION, "presentation", Presentation.Push),
@@ -90,14 +114,6 @@ internal abstract class RouteControllerProcessorBase(
             creatingInjector = declaredMethodNames.contains(CREATE_INJECTOR),
             middlewares = emptyList())
     }
-
-    protected fun getRouteType(view: KSClassDeclaration): RouteType =
-        when
-        {
-            view.hasParent("ViewDialog") -> RouteType.Dialog
-            view.hasParent("ViewBTS") -> RouteType.BTS
-            else -> RouteType.Simple
-        }
 
     private fun generateImplementation(
         element: KSClassDeclaration,
@@ -153,7 +169,4 @@ internal abstract class RouteControllerProcessorBase(
 
         return ClassName(element.packageName.asString(), classNameImpl)
     }
-
-    private fun ClassName.isEmptyAnimationMarker(): Boolean =
-        simpleName == "Nothing" || canonicalName == "java.lang.Void"
 }

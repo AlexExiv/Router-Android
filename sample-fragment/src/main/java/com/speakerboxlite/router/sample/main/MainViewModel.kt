@@ -7,6 +7,7 @@ import com.speakerboxlite.router.sample.base.BaseViewModel
 import com.speakerboxlite.router.sample.chain.ChainPath
 import com.speakerboxlite.router.sample.composite.CompositePath
 import com.speakerboxlite.router.sample.dialogs.DialogPath
+import com.speakerboxlite.router.sample.legacy.SimpleIntegrationRootPath
 import com.speakerboxlite.router.sample.shared.SharedPath
 import com.speakerboxlite.router.sample.simple.SimplePath
 import com.speakerboxlite.router.sample.simple.component.SimpleComponentPath
@@ -73,6 +74,13 @@ class MainViewModel(app: Application): BaseViewModel(app)
     fun onShowSimpleComponent()
     {
         router.route(SimpleComponentPath())
+    }
+
+    fun onShowLegacyIntegrationRoot()
+    {
+        router.route(SimpleIntegrationRootPath(
+            title = "Legacy integration root",
+            source = "@RouterFragmentRoute created this ViewModel screen"))
     }
 
     fun onShowTheme()
