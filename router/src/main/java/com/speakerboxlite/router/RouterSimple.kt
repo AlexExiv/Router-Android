@@ -159,6 +159,7 @@ open class RouterSimple(
 
     override fun replace(path: RoutePath): Router?
     {
+        RoutePathSerializationValidator.validate(path)
         val route = findRoute(path)
         val routeParams = RouteParamsGen(path = path, isReplace = true)
         if (tryRouteMiddlewares(routeParams, route))
@@ -200,6 +201,7 @@ open class RouterSimple(
 
     override fun update(path: RoutePath)
     {
+        RoutePathSerializationValidator.validate(path)
         val viewMeta = _viewsStack.lastOrNull { it.path == path::class } ?: return
         setPath(viewMeta.key, path)
 
@@ -441,6 +443,7 @@ open class RouterSimple(
 
     internal fun setPath(key: String, path: RoutePath)
     {
+        RoutePathSerializationValidator.validate(path)
         dataStorage[key] = path
     }
 
@@ -711,6 +714,7 @@ open class RouterSimple(
         RouterConfigGlobal.log(TAG, "Start route with path: ${path::class}")
 
         checkMainThread("Navigation between screen only possible on the main thread")
+        RoutePathSerializationValidator.validate(path)
         val route = findRoute(path)
 
         //try to check all middlewares

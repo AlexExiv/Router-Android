@@ -6,6 +6,7 @@ object RouterConfigGlobal
 {
     var logFun: LogFun? = null
     var restoreSingleTime = true
+    var validateRoutePathSerializable = true
 
     fun log(tag: String, message: String)
     {
