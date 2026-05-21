@@ -14,6 +14,7 @@ import com.speakerboxlite.router.compose.bootstrap.BaseViewCompose
 import com.speakerboxlite.router.samplecompose.bts.BottomSheetPath
 import com.speakerboxlite.router.compose.currentOrThrow
 import com.speakerboxlite.router.compose.routerViewModel
+import com.speakerboxlite.router.samplecompose.TriangulateRingDemo
 import com.speakerboxlite.router.samplecompose.dialog.DialogPath
 import com.speakerboxlite.router.samplecompose.main.sub.SubComposePath
 import com.speakerboxlite.router.samplecompose.step.StepAuthPath
@@ -36,6 +37,8 @@ fun Main(viewModel: MainViewModel)
         val router = LocalRouter.currentOrThrow
 
         Column {
+            //TriangulateRingDemo()
+
             Button(onClick = { router.route(StepPath(0)) }) {
                 Text(text = "Show steps")
             }

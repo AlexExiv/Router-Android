@@ -431,6 +431,9 @@ open class RouterSimple(
         }
 
         tryRepeatTopIfEmpty()
+
+        if (updateState && _viewsStack.isEmpty() && parent != null)
+            commandBuffer.apply(Command.CloseAll)
     }
 
     internal open fun createRouter(callerKey: String): Router = RouterSimple(callerKey, this, routeManager, routerManager, resultManager)

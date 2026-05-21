@@ -27,7 +27,7 @@ open class CommandExecutorFragment(
     @IdRes val containerId: Int,
     val fragmentManager: FragmentManager,
     val activityFactory: HostActivityFactory? = null,
-    val hostCloseable: HostCloseable? = null): CommandExecutor
+    var hostCloseable: HostCloseable? = null): CommandExecutor
 {
     val backstackCallback = object : OnBackStackChangedListener
     {
@@ -144,6 +144,7 @@ open class CommandExecutorFragment(
     protected fun closeAll()
     {
         hostCloseable?.onCloseHost()
+        hostCloseable = null
     }
 
     protected fun closeTo(key: String)
