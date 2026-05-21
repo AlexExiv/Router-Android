@@ -1,11 +1,10 @@
 package com.speakerboxlite.processor.ksp
 
 import com.google.devtools.ksp.processing.CodeGenerator
-import com.google.devtools.ksp.processing.KSPLogger
 
 internal class RouteControllerCProcessor(
     codeGenerator: CodeGenerator,
-    logger: KSPLogger): RouteControllerProcessorBase(codeGenerator, logger)
+    reporter: KspErrorReporter): RouteControllerProcessorBase(codeGenerator, reporter)
 {
     override val controllerName = "RouteControllerC"
     override val requiredTypeArgumentCount = 3

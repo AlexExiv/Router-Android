@@ -1,12 +1,11 @@
 package com.speakerboxlite.processor.ksp
 
 import com.google.devtools.ksp.processing.CodeGenerator
-import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 
 internal class RouteControllerProcessorManager(
     codeGenerator: CodeGenerator,
-    private val logger: KSPLogger)
+    private val reporter: KspErrorReporter)
 {
     private val processors = mutableListOf<RouteControllerProcessorInterface>()
 
@@ -15,10 +14,10 @@ internal class RouteControllerProcessorManager(
 
     init
     {
-        register(RouteControllerVMCProcessor(codeGenerator, logger))
-        register(RouteControllerVMProcessor(codeGenerator, logger))
-        register(RouteControllerCProcessor(codeGenerator, logger))
-        register(RouteControllerProcessor(codeGenerator, logger))
+        register(RouteControllerVMCProcessor(codeGenerator, reporter))
+        register(RouteControllerVMProcessor(codeGenerator, reporter))
+        register(RouteControllerCProcessor(codeGenerator, reporter))
+        register(RouteControllerProcessor(codeGenerator, reporter))
     }
 
     fun createClass(element: KSClassDeclaration): RouteClass?
@@ -26,7 +25,7 @@ internal class RouteControllerProcessorManager(
         val processor = processors.firstOrNull { it.checkElement(element) }
         if (processor == null)
         {
-            logger.error(
+            reporter.fail(
                 "Router KSP: @Route class ${element.qualifiedName?.asString()} must extend RouteController, RouteControllerVM, RouteControllerC, or RouteControllerVMC.",
                 element)
             return null

@@ -7,6 +7,7 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.validate
+import com.speakerboxlite.processor.ksp.ext.annotations
 
 internal class RouterSymbolProcessor(
     private val codeGenerator: CodeGenerator,
@@ -19,37 +20,62 @@ internal class RouterSymbolProcessor(
         if (processed)
             return emptyList()
 
-        val routeSymbols = resolver.getSymbolsWithAnnotation(ROUTE_ANNOTATION)
-        val invalid = routeSymbols.filterNot { it.validate() }.toList()
+        val reporter = KspErrorReporter(logger)
+        val routeSymbols = resolver.getSymbolsWithAnnotation(ROUTE_ANNOTATION).toList()
+        val fragmentRouteSymbols = resolver.getSymbolsWithAnnotation(ROUTER_FRAGMENT_ROUTE_ANNOTATION).toList()
+        val fragmentFactorySymbols = resolver.getSymbolsWithAnnotation(ROUTER_FRAGMENT_ANNOTATION).toList()
+        val allSymbols = routeSymbols + fragmentRouteSymbols + fragmentFactorySymbols
+        val invalid = allSymbols.filterNot { it.validate() }.toList()
         if (invalid.isNotEmpty())
             return invalid
 
         val routeDeclarations = routeSymbols
             .mapNotNull {
                 it as? KSClassDeclaration ?: run {
-                    logger.error("Router KSP: @Route can be used only on classes.", it)
+                    reporter.fail("Router KSP: @Route can be used only on classes.", it)
                     null
                 }
             }
             .toList()
 
-        if (routeDeclarations.isEmpty())
+        val fragmentDeclarations = (fragmentRouteSymbols + fragmentFactorySymbols)
+            .mapNotNull {
+                it as? KSClassDeclaration ?: run {
+                    reporter.fail("Router KSP: @RouterFragmentRoute and @RouterFragment can be used only on classes.", it)
+                    null
+                }
+            }
+            .distinctBy { it.qualifiedName?.asString() }
+            .toList()
+
+        if (routeDeclarations.isEmpty() && fragmentDeclarations.isEmpty())
             return emptyList()
 
-        val routerApp = RouterAppProcessor(logger).findRouterApp(resolver) ?: return emptyList()
-        val middlewareProcessor = MiddlewareProcessor(resolver, logger)
+        val routerApp = RouterAppProcessor(reporter).findRouterApp(resolver) ?: return emptyList()
+        val middlewareProcessor = MiddlewareProcessor(resolver, reporter)
         val middlewares = middlewareProcessor.prepareMiddlewares()
 
-        val routeProcessor = RouteControllerProcessorManager(codeGenerator, logger)
+        val routeProcessor = RouteControllerProcessorManager(codeGenerator, reporter)
         val routes = routeDeclarations.mapNotNull {
             routeProcessor.createClass(it)?.copy(middlewares = middlewareProcessor.buildMiddlewares(it))
+        }
+        val fragmentRouteProcessor = FragmentRouteProcessor(codeGenerator, reporter, routerApp)
+        val fragmentRoutes = fragmentDeclarations.flatMap { f ->
+            fragmentRouteProcessor.createClasses(f)
+                .map { it.copy(middlewares = middlewareProcessor.buildMiddlewares(f)) }
         }
 
         if (routes.size != routeDeclarations.size)
             return emptyList()
+        if (fragmentRouteProcessor.hadError)
+            return emptyList()
 
         RouterComponentProcessor(codeGenerator)
-            .generate(routerApp, routes, middlewares, routeProcessor.hadComponent || middlewareProcessor.hadComponent)
+            .generate(
+                routerApp,
+                routes + fragmentRoutes,
+                middlewares,
+                routeProcessor.hadComponent || fragmentRoutes.any { it.componentCntrl } || middlewareProcessor.hadComponent)
 
         processed = true
         return emptyList()

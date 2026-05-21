@@ -1,13 +1,16 @@
 package com.speakerboxlite.processor.ksp
 
-import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.speakerboxlite.processor.ksp.ext.annotationValue
+import com.speakerboxlite.processor.ksp.ext.collectAnnotations
+import com.speakerboxlite.processor.ksp.ext.hasAnyParent
+import com.speakerboxlite.processor.ksp.ext.hasParent
 import com.squareup.kotlinpoet.ksp.toClassName
 
 internal class MiddlewareProcessor(
     private val resolver: Resolver,
-    private val logger: KSPLogger)
+    private val reporter: KspErrorReporter)
 {
     private var middlewares = listOf<MiddlewareController>()
     private var middlewaresGlobal = listOf<MiddlewareController>()
@@ -20,7 +23,7 @@ internal class MiddlewareProcessor(
         val middlewareAnnotations = resolver.getSymbolsWithAnnotation(MIDDLEWARE_ANNOTATION)
             .mapNotNull {
                 it as? KSClassDeclaration ?: run {
-                    logger.error("Router KSP: @Middleware can be used only on annotation classes.", it)
+                    reporter.fail("Router KSP: @Middleware can be used only on annotation classes.", it)
                     null
                 }
             }
@@ -31,7 +34,7 @@ internal class MiddlewareProcessor(
             val fqName = annotation.qualifiedName?.asString()
             if (fqName == null)
             {
-                logger.error("Router KSP: middleware annotation must have a qualified name.", annotation)
+                reporter.fail("Router KSP: middleware annotation must have a qualified name.", annotation)
                 return@forEach
             }
 
@@ -55,7 +58,7 @@ internal class MiddlewareProcessor(
                         hasComponent = controller.hasParent(MIDDLEWARE_COMPONENT_CLASS),
                         sourceFile = controller.containingFile))
                 }
-                else -> logger.error("Router KSP: middleware @${annotation.simpleName.asString()} must have exactly one MiddlewareController implementation. Found ${controllers.size}.", annotation)
+                else -> reporter.fail("Router KSP: middleware @${annotation.simpleName.asString()} must have exactly one MiddlewareController implementation. Found ${controllers.size}.", annotation)
             }
         }
 
@@ -63,7 +66,7 @@ internal class MiddlewareProcessor(
         middlewaresGlobal = resolver.getSymbolsWithAnnotation(GLOBAL_MIDDLEWARE_ANNOTATION)
             .mapNotNull {
                 it as? KSClassDeclaration ?: run {
-                    logger.error("Router KSP: @GlobalMiddleware can be used only on classes.", it)
+                    reporter.fail("Router KSP: @GlobalMiddleware can be used only on classes.", it)
                     null
                 }
             }

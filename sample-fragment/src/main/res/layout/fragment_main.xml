@@ -107,6 +107,12 @@
                 <Button
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:text="Show legacy integration root"
+                    android:onClick="@{() -> viewmodel.onShowLegacyIntegrationRoot()}"/>
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:text="Show Theme"
                     android:onClick="@{() -> viewmodel.onShowTheme()}"/>
 

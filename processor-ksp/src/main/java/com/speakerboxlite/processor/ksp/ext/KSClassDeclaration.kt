@@ -1,15 +1,20 @@
-package com.speakerboxlite.processor.ksp
+package com.speakerboxlite.processor.ksp.ext
 
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
+import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeAlias
-import com.google.devtools.ksp.symbol.KSTypeArgument
-import com.google.devtools.ksp.symbol.KSTypeParameter
+import com.speakerboxlite.processor.ksp.CHAIN_ANNOTATION
+import com.speakerboxlite.processor.ksp.MAIN_ROUTER_PACK
+import com.speakerboxlite.processor.ksp.ROUTE_ANNOTATION
+import com.speakerboxlite.processor.ksp.RouteControllerProcessorBase
+import com.speakerboxlite.processor.ksp.TABS_ANNOTATION
+import com.speakerboxlite.processor.ksp.TabsProperties
+import com.speakerboxlite.router.annotations.RouteType
 import com.speakerboxlite.router.annotations.TabUnique
 import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.ksp.toClassName
 
 internal fun KSClassDeclaration.tabsProperties(): TabsProperties?
 {
@@ -44,6 +49,27 @@ internal fun KSClassDeclaration.hasParent(name: String): Boolean
 
     return allSuperTypes().any { it.declaration.simpleName.asString() == name }
 }
+
+internal fun KSClassDeclaration.hasType(qualifiedName: String): Boolean =
+    this.qualifiedName?.asString() == qualifiedName ||
+        allSuperTypes().any { it.declaration.qualifiedName?.asString() == qualifiedName }
+
+internal fun KSClassDeclaration.hasTypeSimple(name: String): Boolean = hasParent(name)
+
+internal fun KSClassDeclaration.routeType(): RouteType =
+    when
+    {
+        hasType("$MAIN_ROUTER_PACK.ViewDialog") || hasParent("ViewDialog") -> RouteType.Dialog
+        hasType("$MAIN_ROUTER_PACK.ViewBTS") || hasParent("ViewBTS") -> RouteType.BTS
+        else -> RouteType.Simple
+    }
+
+internal fun KSClassDeclaration.allPropsAreSerializable(): Boolean =
+    nonSerializableProperties().isEmpty()
+
+internal fun KSClassDeclaration.nonSerializableProperties(): List<String> =
+    serializableProperties()
+        .flatMap { it.type.nonSerializablePropertyPaths(it.name, mutableSetOf()) }
 
 internal fun KSClassDeclaration.getDeclaredFunctions(): Sequence<KSFunctionDeclaration> =
     declarations.filterIsInstance<KSFunctionDeclaration>()
@@ -103,20 +129,11 @@ internal fun KSClassDeclaration.resolveControllerArguments(processor: RouteContr
     return null
 }
 
-internal fun List<KSTypeArgument>.mapClassDeclarations(typeAliasArguments: Map<String, KSClassDeclaration> = mapOf()): List<KSClassDeclaration>
-{
-    return mapNotNull { argument ->
-        when (val declaration = argument.type?.resolve()?.declaration)
-        {
-            is KSClassDeclaration -> declaration
-            is KSTypeParameter -> typeAliasArguments[declaration.name.asString()]
-            else -> null
-        }
-    }
-}
-
 internal fun KSClassDeclaration.annotation(fqName: String): KSAnnotation? =
     annotations.firstOrNull { it.annotationType.resolve().declaration.qualifiedName?.asString() == fqName }
+
+internal fun KSClassDeclaration.annotations(fqName: String): List<KSAnnotation> =
+    annotations.filter { it.annotationType.resolve().declaration.qualifiedName?.asString() == fqName }.toList()
 
 internal inline fun <reified T> KSClassDeclaration.annotationValue(fqName: String, name: String): T? =
     annotation(fqName)?.value(name)
@@ -133,14 +150,60 @@ internal fun KSClassDeclaration.annotationKClassList(fqName: String, name: Strin
         ?.mapNotNull { (it as? KSType)?.declarationClassName() }
         ?: listOf()
 
-internal inline fun <reified T> KSAnnotation.value(name: String): T?
+internal fun KSClassDeclaration.isNothingOrVoid(): Boolean =
+    qualifiedName?.asString() == "kotlin.Nothing" || qualifiedName?.asString() == "java.lang.Void"
+
+internal fun KSClassDeclaration.nonSerializableNestedPropertyPaths(path: String, visited: MutableSet<String>): List<String>
 {
-    val value = arguments.firstOrNull { it.name?.asString() == name }?.value ?: return null
-    return value as? T
+    val name = qualifiedName?.asString() ?: return emptyList()
+
+    if (!shouldInspectSerializableProperties() || !visited.add(name))
+        return emptyList()
+
+    return serializableProperties()
+        .flatMap { it.type.nonSerializablePropertyPaths("$path.${it.name}", visited.toMutableSet()) }
 }
 
-internal inline fun <reified E: Enum<E>> enumValue(value: Any?, default: E): E =
-    value?.toString()?.substringAfterLast(".")?.let { runCatching { enumValueOf<E>(it) }.getOrNull() } ?: default
+private data class SerializableProperty(
+    val name: String,
+    val type: KSType)
 
-internal fun KSType.declarationClassName(): ClassName? =
-    (declaration as? KSClassDeclaration)?.toClassName()
+private fun KSClassDeclaration.serializableProperties(): List<SerializableProperty>
+{
+    val properties = linkedMapOf<String, SerializableProperty>()
+
+    primaryConstructor
+        ?.parameters
+        .orEmpty()
+        .filter { it.isVal || it.isVar }
+        .forEach {
+            val name = it.name?.asString() ?: return@forEach
+            properties[name] = SerializableProperty(name, it.type.resolve())
+        }
+
+    declarations
+        .filterIsInstance<KSPropertyDeclaration>()
+        .forEach {
+            val name = it.simpleName.asString()
+            properties.putIfAbsent(name, SerializableProperty(name, it.type.resolve()))
+        }
+
+    superTypes
+        .mapNotNull { it.resolve().declaration as? KSClassDeclaration }
+        .filter { it.qualifiedName?.asString() != "$MAIN_ROUTER_PACK.RoutePath" }
+        .flatMap { it.serializableProperties() }
+        .forEach { properties.putIfAbsent(it.name, it) }
+
+    return properties.values.toList()
+}
+
+private fun KSClassDeclaration.shouldInspectSerializableProperties(): Boolean
+{
+    val name = qualifiedName?.asString() ?: return false
+    return containingFile != null &&
+        !name.startsWith("kotlin.") &&
+        !name.startsWith("java.") &&
+        !name.startsWith("javax.") &&
+        !name.startsWith("android.") &&
+        !name.startsWith("androidx.")
+}
