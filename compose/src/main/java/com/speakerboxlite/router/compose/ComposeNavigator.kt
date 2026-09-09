@@ -18,6 +18,8 @@ import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.speakerboxlite.router.HostCloseable
@@ -78,7 +80,10 @@ fun CurrentContent(router: Router, navigator: ComposeNavigator)
                 stackBottomSheet.view.Root()
             }
         },
-        sheetState = sheetState)
+        sheetState = sheetState,
+        sheetBackgroundColor = Color.Transparent,
+        sheetElevation = 0.dp,
+    )
     {
         if (stackEntry != null)
         {
